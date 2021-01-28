@@ -2,12 +2,21 @@
     "private": true,
     "scripts": {
         "dev": "esbuild-serve",
+        "dev:vite": "vite",
         "build": "esbuild-serve --build"
     },
-    "dependencies": {
-        "fre": "^2.0.0-rc9"
-    },
+    "dependencies": {},
     "devDependencies": {
-        "@hyrious/esbuild-serve": "^0.1.7"
+        "@hyrious/esbuild-serve": "^0.1.8",
+        "@prefresh/vite": "^2.0.3",
+        "esbuild": "^0.8.36",
+        "husky": "^4.3.8",
+        "preact": "^10.5.12",
+        "vite": "^2.0.0-beta.59"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "yarn build"
+        }
     }
 }

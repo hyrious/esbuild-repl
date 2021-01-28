@@ -1,7 +1,13 @@
 {
-    "include": ["main.tsx"],
+    "include": ["main.tsx", "shim.d.ts"],
     "compilerOptions": {
         "jsx": "react",
-        "jsxFactory": "h"
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
+        "esModuleInterop": true,
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "strict": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true
     }
 }
