@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "esbuild-serve",
+        "build": "esbuild-serve --build"
+    },
+    "dependencies": {
+        "fre": "^2.0.0-rc9"
+    },
+    "devDependencies": {
+        "@hyrious/esbuild-serve": "^0.1.7"
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "include": ["main.tsx"],
+    "compilerOptions": {
+        "jsx": "react",
+        "jsxFactory": "h"
+    }
+}
