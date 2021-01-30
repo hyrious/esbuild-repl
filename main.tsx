@@ -1,7 +1,7 @@
 import type { Service, TransformOptions } from "esbuild";
 import { ComponentChildren, Fragment, h, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { memo } from "preact/compat"
+import { memo } from "preact/compat";
 
 const JsDelivrAPI = "https://data.jsdelivr.com/v1/package/npm/esbuild-wasm";
 
@@ -189,23 +189,26 @@ function App() {
         return <Loading text="loading esbuild (about 10MB)" />;
     }
 
-    const onKeyDown = useCallback(function onKeyDown(e: any) {
-        if (e.key === "Tab") {
-            e.preventDefault();
-            const ta: HTMLTextAreaElement = e.target;
-            const before = code.substring(0, ta.selectionStart);
-            const endPos = ta.selectionEnd;
-            const after = code.substring(endPos);
-            setCode(before + "    " + after);
-            runAfter(() => {
-                ta.selectionStart = ta.selectionEnd = endPos + 4;
-            });
-        }
-    }, [])
+    const onKeyDown = useCallback(
+        function onKeyDown(e: any) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const ta: HTMLTextAreaElement = e.target;
+                const before = code.substring(0, ta.selectionStart);
+                const endPos = ta.selectionEnd;
+                const after = code.substring(endPos);
+                setCode(before + "    " + after);
+                runAfter(() => {
+                    ta.selectionStart = ta.selectionEnd = endPos + 4;
+                });
+            }
+        },
+        [code]
+    );
 
     const onInput = useCallback(function onInput(e: any) {
         setCode(e.target.value);
-    }, [])
+    }, []);
 
     const updateConfig = useCallback(function updateConfig(e: any) {
         const newConfig: Record<string, any> = {};
@@ -241,22 +244,27 @@ function App() {
             }
         }
         setConfig(newConfig);
-    }, [])
+    }, []);
 
-    const renderConfig = useCallback(function renderConfig() {
-        const options: string[] = [];
-        for (const key in config) {
-            const value = config[key as keyof TransformOptions];
-            if (value instanceof Object && !Array.isArray(value) && hasKey(value)) {
-                options.push(`--${key}:${Object.entries(value).map((k, v) => `${k}=${v}`)}`);
-            } else if (value === true) {
-                options.push(`--${key}`);
-            } else {
-                options.push(`--${key}=${value}`);
+    const renderConfig = useCallback(
+        function renderConfig() {
+            const options: string[] = [];
+            for (const key in config) {
+                const value = config[key as keyof TransformOptions];
+                if (value instanceof Object && !Array.isArray(value) && hasKey(value)) {
+                    options.push(
+                        `--${dashize(key)}:${Object.entries(value).map((k, v) => `${k}=${v}`)}`
+                    );
+                } else if (value === true) {
+                    options.push(`--${dashize(key)}`);
+                } else {
+                    options.push(`--${dashize(key)}=${value}`);
+                }
             }
-        }
-        return options.join(" ");
-    }, [config])
+            return options.join(" ");
+        },
+        [config]
+    );
 
     return (
         <>
