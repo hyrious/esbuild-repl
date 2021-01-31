@@ -21,7 +21,6 @@
     padding: 0.5em;
     line-height: 1.25;
     background-color: rgba(255, 0, 0, 0.2);
-    max-width: 50vw;
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: monospace;

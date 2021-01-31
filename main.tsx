@@ -276,7 +276,7 @@ function App() {
             <aside>
                 <input onChange={updateConfig} value={renderConfig()} />
                 {error && (
-                    <span class="error" title={error.replace(/\n/g, "&#010;")}>
+                    <span class="error" title={error.replace(/\n/g, "\r\n")}>
                         {error}
                     </span>
                 )}
