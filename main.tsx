@@ -114,7 +114,7 @@ type PropsWithChildren<P = {}> = P & {
 function Layout({ children }: PropsWithChildren) {
     return (
         <>
-            <header>esbuild repl</header>
+            <header><a href="https://esbuild.github.io/">esbuild</a> repl</header>
             <main>{children}</main>
         </>
     );
