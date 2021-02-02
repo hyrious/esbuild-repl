@@ -114,7 +114,9 @@ type PropsWithChildren<P = {}> = P & {
 function Layout({ children }: PropsWithChildren) {
     return (
         <>
-            <header><a href="https://esbuild.github.io/">esbuild</a> repl</header>
+            <header>
+                <a href="https://esbuild.github.io/">esbuild</a> repl
+            </header>
             <main>{children}</main>
         </>
     );
@@ -156,6 +158,56 @@ function normalize(val: string) {
 const defaultConfig: TransformOptions = {
     loader: "tsx",
 };
+
+function renderConfig(config: Record<string, any>) {
+    const options: string[] = [];
+    for (const key in config) {
+        const value = config[key as keyof TransformOptions];
+        if (value instanceof Object && !Array.isArray(value) && hasKey(value)) {
+            options.push(`--${dashize(key)}:${Object.entries(value).map((k, v) => `${k}=${v}`)}`);
+        } else if (value === true) {
+            options.push(`--${dashize(key)}`);
+        } else {
+            options.push(`--${dashize(key)}=${value}`);
+        }
+    }
+    return options.join(" ");
+}
+
+function makeNewConfig(cmdline: string) {
+    const newConfig: Record<string, any> = {};
+    for (const rowWithDashDash of cmdline.split(/\s+/)) {
+        let row: string;
+        if (/^--/.test(rowWithDashDash)) {
+            row = rowWithDashDash.substring(2);
+        } else {
+            row = rowWithDashDash;
+        }
+        const colon = row.indexOf(":");
+        const equal = row.indexOf("=");
+        if (colon === -1 && equal === -1) {
+            newConfig[camalize(row)] = true;
+        } else {
+            if (colon !== -1 && colon < row.indexOf("=")) {
+                const key = row.substring(0, colon);
+                const value: Record<string, any> = {};
+                for (const pair of row.substring(colon + 1).split(",")) {
+                    const [k, v] = pair.split("=", 2);
+                    value[k] = normalize(v);
+                }
+                newConfig[camalize(key)] = value;
+            } else {
+                const [key, value] = row.split("=", 2);
+                if (value.includes(",")) {
+                    newConfig[camalize(key)] = value.split(",");
+                } else {
+                    newConfig[camalize(key)] = normalize(value);
+                }
+            }
+        }
+    }
+    return newConfig;
+}
 
 function App() {
     const [code, setCode] = useState('render(<App />, document.getElementById("app")!);');
@@ -211,60 +263,8 @@ function App() {
     }, []);
 
     const updateConfig = useCallback(function updateConfig(e: any) {
-        const newConfig: Record<string, any> = {};
-        const input: string = e.target.value;
-        for (const rowWithDashDash of input.split(/\s+/)) {
-            let row: string;
-            if (/^--/.test(rowWithDashDash)) {
-                row = rowWithDashDash.substring(2);
-            } else {
-                row = rowWithDashDash;
-            }
-            const colon = row.indexOf(":");
-            const equal = row.indexOf("=");
-            if (colon === -1 && equal === -1) {
-                newConfig[camalize(row)] = true;
-            } else {
-                if (colon !== -1 && colon < row.indexOf("=")) {
-                    const key = row.substring(0, colon);
-                    const value: Record<string, any> = {};
-                    for (const pair of row.substring(colon + 1).split(",")) {
-                        const [k, v] = pair.split("=", 2);
-                        value[k] = normalize(v);
-                    }
-                    newConfig[camalize(key)] = value;
-                } else {
-                    const [key, value] = row.split("=", 2);
-                    if (value.includes(",")) {
-                        newConfig[camalize(key)] = value.split(",");
-                    } else {
-                        newConfig[camalize(key)] = normalize(value);
-                    }
-                }
-            }
-        }
-        setConfig(newConfig);
+        setConfig(makeNewConfig(e.target.value));
     }, []);
-
-    const renderConfig = useCallback(
-        function renderConfig() {
-            const options: string[] = [];
-            for (const key in config) {
-                const value = config[key as keyof TransformOptions];
-                if (value instanceof Object && !Array.isArray(value) && hasKey(value)) {
-                    options.push(
-                        `--${dashize(key)}:${Object.entries(value).map((k, v) => `${k}=${v}`)}`
-                    );
-                } else if (value === true) {
-                    options.push(`--${dashize(key)}`);
-                } else {
-                    options.push(`--${dashize(key)}=${value}`);
-                }
-            }
-            return options.join(" ");
-        },
-        [config]
-    );
 
     return (
         <>
@@ -274,7 +274,7 @@ function App() {
                 <textarea readOnly value={result} />
             </Layout>
             <aside>
-                <input onChange={updateConfig} value={renderConfig()} />
+                <input onChange={updateConfig} value={renderConfig(config)} />
                 {error && (
                     <span class="error" title={error.replace(/\n/g, "\r\n")}>
                         {error}
