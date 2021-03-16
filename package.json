@@ -7,12 +7,12 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "@hyrious/esbuild-serve": "^0.1.8",
-        "@prefresh/vite": "^2.0.3",
-        "esbuild": "^0.8.36",
+        "@hyrious/esbuild-serve": "^0.2.0",
+        "@prefresh/vite": "^2.1.0",
+        "esbuild": "^0.9.2",
         "husky": "^4.3.8",
-        "preact": "^10.5.12",
-        "vite": "^2.0.0-beta.59"
+        "preact": "^10.5.13",
+        "vite": "^2.1.0"
     },
     "husky": {
         "hooks": {

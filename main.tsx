@@ -1,4 +1,4 @@
-import type { Service, TransformOptions } from "esbuild";
+import type { TransformOptions, TransformResult } from "esbuild";
 import { ComponentChildren, Fragment, h, render } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { memo } from "preact/compat";
@@ -36,17 +36,18 @@ async function getLatestVersion() {
 }
 
 type ESBuild = typeof import("esbuild");
-let esbuildService: Service | null = null;
+let esbuildService: { transform: (input: string, options?: TransformOptions | undefined) => Promise<TransformResult> } | null = null;
 
 async function importESBuild(version: string) {
     if (esbuildService == null) {
         try {
-            const { startService }: ESBuild = await import(
+            const { initialize, transform }: ESBuild = await import(
                 /* @vite-ignore */ getEsbuildUrl(version)
             );
-            esbuildService = await startService({
+            await initialize({
                 wasmURL: getWasmUrl(version),
             });
+            esbuildService = { transform };
         } catch {}
     }
     return esbuildService;
@@ -73,7 +74,7 @@ function usePromise<T>(f: (...args: any) => Promise<T>, ...args: any) {
 }
 
 function useESBuild() {
-    const [service, setService] = useState<Service | null>(null);
+    const [service, setService] = useState<typeof esbuildService>(null);
     const { status, data } = usePromise<string>(getLatestVersion);
     useEffect(() => {
         if (status === "success") {
