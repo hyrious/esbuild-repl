@@ -1,20 +1,73 @@
-.center {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-flow: column nowrap;
+@import "https://cdn.jsdelivr.net/npm/modern-normalize@1.0.0/modern-normalize.css";
+
+body {
+    height: 100vh;
+    background-color: #191919;
+    color: #ccc;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
 }
 
-.code {
+a {
+    color: inherit;
+}
+
+header {
+    padding: 0.75em 1em;
+    color: #ddd;
+    background-color: #111;
+    border-bottom: 2px solid #dfbf00bf;
+    font-weight: bold;
+}
+
+aside {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+main {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+textarea,
+input {
+    margin: none;
+    outline: none;
+    border: none;
+    padding: 0.6em;
+    background-color: #191919;
+    color: #ccc;
+    resize: none;
     font-family: monospace;
+    white-space: pre-wrap;
 }
 
-.spliter {
+input {
+    background-color: #111;
+}
+
+#editor {
+    white-space: nowrap;
     border-right: 1px solid #333;
 }
 
-.error {
+#mask {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: brightness(50%);
+}
+#mask.leave-active {
+    transition-duration: 0.2s;
+}
+#mask.leave-to {
+    opacity: 0;
+}
+
+#error {
     position: fixed;
     bottom: 0.5em;
     right: 0.5em;
@@ -25,56 +78,4 @@
     text-overflow: ellipsis;
     font-family: monospace;
     white-space: pre-wrap;
-}
-
-#app {
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-flow: column nowrap;
-    background-color: #191919;
-    color: #ccc;
-}
-
-main {
-    flex: 1;
-    display: flex;
-}
-
-header {
-    padding: 0.75em 1em;
-    color: #ddd;
-    border-bottom: 2px solid #dfbf00bf;
-    font-weight: bold;
-}
-
-textarea,
-input {
-    flex: 1;
-    border: 0;
-    outline: 0;
-    margin: 0.5em;
-    background-color: #191919;
-    color: #ccc;
-    resize: none;
-    font-family: monospace;
-    white-space: pre-wrap;
-}
-
-textarea:first-child {
-    white-space: nowrap;
-}
-
-aside {
-    display: flex;
-}
-
-header,
-aside,
-aside input {
-    background-color: #111;
-}
-
-a {
-    color: inherit;
 }
