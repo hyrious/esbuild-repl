@@ -124,6 +124,7 @@ const utils = {
         const el = e.target as HTMLInputElement;
         config = utils.cli2cfg(el.value);
         el.value = utils.cfg2cli(config);
+        refresh();
     });
 
     $("#editor").addEventListener("keydown", (e) => {
