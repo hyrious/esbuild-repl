@@ -82,16 +82,16 @@ const utils = {
                 if (colon !== -1 && colon < equal) {
                     const key = a.substring(0, colon);
                     const [k, v] = a.substring(colon + 1).split("=", 2);
-                    config[key] ||= {};
-                    config[key][k] = v;
+                    config[this.camelize(key)] ||= {};
+                    config[this.camelize(key)][k] = v;
                 } else if (colon !== -1 && equal === -1) {
                     const [key, value] = a.split(":", 2);
-                    config[key] ||= [];
-                    config[key].push(value);
+                    config[this.camelize(key)] ||= [];
+                    config[this.camelize(key)].push(value);
                 } else {
                     const [key, value] = a.split("=", 2);
                     const val = { true: true, false: false }[value] || value;
-                    config[key] = val;
+                    config[this.camelize(key)] = val;
                 }
             }
         }

@@ -6,7 +6,7 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "esbuild": "^0.11.17",
-        "vite": "^2.2.3"
+        "esbuild": "^0.11.23",
+        "vite": "^2.3.2"
     }
 }
