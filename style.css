@@ -79,3 +79,9 @@ input {
     font-family: monospace;
     white-space: pre-wrap;
 }
+
+#duration {
+    font-size: small;
+    font-weight: normal;
+    font-family: monospace;
+}

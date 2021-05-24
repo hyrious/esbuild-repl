@@ -140,22 +140,25 @@ const utils = {
         }
     });
 
-    async function refresh() {
+    async function refresh(first = false) {
         const code = ($("#editor") as HTMLTextAreaElement).value;
         try {
+            const t = performance.now();
             const result = await esbuild?.transform(code, config);
+            const duration = performance.now() - t;
             if (result) {
                 ($("#output") as HTMLTextAreaElement).value = result.code;
                 utils.hideError();
+                if (!first) $("#duration").textContent = duration.toFixed(2) + "ms";
             }
         } catch (e) {
             utils.showError(e.message);
         }
     }
 
-    $("#editor").addEventListener("input", refresh);
+    $("#editor").addEventListener("input", () => refresh(false));
 
-    refresh();
+    refresh(true);
 })().catch((reason) => {
     console.error(reason);
     $("#mask").textContent = reason?.message || reason;
