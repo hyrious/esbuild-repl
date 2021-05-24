@@ -13,6 +13,9 @@ a {
 }
 
 header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     padding: 0.75em 1em;
     color: #ddd;
     background-color: #111;
@@ -84,4 +87,53 @@ input {
     font-size: small;
     font-weight: normal;
     font-family: monospace;
+}
+
+#control {
+    flex-grow: 1;
+    text-align: right;
+}
+
+#theme-dark {
+    display: inline-block;
+    fill: #aaa;
+    stroke: #aaa;
+}
+
+#theme-light {
+    display: none;
+}
+
+.light #theme-dark {
+    display: none;
+}
+
+.light #theme-light {
+    display: inline-block;
+    fill: #444;
+    stroke: #444;
+}
+
+.light body {
+    color: #222;
+}
+.light header {
+    color: #000;
+}
+.light textarea,
+.light input {
+    color: #111;
+}
+.light textarea {
+    background-color: #fdfeff;
+}
+.light header,
+.light input {
+    background-color: #eee;
+}
+.light header {
+    border-bottom-color: #ffcf00;
+}
+.light #editor {
+    border-right-color: #ccc;
 }

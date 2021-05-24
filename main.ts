@@ -109,6 +109,9 @@ const utils = {
 };
 
 (async function () {
+    $('#theme').addEventListener('click', () => {
+        document.body.classList.toggle('light');
+    });
     const version = await utils.version();
     $("#version").textContent = version;
     await utils.esbuild(version);
