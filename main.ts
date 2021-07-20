@@ -166,3 +166,7 @@ const utils = {
     console.error(reason);
     $("#mask").textContent = reason?.message || reason;
 });
+
+navigator.serviceWorker.register('./sw.js')
+    .then((e) => console.log("registered sw.js in scope:", e.scope))
+    .catch((e) => console.log("failed to register sw.js:", e));
