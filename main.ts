@@ -97,6 +97,25 @@ const utils = {
         }
         return config;
     },
+    loadQuery() {
+        const query = new URLSearchParams(location.search.slice(1));
+        const version = query.get("version");
+        const shareableString = query.get("shareable");
+        let shareable: { code: string; config: Record<string, any> } | null = null;
+        if (shareableString) {
+            try {
+                shareable = JSON.parse(decodeURIComponent(atob(shareableString)));
+            } catch {}
+        }
+        return { version, shareable };
+    },
+    updateQuery(version: string, shareable: object) {
+        const query = new URLSearchParams();
+        query.set("version", version);
+        query.set("shareable", btoa(encodeURIComponent(JSON.stringify(shareable))));
+        const url = location.origin + location.pathname + "?" + query.toString();
+        history.pushState({ path: url }, "", url);
+    },
     showError(message: string) {
         const el = $("#error") as HTMLElement;
         el.style.display = "";
@@ -109,19 +128,30 @@ const utils = {
 };
 
 (async function () {
-    $('#theme').addEventListener('click', () => {
-        document.body.classList.toggle('light');
+    const query = utils.loadQuery();
+    console.log(query);
+
+    $("#theme").addEventListener("click", () => {
+        document.body.classList.toggle("light");
     });
-    const version = await utils.version();
+    const version = query.version || (await utils.version());
     $("#version").textContent = version;
     await utils.esbuild(version);
     leave($("#mask"));
 
     (window as any).esbuild = esbuild;
 
-    let config: Record<string, any> = {
-        loader: "tsx",
-    };
+    if (query.shareable?.config != null) {
+        ($("#config") as HTMLInputElement).value = utils.cfg2cli(query.shareable?.config);
+    }
+
+    if (query.shareable?.code != null) {
+        ($("#editor") as HTMLTextAreaElement).value = query.shareable?.code;
+        ($("#output") as HTMLTextAreaElement).value = "";
+    }
+
+    let config = utils.cli2cfg(($("#config") as HTMLInputElement).value);
+    let code = ($("#editor") as HTMLTextAreaElement).value;
 
     $("#config").addEventListener("change", (e) => {
         const el = e.target as HTMLInputElement;
@@ -144,7 +174,7 @@ const utils = {
     });
 
     async function refresh(first = false) {
-        const code = ($("#editor") as HTMLTextAreaElement).value;
+        code = ($("#editor") as HTMLTextAreaElement).value;
         try {
             const t = performance.now();
             const result = await esbuild?.transform(code, config);
@@ -157,6 +187,9 @@ const utils = {
         } catch (e) {
             utils.showError(e.message);
         }
+        try {
+            utils.updateQuery(version, { code, config });
+        } catch {}
     }
 
     $("#editor").addEventListener("input", () => refresh(false));
@@ -167,6 +200,8 @@ const utils = {
     $("#mask").textContent = reason?.message || reason;
 });
 
-navigator.serviceWorker.register('./sw.js')
-    .then((e) => console.log("registered sw.js in scope:", e.scope))
-    .catch((e) => console.log("failed to register sw.js:", e));
+if (import.meta.env.PROD)
+    navigator.serviceWorker
+        .register("./sw.js")
+        .then((e) => console.log("registered sw.js in scope:", e.scope))
+        .catch((e) => console.log("failed to register sw.js:", e));

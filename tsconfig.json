@@ -3,6 +3,10 @@
         "noEmit": true,
         "strict": true,
         "skipLibCheck": true,
-        "lib": ["DOM", "ESNext"]
-    }
+        "lib": ["DOM", "ESNext"],
+        "module": "ESNext",
+        "types": ["vite/client"],
+        "moduleResolution": "Node"
+    },
+    "include": ["main.ts"]
 }
