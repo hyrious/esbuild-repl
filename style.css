@@ -51,7 +51,6 @@ input {
 }
 
 #editor {
-    white-space: nowrap;
     border-right: 1px solid #333;
 }
 
