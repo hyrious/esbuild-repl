@@ -8,5 +8,5 @@
         "types": ["vite/client"],
         "moduleResolution": "Node"
     },
-    "include": ["main.ts"]
+    "include": ["main.ts", "shim.d.ts"]
 }

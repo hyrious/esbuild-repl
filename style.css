@@ -56,7 +56,10 @@ input {
 
 #mask {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     inset: 0;
     display: flex;
     align-items: center;
@@ -119,20 +122,19 @@ input {
 }
 .light header {
     color: #000;
+    background-color: #fff;
+    border-bottom-color: #ffcf00;
 }
 .light textarea,
 .light input {
     color: #111;
+    background-color: #fff;
 }
 .light textarea {
-    background-color: #fdfeff;
+    background-color: #f1f1f1;
 }
-.light header,
-.light input {
-    background-color: #eee;
-}
-.light header {
-    border-bottom-color: #ffcf00;
+.light aside {
+    border-top: 1px solid #ccc;
 }
 .light #editor {
     border-right-color: #ccc;

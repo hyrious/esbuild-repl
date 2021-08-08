@@ -6,7 +6,10 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "esbuild": "^0.12.17",
+        "esbuild": "^0.12.19",
         "vite": "^2.4.4"
+    },
+    "dependencies": {
+        "@hyrious/esbuild-dev": "^0.4.4"
     }
 }

@@ -1,4 +1,5 @@
 import type { TransformOptions } from "esbuild";
+import { argsToBuildOptions, buildOptionsToArgs } from "@hyrious/esbuild-dev/args";
 
 type esbuild_t = typeof import("esbuild");
 
@@ -16,7 +17,6 @@ function leave(el: Element, ms = 200) {
 const JsDelivrAPI = "https://data.jsdelivr.com/v1/package/npm/esbuild-wasm";
 const urlPrefix = "https://cdn.jsdelivr.net/npm/esbuild-wasm";
 const urls = {
-    // prettier-ignore
     browser: (version: string) => `${urlPrefix}@${version}/esm/browser.js`,
     wasm: (version: string) => `${urlPrefix}@${version}/esbuild.wasm`,
 };
@@ -43,59 +43,11 @@ const utils = {
         esbuild = (await import(/* @vite-ignore */ urls.browser(version))) as esbuild_t;
         await esbuild.initialize({ wasmURL: urls.wasm(version) });
     },
-    dashize(str: string) {
-        return str.replace(/([A-Z])/g, (x) => "-" + x.toLowerCase());
-    },
-    camelize(str: string) {
-        return str.replace(/-([a-z])/g, (x) => x.substring(1).toUpperCase());
-    },
     cfg2cli(config: Record<string, any>) {
-        const options: string[] = [];
-        for (const key in config) {
-            const value = config[key as keyof TransformOptions];
-            if (Array.isArray(value)) {
-                for (const e of value) {
-                    options.push(`--${this.dashize(key)}:${e}`);
-                }
-            } else if (value instanceof Object) {
-                for (const [k, v] of Object.entries(value)) {
-                    options.push(`--${this.dashize(key)}:${k}=${v}`);
-                }
-            } else if (value === true) {
-                options.push(`--${this.dashize(key)}`);
-            } else {
-                options.push(`--${this.dashize(key)}=${value}`);
-            }
-        }
-        return options.join(" ");
+        return buildOptionsToArgs(config).join(" ");
     },
     cli2cfg(line: string) {
-        const config: Record<string, any> = {};
-        for (const piece of line.split(/\s+/)) {
-            if (!piece.startsWith("--")) continue;
-            const a = piece.substring(2);
-            const colon = a.indexOf(":");
-            const equal = a.indexOf("=");
-            if (colon === -1 && equal === -1) {
-                config[this.camelize(a)] = true;
-            } else {
-                if (colon !== -1 && colon < equal) {
-                    const key = a.substring(0, colon);
-                    const [k, v] = a.substring(colon + 1).split("=", 2);
-                    config[this.camelize(key)] ||= {};
-                    config[this.camelize(key)][k] = v;
-                } else if (colon !== -1 && equal === -1) {
-                    const [key, value] = a.split(":", 2);
-                    config[this.camelize(key)] ||= [];
-                    config[this.camelize(key)].push(value);
-                } else {
-                    const [key, value] = a.split("=", 2);
-                    const val = { true: true, false: false }[value] || value;
-                    config[this.camelize(key)] = val;
-                }
-            }
-        }
-        return config;
+        return argsToBuildOptions(line.split(/\s+/)) as TransformOptions;
     },
     loadQuery() {
         const query = new URLSearchParams(location.search.slice(1));
@@ -141,29 +93,32 @@ const utils = {
 
     (window as any).esbuild = esbuild;
 
+    let $config = $("#config") as HTMLInputElement;
+    let $output = $("#output") as HTMLTextAreaElement;
+    let $editor = $("#editor") as HTMLTextAreaElement;
+
     if (query.shareable?.config != null) {
-        ($("#config") as HTMLInputElement).value = utils.cfg2cli(query.shareable?.config);
+        $config.value = utils.cfg2cli(query.shareable?.config);
     }
 
     if (query.shareable?.code != null) {
-        ($("#editor") as HTMLTextAreaElement).value = query.shareable?.code;
-        ($("#output") as HTMLTextAreaElement).value = "";
+        $editor.value = query.shareable?.code;
+        $output.value = "// initializing...";
     }
 
-    let config = utils.cli2cfg(($("#config") as HTMLInputElement).value);
-    let code = ($("#editor") as HTMLTextAreaElement).value;
+    let config = utils.cli2cfg($config.value);
+    let code = $editor.value;
 
-    $("#config").addEventListener("change", (e) => {
-        const el = e.target as HTMLInputElement;
-        config = utils.cli2cfg(el.value);
-        el.value = utils.cfg2cli(config);
+    $config.addEventListener("change", () => {
+        config = utils.cli2cfg($config.value);
+        $config.value = utils.cfg2cli(config);
         refresh();
     });
 
-    $("#editor").addEventListener("keydown", (e) => {
-        if ((e as KeyboardEvent).key === "Tab") {
+    $editor.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Tab") {
             e.preventDefault();
-            const textarea = e.target as HTMLTextAreaElement;
+            const textarea = $editor;
             const code = textarea.value;
             const before = code.substring(0, textarea.selectionStart);
             const endPos = textarea.selectionEnd;
@@ -174,13 +129,13 @@ const utils = {
     });
 
     async function refresh(first = false) {
-        code = ($("#editor") as HTMLTextAreaElement).value;
+        code = $editor.value;
         try {
             const t = performance.now();
             const result = await esbuild?.transform(code, config);
             const duration = performance.now() - t;
             if (result) {
-                ($("#output") as HTMLTextAreaElement).value = result.code;
+                $output.value = result.code;
                 utils.hideError();
                 if (!first) $("#duration").textContent = duration.toFixed(2) + "ms";
             }
@@ -192,7 +147,7 @@ const utils = {
         } catch {}
     }
 
-    $("#editor").addEventListener("input", () => refresh(false));
+    $editor.addEventListener("input", () => refresh(false));
 
     refresh(true);
 })().catch((reason) => {
