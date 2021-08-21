@@ -32,7 +32,7 @@ const utils = {
         const raw = localStorage.getItem("esbuild-repl");
         if (raw) {
             const [version, time] = raw.split(":", 2);
-            if (Date.now() - +time < 86400 * 7 * 1000) {
+            if (Date.now() - +time < 86400 * 1000) {
                 return version;
             }
         }
