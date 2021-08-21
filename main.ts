@@ -1,5 +1,4 @@
 import type { TransformOptions } from "esbuild";
-import { argsToBuildOptions, buildOptionsToArgs } from "@hyrious/esbuild-dev/args";
 
 type esbuild_t = typeof import("esbuild");
 
@@ -43,11 +42,59 @@ const utils = {
         esbuild = (await import(/* @vite-ignore */ urls.browser(version))) as esbuild_t;
         await esbuild.initialize({ wasmURL: urls.wasm(version) });
     },
+    dashize(str: string) {
+        return str.replace(/([A-Z])/g, (x) => "-" + x.toLowerCase());
+    },
+    camelize(str: string) {
+        return str.replace(/-([a-z])/g, (x) => x.substring(1).toUpperCase());
+    },
     cfg2cli(config: Record<string, any>) {
-        return buildOptionsToArgs(config).join(" ");
+        const options: string[] = [];
+        for (const key in config) {
+            const value = config[key as keyof TransformOptions];
+            if (Array.isArray(value)) {
+                for (const e of value) {
+                    options.push(`--${this.dashize(key)}:${e}`);
+                }
+            } else if (value instanceof Object) {
+                for (const [k, v] of Object.entries(value)) {
+                    options.push(`--${this.dashize(key)}:${k}=${v}`);
+                }
+            } else if (value === true) {
+                options.push(`--${this.dashize(key)}`);
+            } else {
+                options.push(`--${this.dashize(key)}=${value}`);
+            }
+        }
+        return options.join(" ");
     },
     cli2cfg(line: string) {
-        return argsToBuildOptions(line.split(/\s+/)) as TransformOptions;
+        const config: Record<string, any> = {};
+        for (const piece of line.split(/\s+/)) {
+            if (!piece.startsWith("--")) continue;
+            const a = piece.substring(2);
+            const colon = a.indexOf(":");
+            const equal = a.indexOf("=");
+            if (colon === -1 && equal === -1) {
+                config[this.camelize(a)] = true;
+            } else {
+                if (colon !== -1 && colon < equal) {
+                    const key = a.substring(0, colon);
+                    const [k, v] = a.substring(colon + 1).split("=", 2);
+                    config[this.camelize(key)] ||= {};
+                    config[this.camelize(key)][k] = v;
+                } else if (colon !== -1 && equal === -1) {
+                    const [key, value] = a.split(":", 2);
+                    config[this.camelize(key)] ||= [];
+                    config[this.camelize(key)].push(value);
+                } else {
+                    const [key, value] = a.split("=", 2);
+                    const val = { true: true, false: false }[value] || value;
+                    config[this.camelize(key)] = val;
+                }
+            }
+        }
+        return config;
     },
     loadQuery() {
         const query = new URLSearchParams(location.search.slice(1));
