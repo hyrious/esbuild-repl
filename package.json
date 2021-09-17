@@ -1,12 +1,32 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview"
-    },
-    "devDependencies": {
-        "esbuild": "^0.13.10",
-        "vite": "^2.6.13"
-    }
+  "private": true,
+  "scripts": {
+    "build": "rimraf dist && esbuild-dev -p:./scripts/svelte-ssr.ts scripts/build.ts --prod",
+    "dev": "esbuild-dev -p:./scripts/svelte-ssr.ts scripts/dev.ts"
+  },
+  "devDependencies": {
+    "@hyrious/esbuild-dev": "^0.5.0",
+    "@hyrious/rimraf": "^0.1.0",
+    "@hyrious/w7": "^0.1.7",
+    "@tsconfig/svelte": "^2.0.1",
+    "@types/node": "^16.11.6",
+    "chokidar": "^3.5.2",
+    "concurrently": "^6.3.0",
+    "debounce-fn": "^5.0.0",
+    "esbuild": "^0.13.12",
+    "pretty-bytes": "^5.6.0",
+    "svelte": "^3.44.1",
+    "type-fest": "^2.5.2"
+  },
+  "dependencies": {
+    "@codemirror/basic-setup": "^0.19.0",
+    "@codemirror/commands": "^0.19.5",
+    "@codemirror/lang-css": "^0.19.3",
+    "@codemirror/lang-javascript": "^0.19.2",
+    "@codemirror/view": "^0.19.12",
+    "@github/textarea-autosize": "^0.2.2",
+    "@hyrious/shellwords": "^0.1.1",
+    "highlight.js": "^11.3.1",
+    "selector-observer": "^2.1.6"
+  }
 }
