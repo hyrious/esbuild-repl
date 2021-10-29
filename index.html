@@ -30,11 +30,11 @@
         </span>
     </header>
     <main>
-        <textarea id="editor">render(&lt;App /&gt;, document.getElementById("app")!);</textarea>
-        <textarea id="output" readonly>render(/* @__PURE__ */ React.createElement(App, null), document.getElementById("app"));</textarea>
+        <textarea id="editor">a?.b() ?? 1</textarea>
+        <textarea id="output" readonly></textarea>
     </main>
     <aside>
-        <input id="config" value="--loader=tsx">
+        <input id="config" value="--loader=js --target=chrome89">
         <span id="error" style="display: none;"></span>
     </aside>
     <script type="module" src="/main.ts"></script>

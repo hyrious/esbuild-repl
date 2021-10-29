@@ -135,8 +135,6 @@ const utils = {
     });
     const version = query.version || (await utils.version());
     $("#version").textContent = version;
-    await utils.esbuild(version);
-    leave($("#mask"));
 
     (window as any).esbuild = esbuild;
 
@@ -152,6 +150,9 @@ const utils = {
         $editor.value = query.shareable?.code;
         $output.value = "// initializing...";
     }
+
+    await utils.esbuild(version);
+    leave($("#mask"));
 
     let config = utils.cli2cfg($config.value);
     let code = $editor.value;
@@ -187,7 +188,7 @@ const utils = {
                 if (!first) $("#duration").textContent = duration.toFixed(2) + "ms";
             }
         } catch (e) {
-            utils.showError(e.message);
+            utils.showError((e as Error).message);
         }
         try {
             utils.updateQuery(version, { code, config });
@@ -197,7 +198,7 @@ const utils = {
     $editor.addEventListener("input", () => refresh(false));
 
     refresh(true);
-})().catch((reason) => {
+})().catch(reason => {
     console.error(reason);
     $("#mask").textContent = reason?.message || reason;
 });
@@ -205,5 +206,8 @@ const utils = {
 if (import.meta.env.PROD)
     navigator.serviceWorker
         .register("./sw.js")
-        .then((e) => console.log("registered sw.js in scope:", e.scope))
-        .catch((e) => console.log("failed to register sw.js:", e));
+        .then(e => console.log("registered sw.js in scope:", e.scope))
+        .catch(e => console.log("failed to register sw.js:", e));
+
+if (import.meta.env.DEV)
+    navigator.serviceWorker.getRegistrations().then(rs => rs.map(r => r.unregister()));
