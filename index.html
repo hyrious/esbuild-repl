@@ -2,12 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width">
   <title>esbuild.repl</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.scss">
 </head>
-<body>
+<body data-mode="transform">
+  <header>
+    <h1 class="title">
+      <a href="https://esbuild.github.io" target="_blank" noreferrer>esbuild</a>
+      .
+      <a href="https://github.com/hyrious/esbuild-repl" target="_blank" noreferrer>repl</a>
+    </h1>
+    <nav class="mode">
+      <input id="~mode~transform" type="radio" name="mode" value="transform" checked>
+      <label for="~mode~transform">Transform</label>
+      <input id="~mode~build" type="radio" name="mode" value="build">
+      <label for="~mode~build">Build</label>
+    </nav>
+    <aside class="site">
+      <button id="theme" data-value="auto"></button>
+    </aside>
+  </header>
+  <section class="transform">
+    <textarea class="editor">lorem</textarea>
+    <textarea readonly>lorem</textarea>
+  </section>
+  <section class="build">
+    build
+  </section>
   <script type="module" src="/main.ts"></script>
 </body>
 </html>

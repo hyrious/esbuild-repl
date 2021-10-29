@@ -1,0 +1,167 @@
+@import url(https://cdn.jsdelivr.net/npm/sanitize.css);
+
+:link[target] {
+  cursor: cell;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body:not([data-theme="dark"]) {
+  --bg: #fff;
+  --fg: #222;
+  --fg-on: #000;
+  --pre: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    --bg: #191919;
+    --fg: #aaa;
+    --fg-on: #ddd;
+    --pre: #ccc;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+a {
+  color: inherit;
+}
+
+header {
+  padding: 4px 4px 0;
+  display: flex;
+  align-items: center;
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      color: var(--fg-on);
+      text-decoration: underline;
+    }
+  }
+}
+
+textarea {
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid rgba($color: #7f7f7f, $alpha: 0.5);
+  outline: none;
+  background-color: rgba($color: #7f7f7f, $alpha: 0.1);
+  color: var(--fg);
+  border-radius: 6px;
+  font: 14px/140% monospace;
+  overflow-x: auto;
+  resize: none;
+
+  &:focus-visible {
+    border-color: rgba($color: #7f7f7f, $alpha: 0.75);
+  }
+}
+
+@mixin narrow {
+  @media screen and (max-width: 720px) { @content }
+}
+
+.title {
+  margin: 0;
+  padding: 4px 4px 4px 8px;
+  display: inline-flex;
+  font-size: 16px;
+
+  @include narrow {
+    display: none;
+  }
+}
+
+.site {
+  padding: 4px 8px 4px 4px;
+  font-size: 14px;
+
+  #theme {
+    all: unset;
+    display: revert;
+    cursor: pointer;
+
+    &::before {
+      content: "Theme:";
+      @include narrow {
+        content: "";
+      }
+    }
+
+    &::after {
+      content: " " attr(data-value);
+      text-transform: capitalize;
+    }
+  }
+}
+
+.mode {
+  flex-grow: 1;
+  display: flex;
+
+  label {
+    user-select: none;
+    position: relative;
+    text-align: center;
+    cursor: pointer;
+
+    &[for="~mode~transform"] {
+      min-width: 90px;
+    }
+
+    &[for="~mode~build"] {
+      min-width: 50px;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  input[type="radio"] {
+    display: none;
+
+    &:checked + label {
+      color: var(--fg-on);
+      font-weight: bold;
+    }
+  }
+}
+
+$modes: "transform", "build";
+
+@each $mode in $modes {
+  .#{$mode} {
+    flex: 1;
+    display: none;
+  }
+  [data-mode="#{$mode}"] .#{$mode} {
+    display: flex;
+  }
+}
+
+.transform,
+.build {
+  gap: 4px;
+  padding: 4px;
+  @include narrow {
+    flex-direction: column;
+  }
+}
+
+.transform {
+  textarea,
+  pre {
+    flex: 1;
+  }
+}

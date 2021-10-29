@@ -1,0 +1,12 @@
+{
+  "include": ["main.ts", "lib"],
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node"
+  }
+}
