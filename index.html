@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width">
     <title>esbuild.repl</title>
     
-  <script type="module" crossorigin src="assets/index.0d8feba6.js"></script>
-    <link rel="stylesheet" href="assets/index.08b0d3db.css">
-  </head>
+  <script type="module" crossorigin src="assets/index.f0af21f0.js"></script>
+  <link rel="stylesheet" href="assets/index.08b0d3db.css">
+</head>
 <body>
     <div id="mask">
         loading...
@@ -32,11 +32,11 @@
         </span>
     </header>
     <main>
-        <textarea id="editor">render(&lt;App /&gt;, document.getElementById("app")!);</textarea>
-        <textarea id="output" readonly>render(/* @__PURE__ */ React.createElement(App, null), document.getElementById("app"));</textarea>
+        <textarea id="editor">a?.b() ?? 1</textarea>
+        <textarea id="output" readonly></textarea>
     </main>
     <aside>
-        <input id="config" value="--loader=tsx">
+        <input id="config" value="--loader=js --target=chrome89">
         <span id="error" style="display: none;"></span>
     </aside>
     
