@@ -136,8 +136,6 @@ const utils = {
     const version = query.version || (await utils.version());
     $("#version").textContent = version;
 
-    (window as any).esbuild = esbuild;
-
     let $config = $("#config") as HTMLInputElement;
     let $output = $("#output") as HTMLTextAreaElement;
     let $editor = $("#editor") as HTMLTextAreaElement;
@@ -152,6 +150,8 @@ const utils = {
     }
 
     await utils.esbuild(version);
+    (window as any).esbuild = esbuild;
+
     leave($("#mask"));
 
     let config = utils.cli2cfg($config.value);
