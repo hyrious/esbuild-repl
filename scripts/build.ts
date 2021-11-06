@@ -1,5 +1,5 @@
 import esbuild from "esbuild";
-import { argv } from "node:process";
+import { argv, exit } from "node:process";
 import { mergeMetafile } from "./utils";
 import buildHTML from "./build-html";
 import buildJS from "./build-js";
@@ -50,5 +50,6 @@ try {
     }
   }
 } catch (e) {
-  console.log(e);
+  console.error(e);
+  exit(1);
 }

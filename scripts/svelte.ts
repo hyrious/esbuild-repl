@@ -71,7 +71,7 @@ const svelte: Plugin = {
         if (css.code) {
           const key = ID();
           map.set(key, { js, css, dir: dirname(args.path) });
-          const id = `__svelte_${key}:${filename.replaceAll("\\", "/")}`;
+          const id = `__svelte_${key}:${filename.replace(/\\/g, "/")}`;
           return {
             // svelte component must contains a default export
             contents: `

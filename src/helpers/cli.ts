@@ -15,8 +15,8 @@ function quote(s: string) {
       "'" +
       JSON.stringify(s)
         .replace(/^"|"$/g, "")
-        .replaceAll("'", "\\'")
-        .replaceAll('\\"', '"') +
+        .replace(/'/g, "\\'")
+        .replace(/\\"/g, '"') +
       "'"
     );
   } else {

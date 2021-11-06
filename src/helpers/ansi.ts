@@ -20,11 +20,11 @@ type Color = typeof ESCAPE_TO_COLOR[keyof typeof ESCAPE_TO_COLOR];
 // https://github.com/sindresorhus/escape-goat
 function htmlEscape(string: string) {
   return string
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+    .replace(/\&/g, "&amp;")
+    .replace(/\"/g, "&quot;")
+    .replace(/\'/g, "&#39;")
+    .replace(/\</g, "&lt;")
+    .replace(/\>/g, "&gt;");
 }
 
 const TEXT_DECORATIONS = new Set(["strong", "ins"]);
