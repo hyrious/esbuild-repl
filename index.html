@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="color-scheme" content="light dark">
-    <meta name="viewport" content="width=device-width">
-    <title>esbuild.repl</title>
-    
-  <script type="module" crossorigin src="assets/index.6e911b70.js"></script>
-  <link rel="stylesheet" href="assets/index.08b0d3db.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>esbuild.repl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./main.css">
 </head>
 <body>
-    <div id="mask">
-        loading...
-    </div>
-    <header>
-        <span>
-            <a href="https://esbuild.github.io" target="_blank">esbuild</a>.<a href="https://github.com/hyrious/esbuild-repl" target="_blank">repl</a>
-        </span>
-        <span id="version"></span>
-        <span id="duration"></span>
-        <span id="control">
-          <a id="theme">
-            <svg id="theme-light" width="25" height="25" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13.5 4v3m9.5 6.5h-3M13.5 23v-3M7 13.5H4M9 9L7 7m13 0l-2 2m2 11l-2-2M7 20l2-2"></path>
-              <circle cx="13.5" cy="13.5" r="4.5" stroke-width="0"></circle>
-            </svg>
-            <svg id="theme-dark" width="25" height="25" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10.1 6.6a8.08 8.08 0 00.24 11.06 8.08 8.08 0 0011.06.24c-6.46.9-12.2-4.84-11.3-11.3z" stroke-width="0"></path>
-            </svg>
-          </a>
-        </span>
-    </header>
-    <main>
-        <textarea id="editor">a?.b() ?? 1</textarea>
-        <textarea id="output" readonly></textarea>
-    </main>
-    <aside>
-        <input id="config" value="--loader=js --target=chrome89">
-        <span id="error" style="display: none;"></span>
-    </aside>
-    
+  <div id="app"><header class="svelte-1ynbcxn"><h1 class="svelte-1ynbcxn"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-1ynbcxn">esbuild</a>
+    <span>.</span>
+    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer" class="svelte-1ynbcxn">repl</a></h1>
+  <nav class="svelte-1ynbcxn"><input name="mode" id="mode-transform" value="transform" type="radio"  class="svelte-1ynbcxn">
+    <label for="mode-transform" class="svelte-1ynbcxn">Transform</label>
+    <input name="mode" id="mode-build" value="build" type="radio"  class="svelte-1ynbcxn">
+    <label for="mode-build" class="svelte-1ynbcxn">Build</label></nav>
+  <i class="i mdi:moon-waxing-crescent svelte-1ynbcxn" title="theme: auto"></i>
+</header>
+<main class="svelte-628m8p">
+
+
+
+<div class="repl transform svelte-tjpolb"><div class="left">
+    <div class="input svelte-tjpolb"><textarea slot="input" class="editor svelte-1cd399r" spellcheck="false"></textarea>
+    <input spellcheck="false" autocomplete="off" placeholder="--loader=js" value=""></div></div>
+  <div class="right">
+    <div class="output svelte-tjpolb"><pre class="chunk svelte-1cd399r">// initializing</pre>
+    <div class="status loading svelte-1l16bpw">Loading esbuild…
+</div>
+  </div></div>
+</div>
+  <div class="repl build svelte-tjpolb"><div class="left"><h3 class="svelte-tjpolb">ES6 modules go in…</h3>
+    <div class="input svelte-tjpolb">
+    <button class="svelte-ghczoy"><i class="i mdi:plus svelte-ghczoy"></i>
+      <span>add module</span></button></div></div>
+  <div class="right"><h3 class="svelte-tjpolb">…bundle comes out
+      </h3>
+    <div class="output svelte-tjpolb">
+    <div class="status loading svelte-1l16bpw">Loading esbuild…
+</div>
+  </div></div>
+</div>
+</main></div>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

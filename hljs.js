@@ -1,0 +1,1 @@
+importScripts("https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js");addEventListener("message",({data:e})=>{const{code:s,loader:t}=e,{value:h}=hljs.highlight(s,{language:t||"js"});postMessage(h)});
