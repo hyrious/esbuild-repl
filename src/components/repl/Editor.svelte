@@ -82,6 +82,7 @@
     align-items: center;
     right: 0;
     background-color: transparent;
+    color: var(--fg);
     border: none;
     padding: 0;
     outline: none;

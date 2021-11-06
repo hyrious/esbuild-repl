@@ -14,7 +14,7 @@ Make sure you have enough data.
 - Firefox (last 2)
 - Safari (last 2)
 
-### TODO
+### Todo
 
 - Build options panel.
 - In-browser "codepen" (using iframe).
