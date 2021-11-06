@@ -16,14 +16,9 @@ Make sure you have enough data.
 
 ### TODO
 
-- Switch to vanilla JavaScript and native es modules.
-- Virtual files, like [rollup](https://rollupjs.org/repl).
+- Build options panel.
 - In-browser "codepen" (using iframe).
 
-### Changelog
-
-None yet.
-
-### LICENSE
+### License
 
 MIT @ [hyrious](https://github.com/hyrious)
