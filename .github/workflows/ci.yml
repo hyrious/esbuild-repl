@@ -1,11 +1,11 @@
-name: github pages
+name: ci
 
 on:
   push:
     branches:
-      - main
+      - develop
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,7 +20,3 @@ jobs:
           version: latest
           run_install: true
       - run: pnpm build
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
