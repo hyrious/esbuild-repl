@@ -61,7 +61,7 @@
       $outputs = result.outputFiles.map((file) => {
         const sliceAt = file.path.lastIndexOf("__out__") + "__out__".length + 1;
         const name = file.path.slice(sliceAt);
-        const code = file.text.replace(/^\/\/ fs:/g, "// ");
+        const code = file.text.replace(/^\/\/ fs:/gm, "// ");
         return { name, code, isEntry: false };
       });
       buildErrors = result.errors;

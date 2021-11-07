@@ -9,7 +9,7 @@ const fs_plugin: ($modules: Module[]) => Plugin = ($modules) => ({
   setup({ onResolve, onLoad }) {
     onResolve({ filter: /()/ }, (args) => {
       const name = args.path.replace(/^\.\//, "");
-      const mod = $modules.find((e) => e.name === args.path);
+      const mod = $modules.find((e) => e.name === name);
       if (mod) {
         return { path: name, namespace: "fs", pluginData: mod };
       } else {
