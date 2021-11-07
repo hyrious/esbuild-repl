@@ -1,8 +1,8 @@
 <script>
-  import { loading, error, elapsed } from "../../stores/esbuild";
+  import { loading, error } from "../../stores/esbuild";
   import { printError, printWarning } from "../../helpers/ansi";
 
-  export let errors, warnings;
+  export let errors, warnings, elapsed;
 
   // prettier-ignore
   $: status =
@@ -16,8 +16,8 @@
   {#if status === "loading"}
     Loading esbuild&hellip;
   {:else if status === "success"}
-    {#if $elapsed}
-      Finished in {$elapsed}ms.
+    {#if elapsed}
+      Finished in {elapsed}ms.
     {:else}
       Ready.
     {/if}

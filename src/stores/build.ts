@@ -10,3 +10,4 @@ export interface Module {
 export const modules = writable<Module[]>([]);
 export const options = writable<BuildOptions>({});
 export const outputs = writable<Module[]>([]);
+export const elapsed = writable(0);

@@ -1,6 +1,8 @@
 // ansi escape to html
 // https://esbuild.github.io/api/#color
 import type { PartialMessage } from "esbuild";
+import { get } from "svelte/store";
+import { loading } from "../stores/esbuild";
 
 // https://github.com/evanw/esbuild/blob/master/internal/logger/logger.go
 type Escape = "0" | "1" | "37" | "4" | "31" | "32" | "34" | "36" | "35" | "33";
@@ -65,7 +67,7 @@ class AnsiBuffer {
       this.result += "<ins>";
     }
   }
-  color(color: typeof ESCAPE_TO_COLOR[keyof typeof ESCAPE_TO_COLOR]) {
+  color(color: Color) {
     const last = () => this._stack[this._stack.length - 1];
     while (isColor(last())) {
       this._stack.pop();
@@ -105,32 +107,24 @@ export function render(ansi: string) {
 }
 
 export async function printError(errors: PartialMessage[]): Promise<string> {
-  if (typeof esbuild !== "undefined") {
-    if (errors instanceof Error) {
-      let stack = (errors.stack || "").split("\n");
-      stack[0] = "";
-      return printError([
-        { text: errors.message, notes: [{ text: stack.join("\n") }] },
-      ]);
-    }
-    const strings = await esbuild.formatMessages(errors, {
-      kind: "error",
-      color: true,
-    });
-    return strings.map(render).join("");
-  } else {
-    return "";
+  if (errors instanceof Error) {
+    let stack = (errors.stack || "").split("\n");
+    stack[0] = "";
+    return printError([
+      { text: errors.message, notes: [{ text: stack.join("\n") }] },
+    ]);
   }
+  const strings = await esbuild.formatMessages(errors, {
+    kind: "error",
+    color: true,
+  });
+  return strings.map(render).join("");
 }
 
 export async function printWarning(warnings: PartialMessage[]) {
-  if (typeof esbuild !== "undefined") {
-    const strings = await esbuild.formatMessages(warnings, {
-      kind: "warning",
-      color: true,
-    });
-    return strings.map(render).join("");
-  } else {
-    return "";
-  }
+  const strings = await esbuild.formatMessages(warnings, {
+    kind: "warning",
+    color: true,
+  });
+  return strings.map(render).join("");
 }

@@ -6,8 +6,8 @@
   import Layout from "./Layout.svelte";
   import Status from "./Status.svelte";
   import mode from "../../stores/mode";
-  import { code, config } from "../../stores/transform";
-  import { elapsed, error, loading } from "../../stores/esbuild";
+  import { code, config, elapsed } from "../../stores/transform";
+  import { error, loading } from "../../stores/esbuild";
   import { argsToConfig, configToArgs } from "../../helpers/cli";
 
   let transformInput;
@@ -92,7 +92,7 @@
     {:else}
       <pre class="chunk">{transformResult}</pre>
     {/if}
-    <Status errors={transformErrors} warnings={transformWarnings} />
+    <Status errors={transformErrors} warnings={transformWarnings} elapsed={$elapsed} />
   </svelte:fragment>
 </Layout>
 

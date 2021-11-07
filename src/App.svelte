@@ -6,7 +6,7 @@
   import mode from "./stores/mode";
   import { code, config } from "./stores/transform";
   import { modules, options } from "./stores/build";
-  import { version } from "./stores/esbuild";
+  import { loading, version } from "./stores/esbuild";
 
   import {
     getQuery,
@@ -17,7 +17,7 @@
 
   onMount(() => updateStoresFromQuery(getQuery()));
 
-  $: if ($version && version !== "latest") {
+  $: if (!$loading) {
     if ($mode === "build")
       updateQuery({ modules: $modules, options: $options }, $version);
     else if ($mode === "transform")

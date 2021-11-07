@@ -122,5 +122,6 @@
     border: 0;
     white-space: pre-wrap;
     word-break: break-all;
+    cursor: text;
   }
 </style>

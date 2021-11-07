@@ -4,8 +4,8 @@
   import Status from "./Status.svelte";
 
   import mode from "../../stores/mode";
-  import { elapsed, loading, error } from "../../stores/esbuild";
-  import { modules, options, outputs } from "../../stores/build";
+  import { loading, error } from "../../stores/esbuild";
+  import { elapsed, modules, options, outputs } from "../../stores/build";
   import fs_plugin from "../../helpers/fs";
 
   let uid = 1;
@@ -50,7 +50,7 @@
       const result = await esbuild.build({
         entryPoints,
         bundle: true,
-        format: 'esm',
+        format: "esm",
         splitting: true,
         plugins: [fs_plugin($modules)],
         ...$options,
@@ -61,7 +61,7 @@
       $outputs = result.outputFiles.map((file) => {
         const sliceAt = file.path.lastIndexOf("__out__") + "__out__".length + 1;
         const name = file.path.slice(sliceAt);
-        const code = file.text;
+        const code = file.text.replace(/^\/\/ fs:/g, "// ");
         return { name, code, isEntry: false };
       });
       buildErrors = result.errors;
@@ -78,14 +78,7 @@
     }
   }
 
-  let timer = 0;
-
-  function debounced_build($modules, $options) {
-    clearTimeout(timer);
-    timer = setTimeout(() => build($modules, $options), 200);
-  }
-
-  $: !$loading && $mode === "build" && debounced_build($modules, $options);
+  $: !$loading && $mode === "build" && build($modules, $options);
 </script>
 
 <Layout mode="build">
@@ -108,7 +101,7 @@
     {#each $outputs as { name, code, isEntry }}
       <Editor {name} {code} {isEntry} readonly />
     {/each}
-    <Status errors={buildErrors} warnings={buildWarnings} />
+    <Status errors={buildErrors} warnings={buildWarnings} elapsed={$elapsed} />
   </svelte:fragment>
 </Layout>
 

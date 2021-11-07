@@ -5,7 +5,6 @@ export type esbuild_t = typeof import("esbuild");
 export const loading = writable(true);
 export const version = writable("");
 export const error = writable<Error | false>(false);
-export const elapsed = writable(0);
 
 function getEsbuildUrl($version: string) {
   return `https://cdn.jsdelivr.net/npm/esbuild-wasm@${$version}/lib/browser.min.js`;
@@ -30,14 +29,14 @@ version.subscribe(($version: string) => {
         await esbuild.initialize({ wasmURL: getEsbuildWasmUrl($version) });
         await esbuild.transform("let a = 1");
         version.set(esbuild.version);
-        loading.set(false);
         resolve(esbuild);
+        loading.set(false);
       };
       script.onerror = () => {
         const err = new Error(`Could not load esbuild from ${url}.`);
         error.set(err);
-        loading.set(false);
         reject(err);
+        loading.set(false);
       };
       script.src = url;
       document.head.append(script);
