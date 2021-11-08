@@ -6,6 +6,29 @@
   export let isEntry = false;
   export let readonly = false;
 
+  let highlightResultHTML = "";
+
+  const hljs =
+    typeof Worker !== "undefined"
+      ? new Worker("./hljs.js")
+      : { postMessage() {}, addEventListener() {} };
+  hljs.addEventListener("message", (e) => (highlightResultHTML = e.data));
+
+  let timer = 0;
+
+  $: {
+    highlightResultHTML = "";
+    if (readonly && code) {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const loader = name.endsWith('.js') ? 'js' : name.endsWith('.css') ? 'css' : ''
+        if (loader) {
+          hljs.postMessage({ code, loader });
+        }
+      }, 200);
+    }
+  }
+
   const dispatch = createEventDispatcher();
 </script>
 
@@ -35,7 +58,11 @@
     {/if}
   </header>
   {#if readonly}
-    <pre class="chunk">{code}</pre>
+    {#if highlightResultHTML}
+      <pre class="chunk">{@html highlightResultHTML}</pre>
+    {:else}
+      <pre class="chunk">{code}</pre>
+    {/if}
   {:else}
     <textarea class="editor" bind:value={code} />
   {/if}
