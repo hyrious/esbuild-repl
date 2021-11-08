@@ -59,7 +59,10 @@
   }
 
   function updateConfig() {
-    $config = argsToConfig(transformOptions);
+    const newConfig = argsToConfig(transformOptions);
+    if (newConfig) {
+      $config = newConfig;
+    }
   }
 
   onMount(() =>
@@ -106,5 +109,6 @@
   pre {
     white-space: pre-wrap;
     word-break: break-all;
+    cursor: text;
   }
 </style>

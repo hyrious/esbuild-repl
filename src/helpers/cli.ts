@@ -43,10 +43,10 @@ export function configToArgs(options: TransformOptions) {
 /**
  * Call it on every $config update.
  */
-export function argsToConfig(args: string): TransformOptions {
+export function argsToConfig(args: string): TransformOptions | null {
   try {
     return argsToBuildOptions(shellsplit(args)) as TransformOptions;
   } catch {
-    return {};
+    return null;
   }
 }
