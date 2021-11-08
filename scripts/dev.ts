@@ -14,14 +14,17 @@ const watcher = chokidar.watch("src", {
   disableGlobbing: true,
 });
 
-const rebuild = debounceFn(async () => {
-  try {
-    await Promise.all([buildHTML(), buildJS()]);
-    console.log("page refreshed");
-  } catch {
-    console.log("something went wrong");
-  }
-});
+const rebuild = debounceFn(
+  async () => {
+    try {
+      await Promise.all([buildHTML(), buildJS()]);
+      console.log("page refreshed");
+    } catch {
+      console.log("something went wrong");
+    }
+  },
+  { wait: 100 }
+);
 watcher.on("change", rebuild);
 
 rebuild();
