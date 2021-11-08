@@ -4,11 +4,11 @@ export type {};
 declare var self: ServiceWorkerGlobalScope;
 
 const N = "esbuild-repl:v1";
-const R = ["esbuild.wasm", "browser.js"];
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("fetch", (ev) => {
-  if (R.some((name) => ev.request.url.endsWith(name))) {
+  const url = ev.request.url;
+  if (url.endsWith("esbuild.wasm") && !url.includes("latest")) {
     ev.respondWith(
       caches.open(N).then(async (cache) => {
         let resp = await cache.match(ev.request);

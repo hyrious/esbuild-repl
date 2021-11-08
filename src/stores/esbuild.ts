@@ -26,7 +26,9 @@ version.subscribe(($version: string) => {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.onload = async () => {
-        await esbuild.initialize({ wasmURL: getEsbuildWasmUrl($version) });
+        await esbuild.initialize({
+          wasmURL: getEsbuildWasmUrl(esbuild.version),
+        });
         await esbuild.transform("let a = 1");
         version.set(esbuild.version);
         resolve(esbuild);
