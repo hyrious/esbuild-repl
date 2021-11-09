@@ -112,5 +112,5 @@ export function updateQuery(shareable: Shareable, version: string) {
     version,
     shareable: window.btoa(encodeURIComponent(JSON.stringify(shareable))),
   });
-  history.pushState({}, "", location.pathname + "?" + qs.toString());
+  history.replaceState({}, "", location.pathname + "?" + qs.toString());
 }
