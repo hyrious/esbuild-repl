@@ -40,6 +40,7 @@
       <input
         class="module-name"
         placeholder="main.js"
+        spellcheck="false"
         bind:value={name}
         {readonly}
       />
@@ -64,7 +65,7 @@
       <pre class="chunk">{code}</pre>
     {/if}
   {:else}
-    <textarea class="editor" bind:value={code} />
+    <textarea spellcheck="false" class="editor" bind:value={code} />
   {/if}
 </article>
 

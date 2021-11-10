@@ -1,6 +1,6 @@
 <script>
   import Transform from "./repl/Transform.svelte";
-  import Build from "./repl/Build.svelte";
+  import Build from "./repl/build/Build.svelte";
 </script>
 
 <main>

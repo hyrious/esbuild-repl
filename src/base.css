@@ -70,6 +70,7 @@ body::-webkit-scrollbar-thumb:horizontal {
 body:not([data-theme="dark"]) {
   color-scheme: light;
   --bg: #fff;
+  --bg-on: #fff;
   --fg: #222;
   --fg-on: #000;
   --pre: #222;
@@ -80,6 +81,7 @@ body:not([data-theme="dark"]) {
 body[data-theme="dark"] {
   color-scheme: dark;
   --bg: #191919;
+  --bg-on: #333;
   --fg: #aaa;
   --fg-on: #ddd;
   --pre: #ccc;
@@ -91,6 +93,7 @@ body[data-theme="dark"] {
   body:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #191919;
+    --bg-on: #333;
     --fg: #aaa;
     --fg-on: #ddd;
     --pre: #ccc;
@@ -116,7 +119,7 @@ pre {
   color: var(--pre);
 }
 
-pre, textarea, input {
+pre, textarea, input, select {
   outline: none;
   background-color: rgba(127,127,127,.1);
   border: 1px solid rgba(127,127,127,.5);

@@ -1,12 +1,12 @@
 <script>
-  import Layout from "./Layout.svelte";
-  import Editor from "./Editor.svelte";
-  import Status from "./Status.svelte";
+  import Layout from "../Layout.svelte";
+  import Editor from "../Editor.svelte";
+  import Status from "../Status.svelte";
 
-  import mode from "../../stores/mode";
-  import { loading, error } from "../../stores/esbuild";
-  import { elapsed, modules, options, outputs } from "../../stores/build";
-  import fs_plugin from "../../helpers/fs";
+  import mode from "../../../stores/mode";
+  import { loading, error } from "../../../stores/esbuild";
+  import { elapsed, modules, options, outputs } from "../../../stores/build";
+  import fs_plugin from "../../../helpers/fs";
 
   let uid = 1;
 
@@ -47,12 +47,11 @@
         return;
       }
       const timeStart = performance.now();
+      $options = { ...$options };
+      $options.plugins ||= [];
+      $options.plugins.unshift(fs_plugin($modules));
       const result = await esbuild.build({
         entryPoints,
-        bundle: true,
-        format: "esm",
-        splitting: true,
-        plugins: [fs_plugin($modules)],
         ...$options,
         outdir: "__out__",
         write: false,

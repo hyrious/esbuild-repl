@@ -40,12 +40,18 @@ export function getQuery(): QueryObject {
   return query;
 }
 
-const DefaultCode = "let a = 1";
+export const DefaultCode = "let a = 1";
 
-const DefaultModule: Module = {
+export const DefaultModule: Module = {
   name: "main.js",
   code: "export let a = 1",
   isEntry: true,
+};
+
+export const DefaultOptions: BuildOptions = {
+  bundle: true,
+  format: "esm",
+  splitting: true,
 };
 
 /**
@@ -53,6 +59,8 @@ const DefaultModule: Module = {
  * Then call `loadEsbuild($version)` to trigger loading.
  */
 export async function updateStoresFromQuery(query: QueryObject) {
+  let hasSetModules = false;
+  let hasSetOptions = false;
   try {
     if (query.shareable) {
       const json = decodeURIComponent(atob(query.shareable));
@@ -63,8 +71,9 @@ export async function updateStoresFromQuery(query: QueryObject) {
         code.set(shareable.code || DefaultCode);
         mode.set("transform");
       } else if (shareable.options) {
-        options.set(shareable.options);
-        modules.set(shareable.modules || [DefaultModule]);
+        hasSetModules = hasSetOptions = true;
+        options.set({ ...DefaultOptions, ...shareable.options });
+        modules.set(shareable.modules || [{ ...DefaultModule }]);
         mode.set("build");
       }
     } else if (query.gist) {
@@ -79,8 +88,11 @@ export async function updateStoresFromQuery(query: QueryObject) {
   if (!get(code)) {
     code.set(DefaultCode);
   }
-  if (get(modules).length === 0) {
-    modules.set([DefaultModule]);
+  if (!hasSetModules) {
+    modules.set([{ ...DefaultModule }]);
+  }
+  if (!hasSetOptions) {
+    options.set({ ...DefaultOptions });
   }
   version.set(query.version || "latest");
 }
