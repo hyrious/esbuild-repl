@@ -214,6 +214,7 @@
   h4 {
     margin: 0;
     text-align: left;
+    font-size: 14px;
   }
   h4 a {
     text-decoration: none;
@@ -237,6 +238,12 @@
     line-height: 1;
     cursor: pointer;
   }
+  @media screen and (max-width: 720px) {
+    h4 button {
+      font-size: 16px;
+      padding: 0.8em;
+    }
+  }
   .close {
     position: absolute;
     right: 100%;
@@ -257,5 +264,6 @@
   p {
     margin: var(--gap) 0;
     text-align: start;
+    font-size: 14px;
   }
 </style>

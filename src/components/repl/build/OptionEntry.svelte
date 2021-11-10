@@ -31,4 +31,7 @@ import Text from "./scalar/Text.svelte";
   a {
     justify-self: right;
   }
+  code {
+    white-space: nowrap;
+  }
 </style>
