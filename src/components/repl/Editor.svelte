@@ -21,7 +21,10 @@
     if (readonly && code) {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        const loader = name.endsWith('.js') ? 'js' : name.endsWith('.css') ? 'css' : ''
+        let loader = "";
+        if (name.endsWith('.js')) loader = "js";
+        if (name.endsWith('.css')) loader = "css";
+        if (name.endsWith('.map')) loader = "json";
         if (loader) {
           hljs.postMessage({ code, loader });
         }
