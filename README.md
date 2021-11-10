@@ -16,7 +16,6 @@ Make sure you have enough data.
 
 ### Todo
 
-- Build options panel.
 - In-browser "codepen" (using iframe).
 
 ### License
