@@ -88,7 +88,7 @@
       <OptionEntry
         name="charset"
         type="select"
-        options={["", "utf8", "ansii"]}
+        options={["", "utf8", "ascii"]}
         bind:value={$options.charset}
       />
       <OptionEntry
