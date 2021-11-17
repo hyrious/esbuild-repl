@@ -25,19 +25,23 @@ version.subscribe(($version: string) => {
     const url = getEsbuildUrl($version);
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.onload = async () => {
-        await esbuild.initialize({
-          wasmURL: getEsbuildWasmUrl(esbuild.version),
-        });
-        await esbuild.transform("let a = 1");
-        version.set(esbuild.version);
-        resolve(esbuild);
-        loading.set(false);
-      };
-      script.onerror = () => {
+      const onerror = () => {
         const err = new Error(`Could not load esbuild from ${url}.`);
         error.set(err);
         reject(err);
+        loading.set(false);
+      };
+      script.onerror = onerror;
+      script.onload = async () => {
+        var esbuild = globalThis.esbuild;
+        globalThis.esbuild = undefined as any;
+        await esbuild
+          .initialize({ wasmURL: getEsbuildWasmUrl(esbuild.version) })
+          .catch(onerror);
+        await esbuild.transform("let a = 1");
+        version.set(esbuild.version);
+        globalThis.esbuild = esbuild;
+        resolve(esbuild);
         loading.set(false);
       };
       script.src = url;
