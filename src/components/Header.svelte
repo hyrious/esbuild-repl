@@ -1,19 +1,36 @@
 <script context="module">
   const lightIcon = "white-balance-sunny";
   const darkIcon = "moon-waxing-crescent";
-  const matchMedia = typeof window === 'undefined' ? () => ({ matches: true }) : window.matchMedia;
-  const isDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
+  const matchMedia = typeof window === 'undefined'
+    ? () => ({ matches: false, addEventListener() {}, removeEventListener() {} })
+    : window.matchMedia;
+  const prefersDarkMode = matchMedia("(prefers-color-scheme: dark)");
 </script>
 
 <script>
+  import { onMount, onDestroy } from "svelte";
+
   import mode from "../stores/mode";
   import theme from "../stores/theme";
+
+  let isDark = prefersDarkMode.matches;
+  const updateDark = e => {
+    isDark = e.matches;
+  };
+
+  onMount(() => {
+    prefersDarkMode.addEventListener("change", updateDark);
+  });
+
+  onDestroy(() => {
+    prefersDarkMode.removeEventListener("change", updateDark);
+  });
 
   $: iconName = $theme === "light"
               ? lightIcon
               : $theme === "dark"
               ? darkIcon
-              : isDark() ? darkIcon : lightIcon;
+              : isDark ? darkIcon : lightIcon;
 
   function switchTheme() {
     if ($theme === "light") {
@@ -21,7 +38,7 @@
     } else if ($theme === "dark") {
       $theme = "light";
     } else {
-      $theme = isDark() ? "light" : "dark";
+      $theme = isDark ? "light" : "dark";
     }
   }
 </script>
