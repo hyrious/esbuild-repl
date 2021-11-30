@@ -12,6 +12,7 @@
   --magenta: #776eeb;
   --yellow: #c76300;
   --dim: #777;
+  --white: #fff;
   --mono: "Noto Sans Mono", monospace;
 }
 
@@ -36,21 +37,21 @@ body::-webkit-scrollbar-track {
 }
 
 body::-webkit-scrollbar-thumb {
-  background-color: rgba(127, 127, 127, .1);
+  background-color: rgba(127, 127, 127, 0.1);
   background-color: transparent;
   transition: background-color 0.4s;
 }
 
 body:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(127, 127, 127, .1);
+  background-color: rgba(127, 127, 127, 0.1);
 }
 
 body::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(127, 127, 127, .2);
+  background-color: rgba(127, 127, 127, 0.2);
 }
 
 body::-webkit-scrollbar-thumb:active {
-  background-color: rgba(127, 127, 127, .5);
+  background-color: rgba(127, 127, 127, 0.5);
 }
 
 body::-webkit-scrollbar-thumb:vertical {
@@ -111,7 +112,8 @@ a {
   color: inherit;
 }
 
-textarea, input {
+textarea,
+input {
   color: var(--fg-on);
 }
 
@@ -119,30 +121,103 @@ pre {
   color: var(--pre);
 }
 
-pre, textarea, input, select {
+pre,
+textarea,
+input,
+select {
   outline: none;
-  background-color: rgba(127,127,127,.1);
-  border: 1px solid rgba(127,127,127,.5);
+  background-color: rgba(127, 127, 127, 0.1);
+  border: 1px solid rgba(127, 127, 127, 0.5);
   border-radius: var(--gap);
   padding: calc(var(--gap) * 1.5);
 }
 
-pre, code, textarea, input {
+pre,
+code,
+textarea,
+input {
   margin: 0;
   font: 14px/140% var(--mono);
+}
+
+textarea {
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 strong {
   color: var(--fg-on);
 }
 
-.color-red { color: var(--red); }
-.color-green { color: var(--green); }
-.color-blue { color: var(--blue); }
-.color-cyan { color: var(--cyan); }
-.color-magenta { color: var(--magenta); }
-.color-yellow { color: var(--yellow); }
-.color-dim { color: var(--dim); }
+.color-red {
+  color: var(--red);
+}
+.color-green {
+  color: var(--green);
+}
+.color-blue {
+  color: var(--blue);
+}
+.color-cyan {
+  color: var(--cyan);
+}
+.color-magenta {
+  color: var(--magenta);
+}
+.color-yellow {
+  color: var(--yellow);
+}
+.color-dim {
+  color: var(--dim);
+}
+.color-red-bg-red {
+  color: var(--red);
+  background-color: var(--red);
+}
+.color-red-bg-white {
+  color: var(--white);
+  background-color: var(--red);
+}
+.color-green-bg-green {
+  color: var(--green);
+  background-color: var(--green);
+}
+.color-green-bg-white {
+  color: var(--white);
+  background-color: var(--green);
+}
+.color-blue-bg-blue {
+  color: var(--blue);
+  background-color: var(--blue);
+}
+.color-blue-bg-white {
+  color: var(--white);
+  background-color: var(--blue);
+}
+.color-cyan-bg-cyan {
+  color: var(--cyan);
+  background-color: var(--cyan);
+}
+.color-cyan-bg-black {
+  color: var(--black);
+  background-color: var(--cyan);
+}
+.color-magenta-bg-magenta {
+  color: var(--magenta);
+  background-color: var(--magenta);
+}
+.color-magenta-bg-black {
+  color: var(--black);
+  background-color: var(--magenta);
+}
+.color-yellow-bg-yellow {
+  color: var(--yellow);
+  background-color: var(--yellow);
+}
+.color-yellow-bg-black {
+  color: var(--black);
+  background-color: var(--yellow);
+}
 
 .hljs-comment,
 .hljs-keyword,

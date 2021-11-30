@@ -22,9 +22,9 @@
       clearTimeout(timer);
       timer = setTimeout(() => {
         let loader = "";
-        if (name.endsWith('.js')) loader = "js";
-        if (name.endsWith('.css')) loader = "css";
-        if (name.endsWith('.map')) loader = "json";
+        if (name.endsWith(".js")) loader = "js";
+        if (name.endsWith(".css")) loader = "css";
+        if (name.endsWith(".map")) loader = "json";
         if (loader) {
           hljs.postMessage({ code, loader });
         }
@@ -154,5 +154,6 @@
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
+    max-height: 80vh;
   }
 </style>

@@ -1,12 +1,8 @@
 // ansi escape to html
 // https://esbuild.github.io/api/#color
 import type { PartialMessage } from "esbuild";
-import { get } from "svelte/store";
-import { loading } from "../stores/esbuild";
 
 // https://github.com/evanw/esbuild/blob/master/internal/logger/logger.go
-type Escape = "0" | "1" | "37" | "4" | "31" | "32" | "34" | "36" | "35" | "33";
-
 const ESCAPE_TO_COLOR = {
   "37": "dim",
   "31": "red",
@@ -15,7 +11,21 @@ const ESCAPE_TO_COLOR = {
   "36": "cyan",
   "35": "magenta",
   "33": "yellow",
+  "41;31": "red-bg-red",
+  "41;97": "red-bg-white",
+  "42;32": "green-bg-green",
+  "42;97": "green-bg-white",
+  "44;34": "blue-bg-blue",
+  "44;97": "blue-bg-white",
+  "46;36": "cyan-bg-cyan",
+  "46;30": "cyan-bg-black",
+  "45;35": "magenta-bg-magenta",
+  "45;30": "magenta-bg-black",
+  "43;33": "yellow-bg-yellow",
+  "43;30": "yellow-bg-black",
 } as const;
+
+type Escape = "0" | "1" | "4" | keyof typeof ESCAPE_TO_COLOR;
 
 type Color = typeof ESCAPE_TO_COLOR[keyof typeof ESCAPE_TO_COLOR];
 
@@ -86,7 +96,7 @@ export function render(ansi: string) {
   ansi = ansi.trimEnd();
   let i = 0;
   const buffer = new AnsiBuffer();
-  for (let m of ansi.matchAll(/\x1B\[(\d+)m/g)) {
+  for (let m of ansi.matchAll(/\x1B\[([\d;]+)m/g)) {
     const escape = m[1] as Escape;
     buffer.text(ansi.slice(i, m.index));
     i = m.index! + m[0].length;

@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 
 export type esbuild_t = typeof import("esbuild");
 
-export const loading = writable(true);
+export const ready = writable(false);
 export const version = writable("");
 export const error = writable<Error | false>(false);
 
@@ -21,7 +21,6 @@ declare global {
 version.subscribe(($version: string) => {
   if (typeof document !== "undefined") {
     if (!$version) return;
-    loading.set(true);
     const url = getEsbuildUrl($version);
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
@@ -29,7 +28,7 @@ version.subscribe(($version: string) => {
         const err = new Error(`Could not load esbuild from ${url}.`);
         error.set(err);
         reject(err);
-        loading.set(false);
+        ready.set(false);
       };
       script.onerror = onerror;
       script.onload = async () => {
@@ -42,7 +41,7 @@ version.subscribe(($version: string) => {
         version.set(esbuild.version);
         globalThis.esbuild = esbuild;
         resolve(esbuild);
-        loading.set(false);
+        ready.set(true);
       };
       script.src = url;
       document.head.append(script);

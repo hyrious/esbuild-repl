@@ -6,8 +6,8 @@
   import Layout from "./Layout.svelte";
   import Status from "./Status.svelte";
   import mode from "../../stores/mode";
+  import { ready, error } from "../../stores/esbuild";
   import { code, config, elapsed } from "../../stores/transform";
-  import { error, loading } from "../../stores/esbuild";
   import { argsToConfig, configToArgs } from "../../helpers/cli";
 
   let transformInput;
@@ -43,7 +43,7 @@
     }
   }
 
-  $: !$loading && $mode === "transform" && transform($code, $config);
+  $: $ready && $mode === "transform" && transform($code, $config);
   $: transformOptions = configToArgs($config).join(" ");
 
   let timer = 0;
@@ -95,7 +95,11 @@
     {:else}
       <pre class="chunk">{transformResult}</pre>
     {/if}
-    <Status errors={transformErrors} warnings={transformWarnings} elapsed={$elapsed} />
+    <Status
+      errors={transformErrors}
+      warnings={transformWarnings}
+      elapsed={$elapsed}
+    />
   </svelte:fragment>
 </Layout>
 
@@ -110,5 +114,6 @@
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
+    max-height: 80vh;
   }
 </style>

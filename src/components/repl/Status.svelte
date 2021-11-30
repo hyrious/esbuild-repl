@@ -1,12 +1,12 @@
 <script>
-  import { loading, error } from "../../stores/esbuild";
+  import { ready, error } from "../../stores/esbuild";
   import { printError, printWarning } from "../../helpers/ansi";
 
   export let errors, warnings, elapsed;
 
   // prettier-ignore
   $: status =
-      $loading                ? "loading"
+      !$ready                 ? "loading"
     : $error || errors.length ? "error"
     : warnings.length         ? "warning"
     :                           "success";

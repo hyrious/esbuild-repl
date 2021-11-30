@@ -4,7 +4,7 @@
   import Status from "../Status.svelte";
 
   import mode from "../../../stores/mode";
-  import { loading, error } from "../../../stores/esbuild";
+  import { ready, error } from "../../../stores/esbuild";
   import { elapsed, modules, options, outputs } from "../../../stores/build";
   import fs_plugin from "../../../helpers/fs";
 
@@ -77,7 +77,7 @@
     }
   }
 
-  $: !$loading && $mode === "build" && build($modules, $options);
+  $: $ready && $mode === "build" && build($modules, $options);
 </script>
 
 <Layout mode="build">
