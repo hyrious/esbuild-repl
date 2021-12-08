@@ -1,13 +1,18 @@
 import type { Plugin } from "esbuild";
 import type { Warning } from "svelte/types/compiler/interfaces";
-import { parse, relative, dirname } from "node:path";
+import { relative, dirname } from "node:path";
 import { readFile } from "node:fs/promises";
 import { compile } from "svelte/compiler";
 import { convertMessage } from "./utils";
 
 interface Output {
   code: string;
-  map: { toUrl(): string };
+  map: {
+    toUrl(): string;
+    file: string;
+    sources: string[];
+    sourcesContent: string[];
+  };
 }
 
 const svelte: Plugin = {
@@ -15,23 +20,26 @@ const svelte: Plugin = {
   setup({ onResolve, onLoad }) {
     const cwd = process.cwd();
     const map = new Map<number, Data>();
-    type Data = { js: Output; css: Output; dir: string };
+    type Data = { js: Output; css: Output; dir: string; filename: string };
 
     let _id_ = 1;
     const ID = () => _id_++;
 
-    onResolve({ filter: /^__svelte_/ }, (args) => {
-      const { 0: key, index } = args.path.match(/\d+/)!;
+    onResolve({ filter: /^__svelte__:\/\// }, (args) => {
+      const { 1: key, index } = args.path.match(/\?id=(\d+)$/)!;
       return {
-        path: args.path.slice(index! + key.length + 1),
+        path: args.path.slice(13, index),
         namespace: "svelte",
         pluginData: map.get(+key),
       };
     });
 
     onLoad({ filter: /\.css$/, namespace: "svelte" }, (args) => {
-      const { css, dir } = args.pluginData as Data;
+      const { css, dir, filename } = args.pluginData as Data;
       if (css) {
+        // hack into css sourcemap, because cssOutputFilename does not work
+        css.map.file = `../${filename}`;
+        css.map.sources = [css.map.file];
         return {
           contents: css.code + `/*# sourceMappingURL=${css.map.toUrl()} */`,
           loader: "css",
@@ -54,11 +62,11 @@ const svelte: Plugin = {
 
     onLoad({ filter: /\.svelte$/ }, async (args) => {
       const source = await readFile(args.path, "utf8");
-      const filename = relative(cwd, args.path);
+      const filename = relative(cwd, args.path).replace(/\\/g, "/");
       try {
         const { js, css, warnings } = compile(source, {
           filename,
-          name: parse(args.path).name,
+          outputFilename: "dist/main.js",
           generate: "dom",
           hydratable: true,
           css: false,
@@ -68,23 +76,16 @@ const svelte: Plugin = {
           convertMessage(source, filename, w)
         );
 
-        if (css.code) {
-          const key = ID();
-          map.set(key, { js, css, dir: dirname(args.path) });
-          const id = `__svelte_${key}:${filename.replace(/\\/g, "/")}`;
-          return {
-            // svelte component must contains a default export
-            contents: `
-              import "${id}.css";
-              export * from "${id}.js";
-              export { default } from "${id}.js";
-            `,
-            warnings: messages,
-          };
-        }
-
+        const key = ID();
+        map.set(key, { js, css, dir: dirname(args.path), filename });
+        const id = `__svelte__://${filename}`;
         return {
-          contents: js.code + `//# sourceMappingURL=` + js.map.toUrl(),
+          // svelte component must contains a default export
+          contents: `
+            ${css.code ? `import "${id}.css?id=${key}";` : ""}
+            export * from "${id}.js?id=${key}";
+            export { default } from "${id}.js?id=${key}";
+          `,
           warnings: messages,
         };
       } catch (e) {

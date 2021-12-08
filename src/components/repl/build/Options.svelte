@@ -1,7 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
   import { options } from "../../../stores/build";
-  import Boolean from "./scalar/Boolean.svelte";
   import OptionEntry from "./OptionEntry.svelte";
 
   export let open;
@@ -23,15 +22,12 @@
     </button>
   </h4>
   <p>
-    Note: not all options are supported, try use esbuild in the browser console or install it locally.
+    Note: not all options are supported, try use esbuild in the browser console
+    or install it locally.
   </p>
   {#if open}
     <div class="options">
-      <OptionEntry
-        name="bundle"
-        type="boolean"
-        bind:value={$options.bundle}
-      />
+      <OptionEntry name="bundle" type="boolean" bind:value={$options.bundle} />
       <OptionEntry
         name="define"
         type="record"
@@ -50,11 +46,7 @@
         placeholder=".svg=dataurl"
         bind:value={$options.loader}
       />
-      <OptionEntry
-        name="minify"
-        type="boolean"
-        bind:value={$options.minify}
-      />
+      <OptionEntry name="minify" type="boolean" bind:value={$options.minify} />
       <OptionEntry
         name="platform"
         type="select"

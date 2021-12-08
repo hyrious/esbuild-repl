@@ -7,7 +7,7 @@
   let input;
 
   function updateValue() {
-    const result = input.value.split(",").filter(Boolean)
+    const result = input.value.split(",").filter(Boolean);
     if (result.length) {
       value = result;
     } else {

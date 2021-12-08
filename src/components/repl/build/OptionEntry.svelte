@@ -1,9 +1,9 @@
 <script>
   import Boolean from "./scalar/Boolean.svelte";
-import List from "./scalar/List.svelte";
+  import List from "./scalar/List.svelte";
   import Record from "./scalar/Record.svelte";
-import Select from "./scalar/Select.svelte";
-import Text from "./scalar/Text.svelte";
+  import Select from "./scalar/Select.svelte";
+  import Text from "./scalar/Text.svelte";
 
   export let name;
   export let type;

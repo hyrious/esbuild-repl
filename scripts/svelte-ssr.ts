@@ -1,6 +1,6 @@
 import type { Plugin } from "esbuild";
 import type { Warning } from "svelte/types/compiler/interfaces";
-import { parse, relative } from "node:path";
+import { relative } from "node:path";
 import { readFile } from "node:fs/promises";
 import { compile } from "svelte/compiler";
 import { convertMessage } from "./utils";
@@ -17,7 +17,6 @@ const svelteSSR: Plugin = {
         // is about to run in node side.
         const { js, warnings } = compile(source, {
           filename,
-          name: parse(args.path).name,
           generate: "ssr",
           hydratable: true,
           css: false,
