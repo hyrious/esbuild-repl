@@ -4,8 +4,8 @@
 import type { TransformOptions } from "esbuild";
 import { shellsplit } from "@hyrious/shellwords";
 import {
-  argsToBuildOptions,
   buildOptionsToArgs,
+  parseAndRemoveArgs,
 } from "@hyrious/esbuild-dev/args";
 
 function quote(s: string) {
@@ -45,7 +45,7 @@ export function configToArgs(options: TransformOptions) {
  */
 export function argsToConfig(args: string): TransformOptions | null {
   try {
-    return argsToBuildOptions(shellsplit(args)) as TransformOptions;
+    return parseAndRemoveArgs(shellsplit(args)) as TransformOptions;
   } catch {
     return null;
   }
