@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import pRetry from "p-retry";
 
 export type esbuild_t = typeof import("esbuild");
 
@@ -32,11 +33,12 @@ version.subscribe(($version: string) => {
       };
       script.onerror = onerror;
       script.onload = async () => {
-        var esbuild = globalThis.esbuild;
+        const esbuild = globalThis.esbuild;
         globalThis.esbuild = undefined as any;
-        await esbuild
-          .initialize({ wasmURL: getEsbuildWasmUrl(esbuild.version) })
-          .catch(onerror);
+        const wasmURL = getEsbuildWasmUrl(esbuild.version);
+        await pRetry(() => esbuild.initialize({ wasmURL }), {
+          retries: 3,
+        }).catch(onerror);
         await esbuild.transform("let a = 1");
         version.set(esbuild.version);
         globalThis.esbuild = esbuild;
