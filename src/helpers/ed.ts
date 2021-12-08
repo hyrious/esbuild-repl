@@ -21,13 +21,13 @@ function addSortNewLine(
   at: "here" | "begin" | "end"
 ): UpdatedText | undefined {
   const offset = selection[0];
-  if (!offset || !text) return undefined;
+  if (!offset || !text) return;
   const selectionEnd = selection[1] || offset;
 
   const lines = text.slice(0, offset).split("\n");
   const currentLine = lines[lines.length - 1];
   const match = currentLine?.match(INDENTATION_RE);
-  if (!match) return undefined;
+  if (!match) return;
 
   const indentation = match[1] || "";
   const insert = `\n${indentation}`;
@@ -60,14 +60,14 @@ function indent(
 ): UpdatedText | undefined {
   const selectionStart = selection[0] || 0;
   const selectionEnd = selection[1] || selectionStart;
-  if (selection[0] === null) return undefined;
+  if (selection[0] === null) return;
 
   if (selectionStart === selectionEnd) {
     if (substract) {
       const lines = text.slice(0, selectionEnd).split("\n");
       const currentLine = lines[lines.length - 1];
       const match = currentLine?.match(INDENTATION_RE);
-      if (!match) return undefined;
+      if (!match) return;
 
       let indentation = match[0];
       const indent = indentation.length;

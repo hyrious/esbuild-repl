@@ -46,7 +46,6 @@ const svelte: Plugin = {
           resolveDir: dir,
         };
       }
-      return undefined;
     });
 
     onLoad({ filter: /\.js$/, namespace: "svelte" }, (args) => {
@@ -57,7 +56,6 @@ const svelte: Plugin = {
           resolveDir: dir,
         };
       }
-      return undefined;
     });
 
     onLoad({ filter: /\.svelte$/ }, async (args) => {
