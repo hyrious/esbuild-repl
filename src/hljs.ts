@@ -6,9 +6,9 @@ importScripts(
 
 addEventListener(
   "message",
-  ({ data }: MessageEvent<{ code: string; loader?: "css" }>) => {
-    const { code, loader } = data;
+  ({ data }: MessageEvent<{ id: number; code: string; loader?: "css" }>) => {
+    const { id, code, loader } = data;
     const { value } = hljs.highlight(code, { language: loader || "js" });
-    postMessage(value);
+    postMessage({ id, value });
   }
 );

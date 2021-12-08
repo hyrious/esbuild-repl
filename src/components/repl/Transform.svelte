@@ -2,6 +2,7 @@
 
 <script>
   import { onMount } from "svelte";
+  import { hljs_action } from "../../behaviors/hljs";
 
   import Layout from "./Layout.svelte";
   import Status from "./Status.svelte";
@@ -13,15 +14,8 @@
   let transformInput;
   let transformOptions = "";
   let transformResult = "// initializing";
-  let transformResultHTML = "";
   let transformErrors = [];
   let transformWarnings = [];
-
-  const hljs =
-    typeof Worker !== "undefined"
-      ? new Worker("./hljs.js")
-      : { postMessage() {}, addEventListener() {} };
-  hljs.addEventListener("message", (e) => (transformResultHTML = e.data));
 
   async function transform($code, $config) {
     try {
@@ -45,18 +39,7 @@
 
   $: $ready && $mode === "transform" && transform($code, $config);
   $: transformOptions = configToArgs($config).join(" ");
-
-  let timer = 0;
-
-  $: {
-    transformResultHTML = "";
-    if (transformResult) {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        hljs.postMessage({ code: transformResult, loader: $config.loader });
-      }, 200);
-    }
-  }
+  $: loader = $config.loader;
 
   function updateConfig() {
     const newConfig = argsToConfig(transformOptions);
@@ -90,11 +73,7 @@
     />
   </svelte:fragment>
   <svelte:fragment slot="output">
-    {#if transformResultHTML}
-      <pre class="chunk">{@html transformResultHTML}</pre>
-    {:else}
-      <pre class="chunk">{transformResult}</pre>
-    {/if}
+    <pre class="chunk" use:hljs_action={{ code: transformResult, loader }} />
     <Status
       errors={transformErrors}
       warnings={transformWarnings}

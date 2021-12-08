@@ -1,36 +1,19 @@
 <script>
   import { createEventDispatcher } from "svelte";
+  import { hljs_action } from "../../behaviors/hljs";
 
   export let name = "foo.js";
   export let code = "";
   export let isEntry = false;
   export let readonly = false;
 
-  let highlightResultHTML = "";
-
-  const hljs =
-    typeof Worker !== "undefined"
-      ? new Worker("./hljs.js")
-      : { postMessage() {}, addEventListener() {} };
-  hljs.addEventListener("message", (e) => (highlightResultHTML = e.data));
-
-  let timer = 0;
-
-  $: {
-    highlightResultHTML = "";
-    if (readonly && code) {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        let loader = "";
-        if (name.endsWith(".js")) loader = "js";
-        if (name.endsWith(".css")) loader = "css";
-        if (name.endsWith(".map")) loader = "json";
-        if (loader) {
-          hljs.postMessage({ code, loader });
-        }
-      }, 200);
-    }
-  }
+  $: loader = name.endsWith(".js")
+    ? "js"
+    : name.endsWith(".css")
+    ? "css"
+    : name.endsWith(".map")
+    ? "json"
+    : "";
 
   const dispatch = createEventDispatcher();
 </script>
@@ -62,11 +45,7 @@
     {/if}
   </header>
   {#if readonly}
-    {#if highlightResultHTML}
-      <pre class="chunk">{@html highlightResultHTML}</pre>
-    {:else}
-      <pre class="chunk">{code}</pre>
-    {/if}
+    <pre class="chunk" use:hljs_action={{ code, loader }} />
   {:else}
     <textarea spellcheck="false" class="editor" bind:value={code} />
   {/if}
