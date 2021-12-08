@@ -7,6 +7,11 @@ export const ready = writable(false);
 export const version = writable("");
 export const error = writable<Error | false>(false);
 
+let resolveReady!: () => void;
+export const readyPromise = new Promise<void>((r) => {
+  resolveReady = r;
+});
+
 function getEsbuildUrl($version: string) {
   return `https://cdn.jsdelivr.net/npm/esbuild-wasm@${$version}/lib/browser.min.js`;
 }
@@ -33,17 +38,15 @@ version.subscribe(($version: string) => {
       };
       script.onerror = onerror;
       script.onload = async () => {
-        const esbuild = globalThis.esbuild;
-        globalThis.esbuild = undefined as any;
         const wasmURL = getEsbuildWasmUrl(esbuild.version);
         await pRetry(() => esbuild.initialize({ wasmURL }), {
           retries: 3,
         }).catch(onerror);
         await esbuild.transform("let a = 1");
         version.set(esbuild.version);
-        globalThis.esbuild = esbuild;
         resolve(esbuild);
         ready.set(true);
+        resolveReady();
       };
       script.src = url;
       document.head.append(script);

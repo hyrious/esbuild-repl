@@ -1,6 +1,7 @@
 // ansi escape to html
 // https://esbuild.github.io/api/#color
 import type { PartialMessage } from "esbuild";
+import { readyPromise } from "../stores/esbuild";
 
 // https://github.com/evanw/esbuild/blob/master/internal/logger/logger.go
 const ESCAPE_TO_COLOR = {
@@ -117,6 +118,7 @@ export function render(ansi: string) {
 }
 
 export async function printError(errors: PartialMessage[]): Promise<string> {
+  await readyPromise;
   if (errors instanceof Error) {
     let stack = (errors.stack || "").split("\n");
     stack[0] = "";
@@ -132,6 +134,7 @@ export async function printError(errors: PartialMessage[]): Promise<string> {
 }
 
 export async function printWarning(warnings: PartialMessage[]) {
+  await readyPromise;
   const strings = await esbuild.formatMessages(warnings, {
     kind: "warning",
     color: true,

@@ -42,7 +42,6 @@ class ActionTask {
   constructor(readonly node: HTMLPreElement) {}
   replaceInnerHTML = (html: string) => {
     if (!this.cancelled) {
-      console.log(html);
       this.node.innerHTML = html;
     }
   };
