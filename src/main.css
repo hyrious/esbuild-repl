@@ -1,0 +1,117 @@
+@import "sanitize.css";
+@import "icons.css";
+@import "./colors.css";
+
+:root {
+  --gap: 6px;
+  --black: #222;
+  --highlight: #ffcf00;
+  --red: #e54245;
+  --green: #608b00;
+  --blue: #0089b0;
+  --cyan: #008c98;
+  --magenta: #776eeb;
+  --yellow: #c76300;
+  --dim: #777;
+  --white: #fff;
+  --mono: "Noto Sans Mono", monospace;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  font: 16px/140% sans-serif;
+  overflow: hidden;
+}
+
+body:not([data-theme="dark"]) {
+  color-scheme: light;
+  --bg: #fff;
+  --bg-on: #fff;
+  --fg: #222;
+  --fg-on: #000;
+  --pre: #222;
+  --pre-dim: #777;
+  --pre-val: #870;
+}
+
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #191919;
+  --bg-on: #333;
+  --fg: #aaa;
+  --fg-on: #ddd;
+  --pre: #ccc;
+  --pre-dim: #999;
+  --pre-val: #cb8;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #191919;
+    --bg-on: #333;
+    --fg: #aaa;
+    --fg-on: #ddd;
+    --pre: #ccc;
+    --pre-dim: #999;
+    --pre-val: #cb8;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+a {
+  color: inherit;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  padding: 0 var(--gap);
+  overflow: hidden;
+}
+
+textarea,
+input {
+  width: 100%;
+  display: block;
+  color: var(--fg-on);
+}
+
+pre {
+  color: var(--pre);
+}
+
+pre,
+textarea,
+input,
+select {
+  outline: none;
+  background-color: rgba(127, 127, 127, 0.1);
+  border: 1px solid rgba(127, 127, 127, 0.5);
+  border-radius: var(--gap);
+  padding: calc(var(--gap) * 1.5);
+}
+
+pre,
+code,
+textarea,
+input {
+  margin: 0;
+  font: 14px/140% var(--mono);
+}
+
+textarea {
+  white-space: pre-wrap;
+  word-break: break-all;
+  resize: none;
+}
+
+strong {
+  color: var(--fg-on);
+}

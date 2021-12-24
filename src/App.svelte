@@ -1,29 +1,21 @@
-<script>
-  import { onMount } from "svelte";
+<script lang="ts">
   import Header from "./components/Header.svelte";
   import Repl from "./components/Repl.svelte";
-
-  import mode from "./stores/mode";
-  import { code, config } from "./stores/transform";
-  import { modules, options } from "./stores/build";
-  import { ready, version } from "./stores/esbuild";
-
-  import {
-    getQuery,
-    updateQuery,
-    updateStoresFromQuery,
-  } from "./helpers/query";
-  import { render } from "./helpers/ansi";
-
-  onMount(() => updateStoresFromQuery(getQuery()));
-
-  $: if ($ready) {
-    if ($mode === "build")
-      updateQuery({ modules: $modules, options: $options }, $version);
-    else if ($mode === "transform")
-      updateQuery({ code: $code, config: $config }, $version);
-  }
+  import Footer from "./components/Footer.svelte";
+  import Debug from "./components/Debug.svelte";
+  import { debug } from "./stores";
 </script>
 
 <Header />
 <Repl />
+<Footer />
+{#if $debug}<Debug />{/if}
+
+<style>
+  :global(#app) {
+    display: flex;
+    flex-grow: 1;
+    flex-flow: column nowrap;
+    overflow: hidden;
+  }
+</style>

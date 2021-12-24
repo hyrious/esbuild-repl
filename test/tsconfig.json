@@ -1,9 +1,0 @@
-{
-  "include": ["."],
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "esModuleInterop": true
-  }
-}

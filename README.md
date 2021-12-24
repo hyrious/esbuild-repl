@@ -1,22 +1,26 @@
-→ https://hyrious.me/esbuild-repl
+<h2 align='center'>
+  <a href="https://hyrious.me/esbuild-repl"><samp>hyrious.me</samp> / <samp>esbuild-repl</samp></a>
+</h2>
 
-Try esbuild in your browser.
+<p align='center'>
+  <samp>Try esbuild in your browser</samp>
+</p>
 
-### Warning
+**Warning:** It downloads a 10 MB wasm file for each esbuild version. Make sure you have enough data.
 
-It downloads a 10 MB wasm file for each esbuild version.
-Make sure you have enough data.
+## Develop
 
-### Browser support:
-
-- Chrome (last 2)
-- Edge (last 2)
-- Firefox (last 2)
-- Safari (last 2)
+```bash
+pnpm i && pnpm dev
+pnpm build && pnpm preview
+```
 
 ### Todo
 
-- In-browser "codepen" (using iframe).
+PRs are welcome!
+
+- use CodeMirror
+- codepen/playground
 
 ### License
 
