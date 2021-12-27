@@ -1,1 +1,0 @@
-const N="esbuild-repl:v1";self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("fetch",e=>{const s=e.request.url;s.endsWith("esbuild.wasm")&&!s.includes("latest")&&e.respondWith(caches.open(N).then(async r=>{let t=await r.match(e.request);return t||(t=await fetch(e.request),r.put(e.request,t),t)}))});
