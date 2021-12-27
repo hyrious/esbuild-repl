@@ -9,6 +9,7 @@
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "Node",
-    "types": ["svelte", "node"]
+    "types": ["svelte", "node"],
+    "useUnknownInCatchVariables": false
   }
 }

@@ -42,11 +42,19 @@ try {
       .sort(customSort)
       .map(([filename, e]) => ({ filename, bytes: e.bytes }));
     let maxWidth = 0;
-    for (let { filename } of files) {
+    let maxSize = 0;
+    for (let { filename, bytes } of files) {
+      const [size] = prettyBytes(bytes).split(" ");
       maxWidth = Math.max(maxWidth, filename.length);
+      maxSize = Math.max(maxSize, size.length);
     }
     for (let { filename, bytes } of files) {
-      console.log("  " + filename.padEnd(maxWidth), prettyBytes(bytes));
+      const [size, unit] = prettyBytes(bytes).split(" ");
+      console.log(
+        "  " + filename.padEnd(maxWidth),
+        size.padStart(maxSize),
+        unit
+      );
     }
   }
 } catch (e) {

@@ -1,5 +1,6 @@
 import { writable } from "svelte/store";
 import pRetry from "p-retry";
+import { importScript } from "../helpers/script";
 
 export type esbuild_t = typeof import("esbuild");
 
@@ -8,8 +9,10 @@ export const version = writable("");
 export const error = writable<Error | false>(false);
 
 let resolveReady!: () => void;
-export const readyPromise = new Promise<void>((r) => {
+let rejectReady!: (err: Error) => void;
+export const readyPromise = new Promise<void>((r, j) => {
   resolveReady = r;
+  rejectReady = j;
 });
 
 function getEsbuildUrl($version: string) {
@@ -24,32 +27,31 @@ declare global {
   var esbuild: esbuild_t;
 }
 
-version.subscribe(($version: string) => {
+version.subscribe(async ($version: string) => {
   if (typeof document !== "undefined") {
     if (!$version) return;
     const url = getEsbuildUrl($version);
-    return new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      const onerror = () => {
-        const err = new Error(`Could not load esbuild from ${url}.`);
-        error.set(err);
-        reject(err);
-        ready.set(false);
-      };
-      script.onerror = onerror;
-      script.onload = async () => {
-        const wasmURL = getEsbuildWasmUrl(esbuild.version);
-        await pRetry(() => esbuild.initialize({ wasmURL }), {
-          retries: 3,
-        }).catch(onerror);
-        await esbuild.transform("let a = 1");
-        version.set(esbuild.version);
-        resolve(esbuild);
-        ready.set(true);
-        resolveReady();
-      };
-      script.src = url;
-      document.head.append(script);
-    });
+
+    try {
+      await pRetry(
+        () => importScript(url, () => typeof esbuild !== "undefined"),
+        { retries: 3 }
+      );
+
+      const wasmURL = getEsbuildWasmUrl(esbuild.version);
+      await pRetry(() => esbuild.initialize({ wasmURL }), { retries: 3 });
+
+      await esbuild.transform("let a = 1");
+
+      version.set(esbuild.version);
+      ready.set(true);
+
+      resolveReady();
+    } catch (err) {
+      error.set(err);
+      ready.set(false);
+
+      rejectReady(err);
+    }
   }
 });

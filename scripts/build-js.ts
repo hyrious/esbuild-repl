@@ -36,10 +36,10 @@ export default async function buildJS() {
     ...commonOptions,
   });
 
-  let sw = esbuild.build({
-    entryPoints: ["./src/sw.ts"],
-    ...commonOptions,
-  });
+  // let sw = esbuild.build({
+  //   entryPoints: ["./src/sw.ts"],
+  //   ...commonOptions,
+  // });
 
   let hljs = esbuild.build({
     entryPoints: ["./src/hljs.ts"],
@@ -47,8 +47,8 @@ export default async function buildJS() {
   });
 
   const { metafile: m1 } = await main;
-  const { metafile: m2 } = await sw;
+  // const { metafile: m2 } = await sw;
   const { metafile: m3 } = await hljs;
 
-  return [m1, m2, m3].reduce(mergeMetafile);
+  return [m1, m3].reduce(mergeMetafile);
 }
