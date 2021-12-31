@@ -124,5 +124,9 @@ export function updateQuery(shareable: Shareable, version: string) {
     version,
     shareable: window.btoa(encodeURIComponent(JSON.stringify(shareable))),
   });
-  history.replaceState({}, "", location.pathname + "?" + qs.toString());
+  const query = qs.toString();
+  if (query.length > 2000) {
+    console.warn("url is too long! you may not be able to share it correctly.");
+  }
+  history.replaceState({}, "", location.pathname + "?" + query);
 }
