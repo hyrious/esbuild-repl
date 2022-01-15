@@ -87,7 +87,6 @@
   }
   .pane {
     float: left;
-    min-height: 100%;
     overflow: auto;
     overscroll-behavior-y: contain;
     position: relative;
