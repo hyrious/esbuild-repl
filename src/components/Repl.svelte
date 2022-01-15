@@ -1,7 +1,7 @@
 <script lang="ts">
   import Transform from "./Transform.svelte";
   import Build from "./Build.svelte";
-  import Playground from "./Playground.svelte";
+  // import Playground from "./Playground.svelte";
   import { mode } from "../stores";
 </script>
 
