@@ -17,7 +17,12 @@ self.onfetch = (ev) => {
             cache.put(ev.request, response);
           }
         }
-        return response.clone();
+        try {
+          return response.clone();
+        } catch {
+          cache.delete(ev.request);
+          return fetch(ev.request);
+        }
       })
     );
   }

@@ -1,45 +1,27 @@
-<script context="module">
-  const lightIcon = "white-balance-sunny";
-  const darkIcon = "moon-waxing-crescent";
-  const matchMedia = typeof window === 'undefined'
-    ? () => ({ matches: false, addEventListener() {}, removeEventListener() {} })
-    : window.matchMedia;
-  const prefersDarkMode = matchMedia("(prefers-color-scheme: dark)");
-</script>
+<script lang="ts">
+  import type { Writable } from "svelte/store";
+  import { mode, theme } from "../stores";
 
-<script>
-  import { onMount, onDestroy } from "svelte";
+  const modes = ["transform", "build" /* , "playground" */] as const;
 
-  import mode from "../stores/mode";
-  import theme from "../stores/theme";
+  type WritableValue<T> = T extends Writable<infer K> ? K : never;
+  function keydown(m: WritableValue<typeof mode>) {
+    return (ev: KeyboardEvent) => {
+      if (ev.code === "Space" || ev.code === "Enter") {
+        $mode = m;
+      }
+    };
+  }
 
-  let isDark = prefersDarkMode.matches;
-  const updateDark = e => {
-    isDark = e.matches;
-  };
+  async function share() {
+    try {
+      await navigator.clipboard?.writeText(location.href);
+      alert("Sharable URL has been copied to clipboard.");
+    } catch {}
+  }
 
-  onMount(() => {
-    prefersDarkMode.addEventListener("change", updateDark);
-  });
-
-  onDestroy(() => {
-    prefersDarkMode.removeEventListener("change", updateDark);
-  });
-
-  $: iconName = $theme === "light"
-              ? lightIcon
-              : $theme === "dark"
-              ? darkIcon
-              : isDark ? darkIcon : lightIcon;
-
-  function switchTheme() {
-    if ($theme === "light") {
-      $theme = "dark";
-    } else if ($theme === "dark") {
-      $theme = "light";
-    } else {
-      $theme = isDark ? "light" : "dark";
-    }
+  function github() {
+    open("https://github.com/hyrious/esbuild-repl", "_blank");
   }
 </script>
 
@@ -49,13 +31,23 @@
     <span>.</span>
     <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer">repl</a>
   </h1>
-  <nav on:change={(ev) => ($mode = ev.target.value)}>
-    <input name="mode" id="mode-transform" value="transform" type="radio" checked={$mode === "transform"} />
-    <label for="mode-transform">Transform</label>
-    <input name="mode" id="mode-build" value="build" type="radio" checked={$mode === "build"} />
-    <label for="mode-build">Build</label>
+  <nav>
+    {#each modes as m (m)}
+      <input type="radio" name="mode" id="mode-{m}" value={m} checked={$mode === m} />
+      <label for="mode-{m}" tabindex="0" on:click={() => ($mode = m)} on:keydown={keydown(m)}>
+        {m}
+      </label>
+    {/each}
   </nav>
-  <i on:click={switchTheme} class="i mdi:{iconName}" title="theme: {$theme}"></i>
+  <button on:click={github} title="hyrious/esbuild-repl">
+    <i class="i-mdi-github" />
+  </button>
+  <button on:click={share} title="share">
+    <i class="i-mdi-share-variant" />
+  </button>
+  <button on:click={() => ($theme = $theme === "light" ? "dark" : "light")} title="theme: {$theme}">
+    <i class={$theme === "light" ? "i-mdi-white-balance-sunny" : "i-mdi-moon-waxing-crescent"} />
+  </button>
 </header>
 
 <style>
@@ -84,6 +76,7 @@
   label {
     position: relative;
     text-align: center;
+    text-transform: capitalize;
     user-select: none;
     cursor: pointer;
   }
@@ -96,21 +89,29 @@
   label[for="mode-build"] {
     min-width: 50px;
   }
+  label[for="mode-playground"] {
+    min-width: 100px;
+  }
   input[type="radio"] {
     display: none;
   }
   input[type="radio"]:checked + label {
     color: var(--fg-on);
-    font-weight: bold;
+    font-weight: 700;
   }
-  i {
-    color: currentColor;
+  button {
+    margin: 0;
+    border: 0;
     padding: 0 calc(var(--gap) * 2) 0 var(--gap);
+    appearance: none;
+    font-size: 16px;
+    background-color: transparent;
     cursor: pointer;
   }
   @media screen and (max-width: 720px) {
     header {
       padding: var(--gap) var(--gap) 0;
+      overflow-x: auto;
     }
     h1 {
       display: none;

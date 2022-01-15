@@ -1,5 +1,4 @@
 {
-  "include": ["."],
   "compilerOptions": {
     "noEmit": true,
     "strict": true,
@@ -9,6 +8,6 @@
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "Node",
-    "types": ["node"]
+    "types": ["svelte", "node"]
   }
 }

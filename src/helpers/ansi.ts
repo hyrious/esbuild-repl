@@ -1,8 +1,3 @@
-// ansi escape to html
-// https://esbuild.github.io/api/#color
-import type { PartialMessage } from "esbuild";
-import { readyPromise } from "../stores/esbuild";
-
 // https://github.com/evanw/esbuild/blob/master/internal/logger/logger.go
 const ESCAPE_TO_COLOR = {
   "37": "dim",
@@ -40,12 +35,6 @@ function htmlEscape(string: string) {
     .replace(/\>/g, "&gt;");
 }
 
-const TEXT_DECORATIONS = new Set(["strong", "ins"]);
-
-function isColor(text: string): text is Color {
-  return !!text && !TEXT_DECORATIONS.has(text);
-}
-
 class AnsiBuffer {
   result = "";
   _stack: string[] = [];
@@ -55,37 +44,36 @@ class AnsiBuffer {
     this.result += htmlEscape(text);
   }
   reset() {
-    let bracket: string | undefined;
-    while ((bracket = this._stack.pop())) {
-      if (TEXT_DECORATIONS.has(bracket)) {
-        this.result += `</${bracket}>`;
-      } else {
-        this.result += `</span>`;
-      }
+    let close: string | undefined;
+    while ((close = this._stack.pop())) {
+      this.result += close;
     }
   }
   bold() {
     if (!this._bold) {
       this._bold = true;
-      this._stack.push("strong");
       this.result += "<strong>";
+      this._stack.push("</strong>");
     }
   }
   underline() {
     if (!this._underline) {
       this._underline = true;
-      this._stack.push("ins");
       this.result += "<ins>";
+      this._stack.push("</ins>");
     }
   }
+  last() {
+    return this._stack[this._stack.length - 1];
+  }
   color(color: Color) {
-    const last = () => this._stack[this._stack.length - 1];
-    while (isColor(last())) {
+    let close: string | undefined;
+    while ((close = this.last()) === "</span>") {
       this._stack.pop();
-      this.result += `</span>`;
+      this.result += close;
     }
-    this._stack.push(color);
     this.result += `<span class="color-${color}">`;
+    this._stack.push("</span>");
   }
   done() {
     this.reset();
@@ -115,29 +103,4 @@ export function render(ansi: string) {
     buffer.text(ansi.slice(i));
   }
   return buffer.done();
-}
-
-export async function printError(errors: PartialMessage[]): Promise<string> {
-  await readyPromise;
-  if (errors instanceof Error) {
-    let stack = (errors.stack || "").split("\n");
-    stack[0] = "";
-    return printError([
-      { text: errors.message, notes: [{ text: stack.join("\n") }] },
-    ]);
-  }
-  const strings = await esbuild.formatMessages(errors, {
-    kind: "error",
-    color: true,
-  });
-  return strings.map(render).join("");
-}
-
-export async function printWarning(warnings: PartialMessage[]) {
-  await readyPromise;
-  const strings = await esbuild.formatMessages(warnings, {
-    kind: "warning",
-    color: true,
-  });
-  return strings.map(render).join("");
 }

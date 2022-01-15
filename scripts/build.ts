@@ -1,63 +1,74 @@
-import esbuild from "esbuild";
-import { argv, exit } from "node:process";
-import { mergeMetafile } from "./utils";
-import buildHTML from "./build-html";
-import buildJS from "./build-js";
-import prettyBytes from "pretty-bytes";
+import { build, analyzeMetafile } from "esbuild";
+import { mkdirSync, promises, rmSync } from "fs";
+import { importFile } from "@hyrious/esbuild-dev";
+import { svelte, Options } from "@hyrious/esbuild-plugin-svelte";
+import { icons } from "./plugins/icons";
+import { noMap } from "./plugins/no-map";
+import { alsoEmits } from "./plugins/emits";
+import { trimNodeModules } from "./plugins/utils";
+const read = promises.readFile;
+const write = promises.writeFile;
+const copy = promises.copyFile;
 
-type Entry = [filename: string, info: { bytes: number }];
+rmSync("dist", { recursive: true, force: true, maxRetries: 3 });
+mkdirSync("dist", { recursive: true });
 
-function customSort(a: Entry, b: Entry) {
-  // Sort source maps last
-  const isSourceMap = (x: Entry) => x[0].endsWith(".map");
-  let isSourceMap_a = isSourceMap(a);
-  let isSourceMap_b = isSourceMap(b);
-  if (!isSourceMap_a && isSourceMap_b) {
-    return -1;
-  }
-  if (isSourceMap_a && !isSourceMap_b) {
-    return 1;
-  }
+const compilerOptions: Options["compilerOptions"] = {
+  hydratable: true,
+  css: false,
+  enableSourcemap: { js: true, css: false },
+};
 
-  // Sort by size first
-  if (a[1].bytes > b[1].bytes) {
-    return -1;
-  }
-  if (a[1].bytes < b[1].bytes) {
-    return 1;
-  }
+const iconsPlugin = icons({ ssr: true });
 
-  // Sort alphabetically
-  return a[0].localeCompare(b[0]);
+// build html
+{
+  const { default: App } = await importFile("src/App.svelte", {
+    plugins: [iconsPlugin, svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } })],
+    define: {
+      "import.meta.env.DEV": "false",
+    },
+  }).catch(() => process.exit(1));
+  const { html, head } = App.render();
+  const template = await read("src/index.html", "utf8");
+
+  const beforeHead = template.indexOf("</head>");
+  const inApp = template.indexOf('<div id="app">') + '<div id="app">'.length;
+
+  let result = template.slice(0, beforeHead);
+  result += head;
+  result += template.slice(beforeHead, inApp);
+  result += html.trim();
+  result += template.slice(inApp);
+
+  await Promise.all([
+    write("dist/index.html", result),
+    copy("src/favicon.svg", "dist/favicon.svg"),
+  ]);
 }
 
-try {
-  const metafile = mergeMetafile(await buildHTML(), await buildJS());
-  if (argv.includes("--verbose")) {
-    console.log(
-      await esbuild.analyzeMetafile(metafile, { color: true, verbose: true })
-    );
-  } else {
-    const files = Object.entries(metafile.outputs)
-      .sort(customSort)
-      .map(([filename, e]) => ({ filename, bytes: e.bytes }));
-    let maxWidth = 0;
-    let maxSize = 0;
-    for (let { filename, bytes } of files) {
-      const [size] = prettyBytes(bytes).split(" ");
-      maxWidth = Math.max(maxWidth, filename.length);
-      maxSize = Math.max(maxSize, size.length);
-    }
-    for (let { filename, bytes } of files) {
-      const [size, unit] = prettyBytes(bytes).split(" ");
-      console.log(
-        "  " + filename.padEnd(maxWidth),
-        size.padStart(maxSize),
-        unit
-      );
-    }
-  }
-} catch (e) {
-  console.error(e);
-  exit(1);
+// build js
+{
+  const result = await build({
+    entryPoints: ["src/main.ts", "src/sw.ts", "src/hljs.ts"],
+    bundle: true,
+    format: "esm",
+    plugins: [
+      iconsPlugin,
+      svelte({ emitCss: true, compilerOptions }),
+      noMap,
+      alsoEmits(["dist/index.html", "dist/favicon.svg"]),
+    ],
+    splitting: true,
+    minify: true,
+    sourcemap: true,
+    outdir: "dist",
+    define: {
+      "import.meta.env.DEV": "false",
+    },
+    legalComments: "none",
+    metafile: true,
+  }).catch(() => process.exit(1));
+
+  console.log(await analyzeMetafile(trimNodeModules(result.metafile), { color: true }));
 }

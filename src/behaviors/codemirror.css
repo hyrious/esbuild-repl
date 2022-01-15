@@ -1,0 +1,8 @@
+@import "codemirror/lib/codemirror.css";
+
+.CodeMirror {
+  color: var(--fg);
+  direction: ltr;
+  font-family: var(--mono);
+  height: auto;
+}
