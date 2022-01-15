@@ -33,7 +33,6 @@ export const result: Readable<{
   ([$esbuild, $input, $options], set) => {
     if (!$esbuild) return;
     time();
-    console.log([$input, $options], Math.random());
     $esbuild.transform($input, $options).then(set).catch(set).finally(timeEnd);
   },
   {}

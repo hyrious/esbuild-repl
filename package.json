@@ -15,10 +15,10 @@
     "p-retry": "^5.0.0",
     "sanitize.css": "^13.0.0",
     "selector-observer": "^2.1.6",
-    "svelte": "^3.45.0"
+    "svelte": "^3.46.2"
   },
   "devDependencies": {
-    "@hyrious/esbuild-dev": "^0.7.1",
+    "@hyrious/esbuild-dev": "^0.7.2",
     "@hyrious/esbuild-plugin-svelte": "^0.1.4",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.8",
@@ -31,6 +31,6 @@
     "esbuild-wasm": "^0.14.11",
     "highlight.js": "^11.4.0",
     "prettier": "^2.5.1",
-    "prettier-plugin-svelte": "^2.5.1"
+    "prettier-plugin-svelte": "^2.6.0"
   }
 }
