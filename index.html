@@ -4,55 +4,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width">
   <title>esbuild.repl</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script type="module" src="./main.js"></script>
   <link rel="stylesheet" href="./main.css">
 </head>
 <body>
-  <div id="app"><header class="svelte-1ynbcxn"><h1 class="svelte-1ynbcxn"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-1ynbcxn">esbuild</a>
+  <div id="app"><header class="svelte-njd3z7"><h1 class="svelte-njd3z7"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-njd3z7">esbuild</a>
     <span>.</span>
-    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer" class="svelte-1ynbcxn">repl</a></h1>
-  <nav class="svelte-1ynbcxn"><input name="mode" id="mode-transform" value="transform" type="radio"  class="svelte-1ynbcxn">
-    <label for="mode-transform" class="svelte-1ynbcxn">Transform</label>
-    <input name="mode" id="mode-build" value="build" type="radio"  class="svelte-1ynbcxn">
-    <label for="mode-build" class="svelte-1ynbcxn">Build</label></nav>
-  <i class="i mdi:white-balance-sunny svelte-1ynbcxn" title="theme: auto"></i>
+    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer" class="svelte-njd3z7">repl</a></h1>
+  <nav class="svelte-njd3z7"><input type="radio" name="mode" id="mode-transform" value="transform" checked class="svelte-njd3z7">
+      <label for="mode-transform" tabindex="0" class="svelte-njd3z7">transform
+      </label><input type="radio" name="mode" id="mode-build" value="build"  class="svelte-njd3z7">
+      <label for="mode-build" tabindex="0" class="svelte-njd3z7">build
+      </label></nav>
+  <button title="hyrious/esbuild-repl" class="svelte-njd3z7"><i class="i-mdi-github"></i></button>
+  <button title="share" class="svelte-njd3z7"><i class="i-mdi-share-variant"></i></button>
+  <button title="theme: dark" class="svelte-njd3z7"><i class="i-mdi-moon-waxing-crescent"></i></button>
 </header>
-<main class="svelte-628m8p">
+<main data-mode="transform"><section style="" class="svelte-t4165f"><div class="pane svelte-t4165f" style="width: 50%"><section slot="left" class="input"><textarea class="editor" rows="2" spellcheck="false">let a = 1</textarea>
+    <input placeholder="--loader=js" spellcheck="false" autocomplete="off" value=""></section></div>
+  <div class="pane svelte-t4165f" style="width: 50%"><section slot="right" class="output"><pre class="result code svelte-30wqgg"></pre>
+    
+    </section></div>
+  <div class="divider svelte-t4165f" style="left: calc(50% - 8px); height: 0px"></div></section>
 
+  <section style="display: none" class="svelte-t4165f"><div class="pane svelte-t4165f" style="width: 50%"><section slot="left" class="input"><h3 class="svelte-1efahfh"><span class="svelte-1efahfh">ES6 modules go in…</span>
+      <button class="svelte-1efahfh">Start over</button></h3>
+    <article class="module svelte-brz3rh is-entry"><header class="svelte-brz3rh"><input placeholder="main.js" spellcheck="false" class="svelte-brz3rh" value="main.js">
+      <button class="remove svelte-brz3rh"><span class="label svelte-brz3rh">remove</span>
+        <i class="i-mdi-close"></i></button>
+      <button class="entry svelte-brz3rh"><span class="label svelte-brz3rh">(entry module)</span>
+        <i class="i-mdi-minus"></i></button></header>
+  <textarea class="editor svelte-brz3rh" rows="2" spellcheck="false">export let a = 1</textarea>
+</article>
+    <button class="svelte-1efahfh"><i class="i-mdi-plus"></i>
+      <span>add module</span></button></section></div>
+  <div class="pane svelte-t4165f" style="width: 50%"><section slot="right" class="output"><h3 class="svelte-1efahfh">
+      <span class="svelte-1efahfh">…bundle comes out</span></h3>
+    
+    <article class="module svelte-brz3rh"><header class="svelte-brz3rh"><input placeholder="main.js" spellcheck="false" value="main.js" readonly class="svelte-brz3rh"></header>
+  <pre class="chunk svelte-brz3rh"></pre>
+</article>
+    </section></div>
+  <div class="divider svelte-t4165f" style="left: calc(50% - 8px); height: 0px"></div></section>
 
-
-<div class="repl transform svelte-59mg2f"><div class="left">
-    <div class="input svelte-59mg2f"><textarea slot="input" class="editor svelte-1tposm4" spellcheck="false"></textarea>
-    <input spellcheck="false" autocomplete="off" placeholder="--loader=js" value=""></div></div>
-  <div class="right">
-    <div class="output svelte-59mg2f"><pre class="chunk svelte-1tposm4"></pre>
-    <div class="status loading svelte-1l16bpw">Loading esbuild…
-</div>
-  </div></div>
-</div>
-  <div class="repl build svelte-59mg2f"><div class="left"><h3 class="svelte-59mg2f"><span>ES6 modules go in…</span>
-        <button class="svelte-59mg2f">Start over</button></h3>
-    <div class="input svelte-59mg2f">
-    <button class="svelte-ghczoy"><i class="i mdi:plus svelte-ghczoy"></i>
-      <span>add module</span></button></div></div>
-  <div class="right"><h3 class="svelte-59mg2f"><span>…bundle comes out</span>
-        <button class="svelte-59mg2f">Options</button>
-        <section class="svelte-p3b5sl"><h4 class="svelte-p3b5sl"><a href="https://esbuild.github.io/api" class="svelte-p3b5sl">Options</a>
-    <button class="svelte-p3b5sl"><span class="close svelte-p3b5sl">close</span>
-      <i class="i mdi:close"></i></button></h4>
-  <p class="svelte-p3b5sl">Note: not all options are supported, try use esbuild in the browser console
-    or install it locally.
-  </p>
-  
-</section></h3>
-    <div class="output svelte-59mg2f">
-    <div class="status loading svelte-1l16bpw">Loading esbuild…
-</div>
-  </div></div>
-</div>
-</main></div>
-  <script type="module" src="./main.js"></script>
+  </main>
+<footer class="svelte-9g49lf"><i class="i-mdi-loading svelte-9g49lf"></i>
+  <span>Loading...</span>
+</footer></div>
 </body>
 </html>

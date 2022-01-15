@@ -1,1 +1,2 @@
-self.oninstall=self.skipWaiting;self.onactivate=e=>e.waitUntil(self.clients.claim());self.onfetch=e=>{const s=e.request.url;s.endsWith("esbuild.wasm")&&!s.includes("latest")&&e.respondWith(caches.open("esbuild-repl:v1").then(async l=>{let t=await l.match(e.request);return t||(t=await fetch(e.request),t.ok&&l.put(e.request,t)),t.clone()}))};
+self.oninstall=self.skipWaiting;self.onactivate=e=>e.waitUntil(self.clients.claim());self.onfetch=e=>{let l=e.request.url;l.endsWith("esbuild.wasm")&&!l.includes("latest")&&e.respondWith(caches.open("esbuild-repl:v1").then(async s=>{let t=await s.match(e.request);t||(t=await fetch(e.request),t.ok&&s.put(e.request,t));try{return t.clone()}catch{return s.delete(e.request),fetch(e.request)}}))};
+//# sourceMappingURL=sw.js.map
