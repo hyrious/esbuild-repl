@@ -83,12 +83,10 @@
     position: relative;
     overflow: hidden;
     overflow-y: auto;
-    overscroll-behavior-y: contain;
   }
   .pane {
     float: left;
     overflow: auto;
-    overscroll-behavior-y: contain;
     position: relative;
   }
   :global(.pane > section) {
