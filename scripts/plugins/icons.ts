@@ -3,6 +3,7 @@
 // https://github.com/antfu/unocss
 
 import { existsSync, promises } from "fs";
+import { join } from "path";
 import { Plugin } from "esbuild";
 import { createRequire } from "module";
 import { compile } from "svelte/compiler";
@@ -73,13 +74,6 @@ function isValidSelector(selector = ""): selector is string {
 
 function splitCode(code: string) {
   return code.split(/[\s'"`;>=]+/g).filter(isValidSelector);
-}
-
-function isEqualSet<T>(a: Set<T>, b: Set<T>) {
-  if (a === b) return true;
-  if (a.size !== b.size) return false;
-  for (const e of a) if (!b.has(e)) return false;
-  return true;
 }
 
 async function searchForIconSvg(collection: string, icon: string) {
@@ -156,23 +150,49 @@ interface Options {
  * ```
  */
 export function icons({ ssr }: Options = {}): Plugin {
-  // hot reload support
-  let collected = new Set<string>();
-  let applied = new Set<string>();
-
-  const scanClass = async (path: string) => {
-    if (existsSync(path)) {
-      const text = await read(path, "utf8");
-      splitCode(text)
-        .map((e) => (e.startsWith("class:") ? e.slice(6) : e))
-        .filter((e) => e.startsWith("i-"))
-        .forEach((e) => collected.add(e));
-    }
-  };
-
   return {
     name: "icons",
-    setup({ onResolve, onLoad, onStart, onEnd, esbuild, initialOptions }) {
+    setup({ onResolve, onLoad, initialOptions }) {
+      const collected = {
+        data: new Set<string>(),
+        add(cls: string) {
+          this.data.add(cls);
+        },
+        // need to wait for all promises (some are incoming at the middle)
+        // here we assume that *all* tasks are coming at the middle,
+        // meaning when we "await this.promise", we are at the 'post' phase of
+        // esbuild plugins. I'm not sure whether it is correct.
+        tasks: [] as Promise<void>[],
+        push(path: string) {
+          this.tasks.push(scanClass(path));
+        },
+        get promise() {
+          return (async () => {
+            // dirty hack
+            await new Promise((r) => setTimeout(r, 1000));
+            let task: Promise<void> | undefined;
+            while ((task = this.tasks.shift())) {
+              await task;
+            }
+          })();
+        },
+        async generate() {
+          await this.promise;
+          const works = [...this.data].map((e) => generate(e, warn));
+          return (await Promise.all(works)).filter(Boolean).join("\n");
+        },
+      };
+
+      const scanClass = async (path: string) => {
+        if (existsSync(path)) {
+          const text = await read(path, "utf8");
+          splitCode(text)
+            .map((e) => (e.startsWith("class:") ? e.slice(6) : e))
+            .filter((e) => e.startsWith("i-"))
+            .forEach((e) => collected.add(e));
+        }
+      };
+
       // ~icons/mdi/plus.svelte -> mdi/plus.svelte
       onResolve({ filter: /^~icons\/.+\.svelte$/ }, (args) => {
         return {
@@ -199,39 +219,20 @@ export function icons({ ssr }: Options = {}): Plugin {
         }
       });
 
-      onStart(() => {
-        collected.clear();
-      });
-
-      onEnd(async (result) => {
-        if (!isEqualSet(collected, applied)) {
-          applied = new Set(collected);
-          const buildOptions = { ...initialOptions };
-          delete buildOptions.watch;
-          Object.assign(result, await esbuild.build(buildOptions));
-        }
-      });
-
       onLoad({ filter: /\.svelte$/ }, (args) => {
         scanClass(args.path);
         return null;
       });
 
       onResolve({ filter: /^icons\.css$/ }, (args) => {
-        return { path: args.path, namespace: "icons" };
+        // simply bypass the virtual path
+        return { path: join(args.resolveDir, args.path) };
       });
 
       const warn = initialOptions.logLevel !== "silent";
 
-      onLoad({ filter: /^icons\.css$/, namespace: "icons" }, async () => {
-        const tasks = [...applied].map((e) => generate(e, warn));
-        const generated = (await Promise.all(tasks)).filter(Boolean).join("\n");
-        const { code, warnings } = await esbuild.transform(generated, {
-          loader: "css",
-          sourcefile: "../src/icons.css",
-          sourcemap: "inline",
-        });
-        return { contents: code, warnings, loader: "css" };
+      onLoad({ filter: /\bicons\.css$/ }, async () => {
+        return { contents: await collected.generate(), loader: "css" };
       });
     },
   };
