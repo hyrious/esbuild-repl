@@ -41,10 +41,10 @@ function repl($modules: Module[]): Plugin {
         const absPath = normalizeName(args.path);
 
         let mod = $modules.find((e) => normalizeName(e.name) === absPath);
-        if (mod) return { path: absPath, pluginData: mod };
+        if (mod) return { path: normalizeName(mod.name), pluginData: mod };
 
         mod = $modules.find((e) => stripExt(normalizeName(e.name)) === stripExt(absPath));
-        if (mod) return { path: absPath, pluginData: mod };
+        if (mod) return { path: normalizeName(mod.name), pluginData: mod };
 
         return { path: args.path, external: true };
       });
