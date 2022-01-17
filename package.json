@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-dev": "^0.7.2",
-    "@hyrious/esbuild-plugin-svelte": "^0.1.4",
+    "@hyrious/esbuild-plugin-svelte": "^0.1.5",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.8",
     "@iconify-json/mdi": "^1.0.12",

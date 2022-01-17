@@ -32,7 +32,7 @@ async function load() {
 
   if (import.meta.env.DEV) {
     $status.set("Fetching esbuild @ " + version);
-    module = await import("esbuild-wasm");
+    ({ default: module } = await import("esbuild-wasm"));
     window.esbuild = module;
     $version.set(module.version);
     $status.set("Downloading esbuild.wasm @ " + version);

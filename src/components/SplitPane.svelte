@@ -128,7 +128,6 @@
     section {
       display: flex;
       flex-flow: column nowrap;
-      padding-top: var(--gap);
     }
     .divider {
       display: none;

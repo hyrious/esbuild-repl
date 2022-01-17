@@ -27,7 +27,7 @@ const plugins: Plugin[] = [icons(), svelte()];
 // the [icons] plugin will still work as expected.
 
 const { stop: stopWatch } = await build({
-  entryPoints: ["./src/main.ts", "./src/hljs.ts"],
+  entryPoints: ["./src/main.ts", "./src/play.ts", "./src/hljs.ts"],
   bundle: true,
   format: "esm",
   plugins,
@@ -45,11 +45,12 @@ const { stop: stopWatch } = await build({
 
 const banner = `// hot-reload
 ;((source) => {
+  if (source && source.onmessage) return;
   let count = 0; source && (source.onmessage = (ev) => {
     if (ev.data === 'init') count ? location.reload() : count++
     if (ev.data === 'update') location.reload()
   }, console.log("[dev] hot reload enabled"))
-})(typeof window !== 'undefined' && new EventSource("http://localhost:30000"));
+})(typeof window !== 'undefined' && (window.source ||= new EventSource("http://localhost:30000")));
 `;
 
 const { stop: stopServe } = await serve(
@@ -59,9 +60,10 @@ const { stop: stopServe } = await serve(
     servedir: "./src",
   },
   {
-    entryPoints: ["./src/main.ts", "./src/hljs.ts"],
+    entryPoints: ["./src/main.ts", "./src/play.ts", "./src/hljs.ts"],
     bundle: true,
     format: "esm",
+    splitting: true,
     plugins,
     sourcemap: true,
     banner: {

@@ -1,5 +1,6 @@
 // stolen from github's source code :p
 import autosize from "@github/textarea-autosize";
+import { observe } from "selector-observer";
 
 export function fire(target: Element, name: string, detail?: any) {
   return target.dispatchEvent(new CustomEvent(name, { bubbles: true, cancelable: true, detail }));
@@ -227,5 +228,4 @@ export function subscribe(el: Element) {
   };
 }
 
-import { observe } from "selector-observer";
 export const abortController = observe("textarea.editor", { subscribe });

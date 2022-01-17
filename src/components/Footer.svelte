@@ -1,4 +1,7 @@
 <script lang="ts" context="module">
+  import { fade } from "svelte/transition";
+  import { loading, status } from "../stores";
+
   function flip(span: HTMLSpanElement, last: boolean) {
     return {
       update(shift: boolean) {
@@ -14,11 +17,6 @@
       },
     };
   }
-</script>
-
-<script lang="ts">
-  import { fade } from "svelte/transition";
-  import { loading, status } from "../stores";
 </script>
 
 <footer>

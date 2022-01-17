@@ -23,26 +23,31 @@ const iconsPlugin = icons({ ssr: true });
 
 // build html
 {
-  const { default: App } = await importFile("src/App.svelte", {
-    plugins: [iconsPlugin, svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } })],
-    define: {
-      "import.meta.env.DEV": "false",
-    },
-  }).catch(() => process.exit(1));
-  const { html, head } = App.render();
-  const template = await read("src/index.html", "utf8");
+  async function renderHTML(svelteFile: string, templateFile: string) {
+    const { default: App } = await importFile(svelteFile, {
+      plugins: [iconsPlugin, svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } })],
+      define: {
+        "import.meta.env.DEV": "false",
+      },
+    }).catch(() => process.exit(1));
+    const { html, head } = App.render();
+    const template = await read(templateFile, "utf8");
 
-  const beforeHead = template.indexOf("</head>");
-  const inApp = template.indexOf('<div id="app">') + '<div id="app">'.length;
+    const beforeHead = template.indexOf("</head>");
+    const inApp = template.indexOf('<div id="app">') + '<div id="app">'.length;
 
-  let result = template.slice(0, beforeHead);
-  result += head;
-  result += template.slice(beforeHead, inApp);
-  result += html.trim();
-  result += template.slice(inApp);
+    let result = template.slice(0, beforeHead);
+    result += head;
+    result += template.slice(beforeHead, inApp);
+    result += html.trim();
+    result += template.slice(inApp);
+
+    await write(templateFile.replace(/^src\//, "dist/"), result);
+  }
 
   await Promise.all([
-    write("dist/index.html", result),
+    renderHTML("src/App.svelte", "src/index.html"),
+    renderHTML("src/components/Playground.svelte", "src/play.html"),
     copy("src/favicon.svg", "dist/favicon.svg"),
   ]);
 }
@@ -50,14 +55,14 @@ const iconsPlugin = icons({ ssr: true });
 // build js
 {
   const result = await build({
-    entryPoints: ["src/main.ts", "src/sw.ts", "src/hljs.ts"],
+    entryPoints: ["src/main.ts", "./src/play.ts", "src/sw.ts", "src/hljs.ts"],
     bundle: true,
     format: "esm",
     plugins: [
       iconsPlugin,
       svelte({ emitCss: true, compilerOptions }),
       noMap,
-      alsoEmits(["dist/index.html", "dist/favicon.svg"]),
+      alsoEmits(["dist/index.html", "dist/play.html", "dist/favicon.svg"]),
     ],
     splitting: true,
     minify: true,

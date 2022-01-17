@@ -34,10 +34,13 @@
   <nav>
     {#each modes as m (m)}
       <input type="radio" name="mode" id="mode-{m}" value={m} checked={$mode === m} />
-      <label for="mode-{m}" tabindex="0" on:click={() => ($mode = m)} on:keydown={keydown(m)}>
+      <!-- prettier-ignore -->
+      <label for="mode-{m}" tabindex="0" title="esbuild.{m}()"
+             on:click={() => ($mode = m)} on:keydown={keydown(m)}>
         {m}
       </label>
     {/each}
+    <a class="playground" href="./play.html" title="play your code">playground</a>
   </nav>
   <button on:click={github} title="hyrious/esbuild-repl">
     <i class="i-mdi-github" />
@@ -89,8 +92,13 @@
   label[for="mode-build"] {
     min-width: 50px;
   }
-  label[for="mode-playground"] {
+  a.playground {
     min-width: 100px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+  a.playground:hover {
+    text-decoration: underline;
   }
   input[type="radio"] {
     display: none;
@@ -110,10 +118,12 @@
   }
   @media screen and (max-width: 720px) {
     header {
-      padding: var(--gap) var(--gap) 0;
-      overflow-x: auto;
+      padding: var(--gap);
     }
     h1 {
+      display: none;
+    }
+    a.playground {
       display: none;
     }
   }

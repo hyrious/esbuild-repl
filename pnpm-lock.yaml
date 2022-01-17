@@ -3,7 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@github/textarea-autosize': ^0.2.2
   '@hyrious/esbuild-dev': ^0.7.2
-  '@hyrious/esbuild-plugin-svelte': ^0.1.4
+  '@hyrious/esbuild-plugin-svelte': ^0.1.5
   '@hyrious/rimraf': ^0.1.0
   '@hyrious/shellwords': ^0.1.1
   '@hyrious/w7': ^0.1.8
@@ -34,7 +34,7 @@ dependencies:
 
 devDependencies:
   '@hyrious/esbuild-dev': 0.7.2_esbuild@0.14.11
-  '@hyrious/esbuild-plugin-svelte': 0.1.4_esbuild@0.14.11+svelte@3.46.2
+  '@hyrious/esbuild-plugin-svelte': 0.1.5_esbuild@0.14.11+svelte@3.46.2
   '@hyrious/rimraf': 0.1.0
   '@hyrious/w7': 0.1.8
   '@iconify-json/mdi': 1.0.12
@@ -77,8 +77,8 @@ packages:
       esbuild: 0.14.11
     dev: true
 
-  /@hyrious/esbuild-plugin-svelte/0.1.4_esbuild@0.14.11+svelte@3.46.2:
-    resolution: {integrity: sha512-C7qMwEyNLDp/iGUzcVGjWwocPGTY2EHuNnKnKzBaafGFDa9rdVb8KbdVF3JNWI0+HtvBcUCdW3B36lw9giETKg==}
+  /@hyrious/esbuild-plugin-svelte/0.1.5_esbuild@0.14.11+svelte@3.46.2:
+    resolution: {integrity: sha512-0HL2pkNxetMBhwM+iXfl7wZ9PlPYpVVFYGN1IKcUg7XVnptaVRVVETx2v8PvmjLqGyTRPavFm+qvM6m7Ps5pMg==}
     engines: {node: '>=14'}
     peerDependencies:
       esbuild: '*'
