@@ -6,6 +6,7 @@ import { icons } from "./plugins/icons";
 import { noMap } from "./plugins/no-map";
 import { alsoEmits } from "./plugins/emits";
 import { trimNodeModules } from "./plugins/utils";
+import { fixture } from "./plugins/fixture";
 const read = promises.readFile;
 const write = promises.writeFile;
 const copy = promises.copyFile;
@@ -24,6 +25,7 @@ const compilerOptions: Options["compilerOptions"] = {
   async function renderHTML(svelteFile: string, templateFile: string) {
     const { default: App } = await importFile(svelteFile, {
       plugins: [
+        fixture({ filter: /playground\.ts$/ }),
         icons({ glob: "src/**/*.svelte", ssr: true }),
         svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } }),
       ],
@@ -60,6 +62,7 @@ const compilerOptions: Options["compilerOptions"] = {
     bundle: true,
     format: "esm",
     plugins: [
+      fixture({ filter: /playground\.ts$/ }),
       icons({ glob: "src/**/*.svelte", ssr: true }),
       svelte({ emitCss: true, compilerOptions }),
       noMap,

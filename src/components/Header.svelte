@@ -2,7 +2,7 @@
   import type { Writable } from "svelte/store";
   import { mode, theme } from "../stores";
 
-  const modes = ["transform", "build" /* , "playground" */] as const;
+  const modes = ["transform", "build"] as const;
 
   type WritableValue<T> = T extends Writable<infer K> ? K : never;
   function keydown(m: WritableValue<typeof mode>) {
@@ -34,9 +34,13 @@
   <nav>
     {#each modes as m (m)}
       <input type="radio" name="mode" id="mode-{m}" value={m} checked={$mode === m} />
-      <!-- prettier-ignore -->
-      <label for="mode-{m}" tabindex="0" title="esbuild.{m}()"
-             on:click={() => ($mode = m)} on:keydown={keydown(m)}>
+      <label
+        for="mode-{m}"
+        tabindex="0"
+        title="esbuild.{m}()"
+        on:click={() => ($mode = m)}
+        on:keydown={keydown(m)}
+      >
         {m}
       </label>
     {/each}

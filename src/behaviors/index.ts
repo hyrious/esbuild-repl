@@ -1,6 +1,6 @@
 import { isMobile } from "../helpers";
 import "./esbuild";
-import "./query";
+import "./sw";
 import "./theme";
 
 if (isMobile) {

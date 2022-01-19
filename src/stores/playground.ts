@@ -1,26 +1,12 @@
 import { writable } from "svelte/store";
 
 export interface ReplFile {
-  uid: number;
-  name: string;
+  name: string; // name should be unique, we are simulating a real file system
   contents: string;
 }
 
 export const html = writable(`<!-- see main.jsx -->`);
-export const files = writable<ReplFile[]>([
-  {
-    uid: 0,
-    name: "main.jsx",
-    contents: `import { h, Fragment, render, useState } from 'fre'
+export const files = writable<ReplFile[]>(fixture("../fixture/*"));
 
-function App() {
-  const [count, setCount] = useState(0)
-  return <>
-    <h1>{count}</h1>
-    <button onClick={() => setCount(count + 1)}>+</button>
-  </>
-}
-
-render(<App />, document.body)`,
-  },
-]);
+// will be replaced by scripts/plugins/fixture.ts
+declare function fixture(path: string): ReplFile[];

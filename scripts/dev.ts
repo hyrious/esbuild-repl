@@ -1,10 +1,11 @@
 import { createReadStream, statSync } from "fs";
-import { build, Plugin, serve } from "esbuild";
+import { build, serve } from "esbuild";
 import { createServer, ServerResponse } from "http";
 import { svelte } from "@hyrious/esbuild-plugin-svelte";
 import { clearWarns } from "./plugins/utils";
 import { icons } from "./plugins/icons";
 import { resolve } from "path";
+import { fixture } from "./plugins/fixture";
 
 let port = 3000;
 
@@ -48,7 +49,7 @@ const { stop: stopServe } = await serve(
     bundle: true,
     format: "esm",
     splitting: true,
-    plugins: [icons({ glob: "src/**/*.svelte" }), svelte()],
+    plugins: [fixture({ filter: /playground\.ts$/ }), icons({ glob: "src/**/*.svelte" }), svelte()],
     sourcemap: true,
     banner: {
       js: banner,

@@ -77,13 +77,6 @@ function splitCode(code: string) {
   return code.split(/[\s'"`;>=]+/g).filter(isValidSelector);
 }
 
-function isEqualSet<T>(a: Set<T>, b: Set<T>) {
-  if (a === b) return true;
-  if (a.size !== b.size) return false;
-  for (const e of a) if (!b.has(e)) return false;
-  return true;
-}
-
 async function searchForIconSvg(collection: string, icon: string) {
   const ids = [
     icon,
@@ -172,7 +165,7 @@ export function icons({ glob, ssr = false }: Options): Plugin {
             .forEach((e) => collected.add(e));
         }
       }
-      let prepare = fg([glob]).then((files) => Promise.all(files.map((path) => scanClass(path))));
+      let prepare = fg(glob).then((files) => Promise.all(files.map((path) => scanClass(path))));
 
       // ~icons/mdi/plus.svelte -> mdi/plus.svelte
       onResolve({ filter: /^~icons\/.+\.svelte$/ }, (args) => {
