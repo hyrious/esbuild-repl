@@ -1,7 +1,7 @@
 {
   "version": 3,
   "sources": ["../src/components/Playground.svelte", "../src/play.ts"],
-  "sourcesContent": ["<script lang=\"ts\">\n</script>\n\n<p>\uD83D\uDEA7 Working in Progress \uD83D\uDEA7</p>\n\n<style>\n  p {\n    position: absolute;\n    inset: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }\n</style>\n", "import \"./main.css\";\nimport \"./behaviors/theme\";\nimport \"./behaviors/esbuild\";\nimport \"./behaviors/editor\";\nimport Playground from \"./components/Playground.svelte\";\n\nObject.assign(window, {\n  app: new Playground({\n    target: document.querySelector(\"#app\")!,\n    hydrate: !import.meta.env.DEV,\n  }),\n});\n\nif (import.meta.env.DEV) {\n  navigator.serviceWorker?.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));\n} else {\n  navigator.serviceWorker\n    ?.register(\"./sw.js\")\n    .then((e) => console.log(\"registered sw.js in scope:\", e.scope))\n    .catch((e) => console.log(\"failed to register sw.js:\", e));\n}\n"],
-  "mappings": "gQAGG,iGAAA,2GAAH,EAA+B,EAAA,EAAA,6GCG/B,OAAO,OAAO,OAAQ,CACpB,IAAK,GAAI,GAAW,CAClB,OAAQ,SAAS,cAAc,QAC/B,QAAS,OAOX,UAAU,eACN,SAAS,WACV,KAAK,AAAC,GAAM,QAAQ,IAAI,6BAA8B,EAAE,QACxD,MAAM,AAAC,GAAM,QAAQ,IAAI,4BAA6B",
+  "sourcesContent": ["<script lang=\"ts\">\n</script>\n\n<p>\uD83D\uDEA7 Working in Progress \uD83D\uDEA7</p>\n\n<style>\n  p {\n    position: absolute;\n    inset: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }\n</style>\n", "import \"./main.css\";\nimport \"./behaviors\";\nimport Playground from \"./components/Playground.svelte\";\n\nObject.assign(window, {\n  app: new Playground({\n    target: document.querySelector(\"#app\")!,\n    hydrate: !import.meta.env.DEV,\n  }),\n});\n"],
+  "mappings": "oOAGG,iGAAA,2GAAH,EAA+B,EAAA,EAAA,+GCC/B,OAAO,OAAO,OAAQ,CACpB,IAAK,GAAI,GAAW,CAClB,OAAQ,SAAS,cAAc,QAC/B,QAAS",
   "names": []
 }
