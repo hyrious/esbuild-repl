@@ -159,21 +159,21 @@ interface Options {
  * ```
  */
 export function icons({ glob, ssr = false }: Options): Plugin {
-  let collected = new Set<string>();
-  async function scanClass(path: string) {
-    if (existsSync(path)) {
-      const text = await read(path, "utf8");
-      splitCode(text)
-        .map((e) => (e.startsWith("class:") ? e.slice(6) : e))
-        .filter((e) => e.startsWith("i-"))
-        .forEach((e) => collected.add(e));
-    }
-  }
-  let prepare = fg([glob]).then((files) => Promise.all(files.map((path) => scanClass(path))));
-
   return {
     name: "icons",
     setup({ onResolve, onLoad, initialOptions }) {
+      let collected = new Set<string>();
+      async function scanClass(path: string) {
+        if (existsSync(path)) {
+          const text = await read(path, "utf8");
+          splitCode(text)
+            .map((e) => (e.startsWith("class:") ? e.slice(6) : e))
+            .filter((e) => e.startsWith("i-"))
+            .forEach((e) => collected.add(e));
+        }
+      }
+      let prepare = fg([glob]).then((files) => Promise.all(files.map((path) => scanClass(path))));
+
       // ~icons/mdi/plus.svelte -> mdi/plus.svelte
       onResolve({ filter: /^~icons\/.+\.svelte$/ }, (args) => {
         return {
