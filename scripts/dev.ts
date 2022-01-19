@@ -10,27 +10,11 @@ let port = 3000;
 
 const clients: ServerResponse[] = [];
 
-const plugins: Plugin[] = [icons(), svelte()];
-
-// use [watch] and [serve] together to enable hot reload.
-// this is a bit tricky, the [icons] plugin will make use of
-// `onEnd()` to generate an 'icons.css' file at the second pass.
-//
-// however, `onEnd()` will never be triggered in serve mode:
-// https://github.com/evanw/esbuild/issues/1384
-//
-// we reuse the same plugin instance to let build & serve
-// share the context -- hopefully it works! Thus in serve mode
-// we can still get a fresh 'icons.css'.
-//
-// in other words, even when esbuild finally resolves that issue,
-// the [icons] plugin will still work as expected.
-
 const { stop: stopWatch } = await build({
   entryPoints: ["./src/main.ts", "./src/play.ts", "./src/hljs.ts"],
   bundle: true,
   format: "esm",
-  plugins,
+  plugins: [icons({ glob: "src/**/*.svelte" }), svelte()],
   watch: {
     onRebuild() {
       clearWarns();
@@ -64,7 +48,7 @@ const { stop: stopServe } = await serve(
     bundle: true,
     format: "esm",
     splitting: true,
-    plugins,
+    plugins: [icons({ glob: "src/**/*.svelte" }), svelte()],
     sourcemap: true,
     banner: {
       js: banner,

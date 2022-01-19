@@ -2,6 +2,7 @@
 // https://github.com/antfu/unplugin-icons
 // https://github.com/antfu/unocss
 
+import fg from "fast-glob";
 import { existsSync, promises } from "fs";
 import { Plugin } from "esbuild";
 import { createRequire } from "module";
@@ -11,6 +12,7 @@ import { iconToSVG } from "@iconify/utils/lib/svg/build";
 import { getIconData } from "@iconify/utils/lib/icon-set/get-icon";
 import { defaults as DefaultIconCustomizations } from "@iconify/utils/lib/customisations";
 import { warnOnce } from "./utils";
+import { join } from "path";
 
 const read = promises.readFile;
 
@@ -146,6 +148,7 @@ async function generate(cls: string, warn: boolean) {
 }
 
 interface Options {
+  glob: string;
   ssr?: boolean;
 }
 
@@ -155,12 +158,9 @@ interface Options {
  * <div class="i-mdi-plus"><Plus /></div>
  * ```
  */
-export function icons({ ssr }: Options = {}): Plugin {
-  // hot reload support
+export function icons({ glob, ssr = false }: Options): Plugin {
   let collected = new Set<string>();
-  let applied = new Set<string>();
-
-  const scanClass = async (path: string) => {
+  async function scanClass(path: string) {
     if (existsSync(path)) {
       const text = await read(path, "utf8");
       splitCode(text)
@@ -168,11 +168,12 @@ export function icons({ ssr }: Options = {}): Plugin {
         .filter((e) => e.startsWith("i-"))
         .forEach((e) => collected.add(e));
     }
-  };
+  }
+  let prepare = fg([glob]).then((files) => Promise.all(files.map((path) => scanClass(path))));
 
   return {
     name: "icons",
-    setup({ onResolve, onLoad, onStart, onEnd, esbuild, initialOptions }) {
+    setup({ onResolve, onLoad, initialOptions }) {
       // ~icons/mdi/plus.svelte -> mdi/plus.svelte
       onResolve({ filter: /^~icons\/.+\.svelte$/ }, (args) => {
         return {
@@ -199,39 +200,22 @@ export function icons({ ssr }: Options = {}): Plugin {
         }
       });
 
-      onStart(() => {
-        collected.clear();
-      });
-
-      onEnd(async (result) => {
-        if (!isEqualSet(collected, applied)) {
-          applied = new Set(collected);
-          const buildOptions = { ...initialOptions };
-          delete buildOptions.watch;
-          Object.assign(result, await esbuild.build(buildOptions));
-        }
-      });
-
       onLoad({ filter: /\.svelte$/ }, (args) => {
         scanClass(args.path);
         return null;
       });
 
       onResolve({ filter: /^icons\.css$/ }, (args) => {
-        return { path: args.path, namespace: "icons" };
+        return { path: join(args.resolveDir, args.path) };
       });
 
       const warn = initialOptions.logLevel !== "silent";
 
-      onLoad({ filter: /^icons\.css$/, namespace: "icons" }, async () => {
-        const tasks = [...applied].map((e) => generate(e, warn));
-        const generated = (await Promise.all(tasks)).filter(Boolean).join("\n");
-        const { code, warnings } = await esbuild.transform(generated, {
-          loader: "css",
-          sourcefile: "../src/icons.css",
-          sourcemap: "inline",
-        });
-        return { contents: code, warnings, loader: "css" };
+      onLoad({ filter: /icons\.css$/ }, async () => {
+        await prepare;
+        const tasks = [...collected].map((e) => generate(e, warn));
+        const contents = (await Promise.all(tasks)).filter(Boolean).join("\n");
+        return { contents, loader: "css" };
       });
     },
   };

@@ -19,13 +19,14 @@ const compilerOptions: Options["compilerOptions"] = {
   enableSourcemap: { js: true, css: false },
 };
 
-const iconsPlugin = icons({ ssr: true });
-
 // build html
 {
   async function renderHTML(svelteFile: string, templateFile: string) {
     const { default: App } = await importFile(svelteFile, {
-      plugins: [iconsPlugin, svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } })],
+      plugins: [
+        icons({ glob: "src/**/*.svelte", ssr: true }),
+        svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } }),
+      ],
       define: {
         "import.meta.env.DEV": "false",
       },
@@ -59,7 +60,7 @@ const iconsPlugin = icons({ ssr: true });
     bundle: true,
     format: "esm",
     plugins: [
-      iconsPlugin,
+      icons({ glob: "src/**/*.svelte", ssr: true }),
       svelte({ emitCss: true, compilerOptions }),
       noMap,
       alsoEmits(["dist/index.html", "dist/play.html", "dist/favicon.svg"]),
