@@ -9,14 +9,18 @@ import { EsbuildFlags, parse } from "@hyrious/esbuild-dev/args";
 import { shellsplit } from "@hyrious/shellwords";
 import { derived, Readable, writable } from "svelte/store";
 import { isBrowser, render } from "../helpers";
-import { esbuild, time, timeEnd } from "./index";
+import { status, esbuild, time, timeEnd } from "./index";
 
 export const input = writable("let a = 1");
 export const options = writable("");
 
 export const optionsObj: Readable<TransformOptions> = derived(options, ($options, set) => {
-  const { _, ...options } = parse(shellsplit($options), EsbuildFlags) as any;
-  set(options);
+  try {
+    const { _, ...options } = parse(shellsplit($options), EsbuildFlags) as any;
+    set(options);
+  } catch (err) {
+    status.set(String(err));
+  }
 });
 
 export const loader: Readable<Loader | undefined> = derived(optionsObj, ($options, set) => {
