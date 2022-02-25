@@ -3,6 +3,10 @@
 
   let fold = true;
 
+  function reset_build_options() {
+    $buildOptions = { bundle: true };
+  }
+
   $: entriesHTML = `[${$modules
     .filter((e) => e.isEntry)
     .map((e) => e.name)
@@ -13,6 +17,7 @@
 <article class:expanded={!fold} aria-expanded={!fold}>
   <header on:click={() => (fold = !fold)}>
     <input value="Build Options" spellcheck="false" readonly />
+    <i class="i-mdi-reload" title="Reset Build Options" on:click|stopPropagation={reset_build_options} />
     <i
       class="i-mdi-information"
       title="not all options are supported, try use esbuild in the browser console or install it locally."
@@ -155,27 +160,19 @@
         type="checkbox"
         bind:checked={$buildOptions.ignoreAnnotations}
       />
-      <label for="opt-ignore-annotations" class="hljs-keyword">
-        {$buildOptions.ignoreAnnotations}
-      </label>
+      <label for="opt-ignore-annotations" class="hljs-keyword">{$buildOptions.ignoreAnnotations}</label>
     </div>,
     keepNames: <div class="option">
       <input id="opt-keep-names" type="checkbox" bind:checked={$buildOptions.keepNames} />
-      <label for="opt-keep-names" class="hljs-keyword">
-        {$buildOptions.keepNames}
-      </label>
+      <label for="opt-keep-names" class="hljs-keyword">{$buildOptions.keepNames}</label>
     </div>,
     sourcesContent: <div class="option">
       <input id="opt-sources-content" type="checkbox" bind:checked={$buildOptions.sourcesContent} />
-      <label for="opt-sources-content" class="hljs-keyword">
-        {$buildOptions.sourcesContent}
-      </label>
+      <label for="opt-sources-content" class="hljs-keyword">{$buildOptions.sourcesContent}</label>
     </div>,
     treeShaking: <div class="option">
       <input id="opt-tree-shaking" type="checkbox" bind:checked={$buildOptions.treeShaking} />
-      <label for="opt-tree-shaking" class="hljs-keyword">
-        {$buildOptions.treeShaking}
-      </label>
+      <label for="opt-tree-shaking" class="hljs-keyword">{$buildOptions.treeShaking}</label>
     </div>,
 &#125;)</pre>
 </article>
@@ -209,6 +206,10 @@
     right: calc(var(--gap) * 1.5);
     margin: auto;
     cursor: help;
+  }
+  .i-mdi-reload {
+    right: calc(32px + var(--gap) * 1.5);
+    cursor: pointer;
   }
   input[readonly] {
     color: var(--fg);
