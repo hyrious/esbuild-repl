@@ -12,18 +12,17 @@
   export let readonly = false;
 
   let CodeMirror: typeof import("codemirror") | undefined;
-  let editor: CodeMirror.Editor;
-  let editorEl: HTMLTextAreaElement;
+  let editor: CodeMirror.Editor | undefined;
+  let editorEl: HTMLTextAreaElement | undefined;
   let previousContents = contents;
   let loader: Loader;
-  let cm_mode = "js";
 
   $: loader = name.endsWith(".css") ? "css" : name.endsWith(".map") ? "json" : "js";
   $: if (CodeMirror && editor && name) {
     const m = /.+\.([^.]+)$/.exec(name);
     const info = CodeMirror.findModeByExtension((m && m[1]) || "js");
     if (info) {
-      tick().then(editor.setOption.bind(editor, "mode", info.mime));
+      editor.setOption("mode", info.mime);
     }
   }
 
@@ -41,7 +40,7 @@
       tabSize: 2,
       dragDrop: false,
       value: contents,
-      mode: cm_mode,
+      mode: loader === "js" ? "javascript" : loader,
       readOnly: readonly,
     });
 
@@ -56,10 +55,6 @@
   onDestroy(() => {
     editor && (editor as any).toTextArea();
   });
-
-  $: if (cm_mode && editor) {
-    editor.setOption("mode", cm_mode);
-  }
 
   $: if (previousContents !== contents && editor) {
     previousContents = contents;
