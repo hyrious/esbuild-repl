@@ -41,7 +41,7 @@
     color: var(--fg);
     padding: 0.5em 1em;
     cursor: pointer;
-    line-height: 140%;
+    line-height: 1.4;
   }
   button:hover {
     --fg: var(--fg-on);

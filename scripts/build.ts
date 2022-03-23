@@ -6,7 +6,7 @@ import { icons } from "./plugins/icons";
 import { noMap } from "./plugins/no-map";
 import { alsoEmits } from "./plugins/emits";
 import { trimNodeModules } from "./plugins/utils";
-import { fixture } from "./plugins/fixture";
+// import { fixture } from "./plugins/fixture";
 const read = promises.readFile;
 const write = promises.writeFile;
 const copy = promises.copyFile;
@@ -25,14 +25,16 @@ const compilerOptions: Options["compilerOptions"] = {
   async function renderHTML(svelteFile: string, templateFile: string) {
     const { default: App } = await importFile(svelteFile, {
       plugins: [
-        fixture({ filter: /playground\.ts$/ }),
+        // fixture({ filter: /playground\.ts$/ }),
         icons({ glob: "src/**/*.svelte", ssr: true }),
         svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } }),
       ],
       define: {
         "import.meta.env.DEV": "false",
+        __SSR__: "true",
       },
     }).catch(() => process.exit(1));
+
     const { html, head } = App.render();
     const template = await read(templateFile, "utf8");
 
@@ -62,7 +64,7 @@ const compilerOptions: Options["compilerOptions"] = {
     bundle: true,
     format: "esm",
     plugins: [
-      fixture({ filter: /playground\.ts$/ }),
+      // fixture({ filter: /playground\.ts$/ }),
       icons({ glob: "src/**/*.svelte", ssr: true }),
       svelte({ emitCss: true, compilerOptions }),
       noMap,
@@ -74,6 +76,7 @@ const compilerOptions: Options["compilerOptions"] = {
     outdir: "dist",
     define: {
       "import.meta.env.DEV": "false",
+      __SSR__: "false",
     },
     legalComments: "none",
     metafile: true,

@@ -5,7 +5,7 @@ import { svelte } from "@hyrious/esbuild-plugin-svelte";
 import { clearWarns } from "./plugins/utils";
 import { icons } from "./plugins/icons";
 import { resolve } from "path";
-import { fixture } from "./plugins/fixture";
+// import { fixture } from "./plugins/fixture";
 
 let port = 3000;
 
@@ -49,13 +49,18 @@ const { stop: stopServe } = await serve(
     bundle: true,
     format: "esm",
     splitting: true,
-    plugins: [fixture({ filter: /playground\.ts$/ }), icons({ glob: "src/**/*.svelte" }), svelte()],
+    plugins: [
+      // fixture({ filter: /playground\.ts$/ }),
+      icons({ glob: "src/**/*.svelte" }),
+      svelte(),
+    ],
     sourcemap: true,
     banner: {
       js: banner,
     },
     define: {
       "import.meta.env.DEV": "true",
+      __SSR__: "false",
     },
   }
 );

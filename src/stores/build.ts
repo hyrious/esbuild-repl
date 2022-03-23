@@ -71,6 +71,8 @@ export const outputs: Readable<Outputs> = derived(
     buildOptions.outdir = "/";
     buildOptions.write = false;
     buildOptions.allowOverwrite = true;
+    // hide errors in console, but still in build result
+    buildOptions.logLevel = "silent";
 
     time();
     $esbuild
