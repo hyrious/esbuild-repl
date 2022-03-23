@@ -84,8 +84,8 @@
     position: relative;
     text-align: center;
     text-transform: capitalize;
-    user-select: none;
     cursor: pointer;
+    user-select: none;
   }
   label:hover {
     text-decoration: underline;

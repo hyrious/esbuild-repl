@@ -1,20 +1,74 @@
 <script lang="ts">
   import type { Loader } from "esbuild";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
+  import { isBrowser, isMobile } from "../helpers";
   import { hljs_action } from "../helpers/hljs";
+  import { getCodeMirror } from "../behaviors/get-codemirror";
+  import { mode } from "../stores";
 
   export let name = "";
   export let contents = "";
   export let isEntry = false;
   export let readonly = false;
 
+  let CodeMirror: typeof import("codemirror") | undefined;
+  let editor: CodeMirror.Editor;
+  let editorEl: HTMLTextAreaElement;
+  let previousContents = contents;
   let loader: Loader;
+  let cm_mode = "js";
 
   $: loader = name.endsWith(".css") ? "css" : name.endsWith(".map") ? "json" : "js";
+  $: if (CodeMirror && editor && name) {
+    const m = /.+\.([^.]+)$/.exec(name);
+    const info = CodeMirror.findModeByExtension((m && m[1]) || "js");
+    if (info) {
+      tick().then(editor.setOption.bind(editor, "mode", info.mime));
+    }
+  }
 
   const dispatch = createEventDispatcher();
 
-  // TODO: CodeMirror
+  onMount(async () => {
+    if (!editorEl) return;
+    ({ default: CodeMirror } = await getCodeMirror());
+
+    editor = CodeMirror.fromTextArea(editorEl, {
+      lineNumbers: true,
+      lineWrapping: true,
+      indentWithTabs: true,
+      indentUnit: 2,
+      tabSize: 2,
+      dragDrop: false,
+      value: contents,
+      mode: cm_mode,
+      readOnly: readonly,
+    });
+
+    editor.on("change", (instance) => {
+      contents = instance.getValue();
+      previousContents = contents;
+    });
+
+    editor.setValue(contents);
+  });
+
+  onDestroy(() => {
+    editor && (editor as any).toTextArea();
+  });
+
+  $: if (cm_mode && editor) {
+    editor.setOption("mode", cm_mode);
+  }
+
+  $: if (previousContents !== contents && editor) {
+    previousContents = contents;
+    editor.setValue(contents);
+  }
+
+  $: if ($mode && editor) {
+    tick().then(editor.refresh.bind(editor));
+  }
 </script>
 
 <article class="module" class:is-entry={isEntry}>
@@ -33,7 +87,11 @@
       </button>
     {/if}
   </header>
-  {#if readonly}
+  {#if isBrowser && !isMobile && !readonly}
+    <div class="codemirror-container">
+      <textarea tabindex="0" value={contents} bind:this={editorEl} />
+    </div>
+  {:else if readonly}
     <pre class="chunk" use:hljs_action={{ code: contents, loader }} />
   {:else}
     <textarea class="editor" rows="2" spellcheck="false" bind:value={contents} />
@@ -54,7 +112,7 @@
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     outline: none;
-    font: 14px/140% var(--mono);
+    font: 14px/1.4 var(--mono);
     background-color: rgba(127, 127, 127, 0.1);
     padding: calc(var(--gap) * 1.5);
     cursor: text;

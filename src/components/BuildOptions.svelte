@@ -16,8 +16,12 @@
 
 <article class:expanded={!fold} aria-expanded={!fold}>
   <header on:click={() => (fold = !fold)}>
-    <input value="Build Options" spellcheck="false" readonly />
-    <i class="i-mdi-reload" title="Reset Build Options" on:click|stopPropagation={reset_build_options} />
+    <h2>Build Options</h2>
+    <i
+      class="i-mdi-reload"
+      title="Reset Build Options"
+      on:click|stopPropagation={reset_build_options}
+    />
     <i
       class="i-mdi-information"
       title="not all options are supported, try use esbuild in the browser console or install it locally."
@@ -160,7 +164,9 @@
         type="checkbox"
         bind:checked={$buildOptions.ignoreAnnotations}
       />
-      <label for="opt-ignore-annotations" class="hljs-keyword">{$buildOptions.ignoreAnnotations}</label>
+      <label for="opt-ignore-annotations" class="hljs-keyword"
+        >{$buildOptions.ignoreAnnotations}</label
+      >
     </div>,
     keepNames: <div class="option">
       <input id="opt-keep-names" type="checkbox" bind:checked={$buildOptions.keepNames} />
@@ -188,16 +194,14 @@
   .expanded header {
     border-bottom: 1px solid rgba(127, 127, 127, 0.5);
   }
-  header input {
-    border: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    outline: none;
-    font: 14px/140% var(--mono);
-    background-color: rgba(127, 127, 127, 0.1);
+  header h2 {
+    margin: 0;
     padding: calc(var(--gap) * 1.5);
+    font: 14px/1.4 var(--mono);
+    color: var(--fg);
+    background-color: rgba(127, 127, 127, 0.1);
     cursor: pointer;
-    line-height: 1;
+    user-select: none;
   }
   header i {
     position: absolute;
@@ -210,9 +214,6 @@
   .i-mdi-reload {
     right: calc(32px + var(--gap) * 1.5);
     cursor: pointer;
-  }
-  input[readonly] {
-    color: var(--fg);
   }
   pre {
     max-height: calc(100vh - 96px);

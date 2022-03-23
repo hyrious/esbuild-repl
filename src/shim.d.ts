@@ -1,3 +1,5 @@
+declare var __SSR__: boolean;
+
 declare interface ImportMeta {
   env: {
     DEV: boolean;
