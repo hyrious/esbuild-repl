@@ -19,4 +19,5 @@ jobs:
         with:
           version: latest
           run_install: true
+      - run: pnpm check
       - run: pnpm build

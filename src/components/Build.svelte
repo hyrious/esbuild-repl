@@ -64,7 +64,7 @@
     </h3>
     <svelte:component this={BuildOptions} />
     {#if $outputs.files}
-      {#each $outputs.files as file, i}
+      {#each $outputs.files as file}
         <Editor name={file.name.replace(/^\//, "")} contents={file.contents} readonly />
       {/each}
     {/if}

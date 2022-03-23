@@ -151,7 +151,7 @@ function updateText(element: HTMLInputElement, result: UpdatedText, event: Keybo
   element.selectionEnd = result.selection[1];
 
   event.preventDefault();
-  fire(element, "change");
+  fire(element, "input");
 }
 
 function handleEnter(ev: Event) {
@@ -187,6 +187,51 @@ function handleEnter(ev: Event) {
   }
 }
 
+// stolen from refined-github source/features/one-key-formatting.tsx :p
+const FormattingChars = ["`", "'", '"', "[", "(", "{", "*", "_", "~", "“", "‘"];
+const MatchingChars = ["`", "'", '"', "]", ")", "}", "*", "_", "~", "”", "’"];
+
+function handleFormat(ev: Event) {
+  if (isIMEVisible) {
+    return;
+  }
+
+  const event = ev as KeyboardEvent;
+
+  if (!FormattingChars.includes(event.key)) {
+    return;
+  }
+
+  const element = event.target as HTMLInputElement;
+
+  const [start, end] = [element.selectionStart, element.selectionEnd];
+
+  if (start === end) {
+    return;
+  }
+
+  const result = wrapSelection(element.value, [start, end], event.key);
+  if (result === undefined) return;
+
+  updateText(element, result, event);
+}
+
+function wrapSelection(
+  text: string,
+  [start, end]: SelectionRange,
+  left: string
+): UpdatedText | undefined {
+  if (start == null || end == null || start === end) return;
+
+  const right = MatchingChars[FormattingChars.indexOf(left)];
+  const selection = text.slice(start, end);
+
+  return {
+    text: text.slice(0, start) + left + selection + right + text.slice(end),
+    selection: [start + left.length, end + left.length],
+  };
+}
+
 function updateIndentation(ev: Event) {
   if (isIMEVisible) {
     return;
@@ -214,6 +259,7 @@ function updateIndentation(ev: Event) {
 export function subscribe(el: Element) {
   el.addEventListener("keydown", updateIndentation);
   el.addEventListener("keydown", handleEnter);
+  el.addEventListener("keydown", handleFormat);
   el.addEventListener("compositionstart", onCompositionStart);
   el.addEventListener("compositionend", onCompositionEnd);
   const { unsubscribe } = autosize(el);
@@ -221,6 +267,7 @@ export function subscribe(el: Element) {
     unsubscribe: () => {
       el.removeEventListener("keydown", updateIndentation);
       el.removeEventListener("keydown", handleEnter);
+      el.removeEventListener("keydown", handleFormat);
       el.removeEventListener("compositionstart", onCompositionStart);
       el.removeEventListener("compositionend", onCompositionEnd);
       unsubscribe();
