@@ -19,7 +19,6 @@ pnpm build && pnpm preview
 
 PRs are welcome!
 
-- [esbuild#2105](https://github.com/evanw/esbuild/issues/2105)
 - codepen/playground
 
 ### License
