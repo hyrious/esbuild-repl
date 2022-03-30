@@ -13,11 +13,40 @@
     };
   }
 
-  async function share() {
+  async function share(ev: MouseEvent) {
     try {
-      await navigator.clipboard?.writeText(location.href);
+      let url = ev.shiftKey ? share_as_rollup() : location.href;
+      await navigator.clipboard?.writeText(url);
       alert("Sharable URL has been copied to clipboard.");
     } catch {}
+  }
+
+  function share_as_rollup() {
+    const query = new URLSearchParams(location.search);
+    let modules: any = query.get("modules");
+    if (modules) {
+      modules = JSON.parse(modules).map((m: [string, string, number]) => ({
+        name: m[0],
+        code: m[1],
+        isEntry: !!m[2],
+      }));
+    } else {
+      modules = [
+        {
+          name: "main.js",
+          code: query.get("input"),
+          isEntry: true,
+        },
+      ];
+    }
+    const rollup_share = {
+      example: null,
+      modules,
+      options: { amd: { id: "" }, format: "es", globals: {}, name: "a" },
+    };
+    return `https://rollupjs.org/repl/?shareable=${btoa(
+      encodeURIComponent(JSON.stringify(rollup_share))
+    )}`;
   }
 
   function github() {
@@ -49,7 +78,7 @@
   <button on:click={github} title="hyrious/esbuild-repl">
     <i class="i-mdi-github" />
   </button>
-  <button on:click={share} title="share">
+  <button on:click={share} title="share (press shift for rollup url)">
     <i class="i-mdi-share-variant" />
   </button>
   <button on:click={() => ($theme = $theme === "light" ? "dark" : "light")} title="theme: {$theme}">

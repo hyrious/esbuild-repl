@@ -79,7 +79,7 @@
 }
 .CodeMirror-foldgutter-open:after,
 .CodeMirror-foldgutter-folded:after {
-  content: '>';
+  content: ">";
   font-size: 0.8em;
   opacity: 0.8;
   transition: transform 0.2s;
@@ -199,12 +199,14 @@
   text-decoration: line-through;
 }
 
-.cm-s-default .cm-atom,
 .cm-s-default .cm-def,
 .cm-s-default .cm-variable-2,
 .cm-s-default .cm-variable-3,
 .cm-s-default .cm-punctuation {
   color: var(--base);
+}
+.cm-s-default .cm-atom {
+  color: var(--pre-dim);
 }
 .cm-s-default .cm-property {
   color: var(--property);
@@ -478,7 +480,7 @@ div.CodeMirror-dragcursors {
 }
 
 .cm-tab-wrap-hack:after {
-  content: '';
+  content: "";
 }
 
 span.CodeMirror-selectedtext {
