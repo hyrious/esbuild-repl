@@ -5,6 +5,7 @@ import {
   loading as $loading,
   status as $status,
   version as $version,
+  versions as $versions,
 } from "../stores";
 
 type esbuild_t = typeof import("esbuild");
@@ -35,6 +36,7 @@ async function load() {
     ({ default: module } = await import("esbuild-wasm"));
     window.esbuild = module;
     $version.set(module.version);
+    $versions.update((vs) => (vs.includes(module.version) ? vs : [...vs, module.version]));
     $status.set("Downloading esbuild.wasm @ " + version);
     await module.initialize({ wasmURL: "http://localhost:30000/esbuild.wasm" });
     await module.transform("let a = 1");
@@ -50,6 +52,7 @@ async function load() {
       await pRetry(() => report(script(jsURL, () => isDef(window.esbuild))), { retries: 3 });
       module = window.esbuild as esbuild_t;
       $version.set(module.version);
+      $versions.update((vs) => (vs.includes(module.version) ? vs : [...vs, module.version]));
       const wasmURL = wasmUrl(i, module.version);
       $status.set("Downloading " + wasmURL);
       await pRetry(() => report(module.initialize({ wasmURL })), { retries: 3 });
@@ -97,6 +100,15 @@ function script(src: string, isReady: () => boolean) {
     document.head.append(script);
   });
 }
+
+const versionsUrl = "https://data.jsdelivr.com/v1/package/npm/esbuild-wasm";
+
+async function load_versions() {
+  const { versions } = await fetch(versionsUrl).then((r) => r.json());
+  $versions.set(versions);
+}
+
+load_versions().catch(console.error);
 
 (async () => {
   try {

@@ -15,6 +15,7 @@ export const mode = writable<"transform" | "build" | "playground">("transform");
 
 // other
 export const debug = writable(import.meta.env.DEV);
+export const versions = writable(["latest"]);
 
 let timer = 0;
 export function time() {

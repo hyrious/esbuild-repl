@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
-  import { mode, theme } from "../stores";
+  import { getQuery } from "../helpers";
+  import { mode, theme, version, versions } from "../stores";
 
   const modes = ["transform", "build"] as const;
 
@@ -52,6 +53,15 @@
   function github() {
     open("https://github.com/hyrious/esbuild-repl", "_blank");
   }
+
+  function switch_version(ev: Event) {
+    const version = (ev.target as HTMLSelectElement)?.value;
+    if (typeof version === "string") {
+      const query = getQuery();
+      query.version = version;
+      location.search = new URLSearchParams(query).toString();
+    }
+  }
 </script>
 
 <header>
@@ -75,6 +85,11 @@
     {/each}
     <a class="playground" href="./play.html" title="play your code">playground</a>
   </nav>
+  <select value={$version} title="change version" on:change={switch_version}>
+    {#each $versions as v}
+      <option value={v}>{v}</option>
+    {/each}
+  </select>
   <button on:click={github} title="hyrious/esbuild-repl">
     <i class="i-mdi-github" />
   </button>
@@ -140,20 +155,28 @@
     color: var(--fg-on);
     font-weight: 700;
   }
+  select,
   button {
     margin: 0;
     border: 0;
     padding: 0 calc(var(--gap) * 2) 0 var(--gap);
     appearance: none;
     font-size: 16px;
+    color: var(--fg);
     background-color: transparent;
     cursor: pointer;
+  }
+  select {
+    padding: 2px calc(var(--gap) * 2) 0;
+    font-size: 14px;
+    font-family: var(--mono);
   }
   @media screen and (max-width: 720px) {
     header {
       padding: var(--gap);
     }
-    h1 {
+    h1,
+    select {
       display: none;
     }
     a.playground {
