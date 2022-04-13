@@ -45,6 +45,16 @@ export const result: Readable<{
 export const errorsHTML = derived([esbuild, result], ([$esbuild, $result], set) => {
   if (!$esbuild) return;
   const { errors, warnings } = $result;
+
+  if (!errors && !warnings) {
+    if ($result instanceof Error) {
+      $esbuild
+        .formatMessages([{ text: $result.message }], { color: true, kind: "error" })
+        .then((raw) => set(raw.map((ansi) => render(ansi)).join("\n")));
+    }
+    return;
+  }
+
   Promise.all([
     errors?.length ? $esbuild.formatMessages(errors, { color: true, kind: "error" }) : null,
     warnings?.length ? $esbuild.formatMessages(warnings, { color: true, kind: "warning" }) : null,
