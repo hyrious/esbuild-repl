@@ -1,14 +1,8 @@
 <script lang="ts">
+  import Footer from "./Footer.svelte";
 </script>
 
-<p>🚧 Working in Progress 🚧</p>
+<Footer />
 
 <style>
-  p {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 </style>
