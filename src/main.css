@@ -118,6 +118,10 @@ strong {
   color: var(--fg-on);
 }
 
+i {
+  flex-shrink: 0;
+}
+
 #app {
   display: flex;
   flex-grow: 1;

@@ -2,6 +2,7 @@
   import Footer from "../components/Footer.svelte";
   import SplitPane from "../components/SplitPane.svelte";
   import { clamp } from "../helpers";
+  import { version } from "../stores";
   import Editor from "./Editor.svelte";
   import Explorer from "./Explorer.svelte";
   import Preview from "./Preview.svelte";
@@ -49,6 +50,7 @@
   </div>
   <div class="right">
     <Tabs>
+      <button class="refresh-preview" style:display={show_preview ? "" : "none"}>Refresh</button>
       <label class="toggle-preview" class:active={show_preview} for="toggle-preview">
         <input type="checkbox" name="preview" id="toggle-preview" bind:checked={show_preview} />
         <span>Preview</span>
@@ -69,6 +71,9 @@
   <label for="toggle-explorer" title="Toggle Sidebar">
     <i class="i-ph-sidebar-simple-fill" />
   </label>
+  <span class="footer-right" slot="right">
+    esbuild@{$version}
+  </span>
 </Footer>
 
 <style>
@@ -91,19 +96,27 @@
   .right-contents {
     flex: 1;
   }
-  .toggle-preview {
+  .toggle-preview,
+  .refresh-preview {
+    appearance: none;
+    border: 0;
+    border-radius: 0;
+    color: var(--fg);
     padding: 0 calc(2 * var(--gap));
     display: inline-flex;
     align-items: center;
+    background-color: var(--bg);
     font-size: 13px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
   }
-  .toggle-preview:hover {
+  .toggle-preview:hover,
+  .refresh-preview:hover {
     background-color: var(--bg-on);
   }
-  .toggle-preview.active {
+  .toggle-preview.active,
+  .refresh-preview:active {
     color: var(--fg-on);
   }
   .divider {
@@ -147,5 +160,8 @@
   }
   .btn[type="checkbox"] + label:hover i {
     color: var(--fg-on);
+  }
+  .footer-right {
+    padding-right: var(--gap);
   }
 </style>

@@ -19,7 +19,7 @@
   .folder {
     display: flex;
     align-items: center;
-    padding: var(--gap) calc(2 * var(--gap));
+    padding: 4px calc(2 * var(--gap));
     font-size: 12px;
     cursor: pointer;
     user-select: none;

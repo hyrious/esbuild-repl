@@ -14,8 +14,10 @@
     if (btn && btn.dataset.i) {
       const i = Number(btn.dataset.i);
       files = files.filter((_, j) => j !== i);
-      if (i <= selected) {
+      if (selected && i < selected) {
         selected--;
+      } else if (i === selected) {
+        selected = 0;
       }
     }
   }
@@ -24,7 +26,7 @@
 <div class="tabs" on:input={change_file}>
   {#each files as name, i}
     <label class="tab" class:active={i === selected}>
-      <input class="tab-input" type="radio" name="tabs" data-i={i} />
+      <input class="tab-input" type="radio" name="tabs" checked={i === selected} data-i={i} />
       <span class="filename">{name}</span>
       <button class="btn close" data-i={i} on:click={close_file}>
         <i class="i-mdi-close" />
