@@ -8,14 +8,27 @@
       selected = Number(target.dataset.i);
     }
   }
+
+  function close_file(ev: Event) {
+    const btn = ev.currentTarget as HTMLButtonElement;
+    if (btn && btn.dataset.i) {
+      const i = Number(btn.dataset.i);
+      files = files.filter((_, j) => j !== i);
+      if (i <= selected) {
+        selected--;
+      }
+    }
+  }
 </script>
 
 <div class="tabs" on:input={change_file}>
   {#each files as name, i}
     <label class="tab" class:active={i === selected}>
-      <input type="radio" name="tabs" data-i={i} />
-      <span>{name}</span>
-      <button>&cross;</button>
+      <input class="tab-input" type="radio" name="tabs" data-i={i} />
+      <span class="filename">{name}</span>
+      <button class="btn close" data-i={i} on:click={close_file}>
+        <i class="i-mdi-close" />
+      </button>
     </label>
   {/each}
   <div class="splitter" />
@@ -28,7 +41,7 @@
     border-bottom: 1px solid var(--border);
   }
   .tab {
-    padding: 0 calc(2 * var(--gap));
+    padding: 0 var(--gap) 0 calc(2 * var(--gap));
     border-right: 1px solid var(--border);
     display: inline-flex;
     align-items: center;
@@ -38,11 +51,41 @@
     user-select: none;
     -webkit-user-select: none;
   }
+  .tab-input {
+    display: none;
+  }
+  .filename {
+    padding-right: var(--gap);
+  }
+  .i-mdi-close {
+    pointer-events: none;
+  }
+  .btn {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 2px;
+    padding: 0;
+    appearance: none;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--bg);
+    -webkit-user-select: none;
+    opacity: 0;
+    transition: opacity 0.3s, background-color 0.3s;
+  }
+  .btn:hover {
+    opacity: 1;
+    background-color: var(--bg-on);
+  }
   .active {
     position: relative;
     color: var(--fg-on);
     background-color: var(--bg);
     cursor: grab;
+  }
+  .active .btn {
+    opacity: 1;
   }
   .active::after {
     content: "";

@@ -100,9 +100,11 @@
     user-select: none;
     -webkit-user-select: none;
   }
+  .toggle-preview:hover {
+    background-color: var(--bg-on);
+  }
   .toggle-preview.active {
     color: var(--fg-on);
-    background-color: var(--bg);
   }
   .divider {
     display: block;

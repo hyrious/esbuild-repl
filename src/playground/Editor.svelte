@@ -6,9 +6,10 @@
 
 <style>
   .editor {
+    padding: var(--gap);
     border-width: 0;
     border-radius: 0;
-    height: 100%;
+    height: 100% !important;
     font-size: 12px;
     background-color: var(--bg);
   }
