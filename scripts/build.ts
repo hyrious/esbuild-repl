@@ -52,7 +52,7 @@ const compilerOptions: Options["compilerOptions"] = {
 
   await Promise.all([
     renderHTML("src/App.svelte", "src/index.html"),
-    renderHTML("src/components/Playground.svelte", "src/play.html"),
+    renderHTML("src/playground/Playground.svelte", "src/play.html"),
     copy("src/favicon.svg", "dist/favicon.svg"),
   ]);
 }

@@ -19,9 +19,17 @@
   }
 </script>
 
-<footer>
+<script lang="ts">
+  export let size: "normal" | "small" = "normal";
+  export let extra = "";
+</script>
+
+<footer class:compact={size === "small"}>
+  <slot />
   {#if $loading}<i in:fade class="i-mdi-loading" />{/if}
-  <span use:flip={$loading}>{$status}</span>
+  <span use:flip={$loading}>{$status}{extra}</span>
+  <span class="splitter" />
+  <slot name="right" />
 </footer>
 
 <style>
@@ -33,6 +41,14 @@
     align-items: center;
     gap: var(--gap);
     font-size: 14px;
+  }
+  .compact {
+    border-top: 1px solid var(--border);
+    padding: 2px var(--gap);
+    font-size: 12px;
+  }
+  .splitter {
+    flex: 1;
   }
   .i-mdi-loading {
     animation: rotate 0.4s linear infinite;

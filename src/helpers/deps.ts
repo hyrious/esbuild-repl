@@ -1,4 +1,4 @@
-import { Plugin } from "esbuild";
+import type { Plugin } from "esbuild";
 import { tick } from "svelte";
 
 // "pkg" => "pkg", ""
@@ -42,11 +42,19 @@ async function follow_redirects(url: string) {
   return res.url;
 }
 
-export interface DepsOptions {
-  log?: (msg: string) => void;
-  baseUrl: string;
+function is_external(path: string, external: string[]) {
+  // Should we handle '*' in external config?
+  return external.some((ext) => path === ext || path.startsWith(ext + "/"));
 }
 
+export interface DepsOptions {
+  log?: (msg: string) => void;
+  baseUrl?: string;
+}
+
+// Caveats:
+// 1. Not support resolving extensions, i.e. must use `import "./file.js"`.
+// 2. No complex resolving logic (browser, exports), just uses pkg.module || pkg.main.
 export function deps({ log = console.log, baseUrl = "https://unpkg.com" }: DepsOptions): Plugin {
   return {
     name: "deps",
@@ -58,25 +66,28 @@ export function deps({ log = console.log, baseUrl = "https://unpkg.com" }: DepsO
       });
 
       onResolve({ filter: /^[\@w]/ }, async (args) => {
-        // Should we handle '*' in external config?
-        if (external.some((ext) => args.path === ext || args.path.startsWith(ext + "/"))) {
+        if (is_external(args.path, external)) {
           return null;
         }
         log(`resolving ${args.path}`);
         const [pkgName, subPath] = split(args.path);
-        if (!subPath) {
-          const pkg_url = await follow_redirects(`${baseUrl}/${pkgName}/package.json`);
-          const pkg_json = (await cached_fetch(pkg_url)).body;
-          const pkg = JSON.parse(pkg_json);
-          if (pkg.module || pkg.main) {
-            const url = pkg_url.replace(/\/package\.json$/, "");
-            const path = new URL(pkg.module || pkg.main, `${url}/`).href;
+        try {
+          if (!subPath) {
+            const pkg_url = await follow_redirects(`${baseUrl}/${pkgName}/package.json`);
+            const pkg_json = (await cached_fetch(pkg_url)).body;
+            const pkg = JSON.parse(pkg_json);
+            if (pkg.module || pkg.main) {
+              const url = pkg_url.replace(/\/package\.json$/, "");
+              const path = new URL(pkg.module || pkg.main, `${url}/`).href;
+              return { path, namespace: "deps" };
+            }
+          } else {
+            // TODO: apply conditional exports rules on subPath
+            const path = await follow_redirects(`${baseUrl}/${args.path}`);
             return { path, namespace: "deps" };
           }
-        } else {
-          // TODO: apply conditional exports rules on subPath
-          const path = await follow_redirects(`${baseUrl}/${args.path}`);
-          return { path, namespace: "deps" };
+        } catch (err) {
+          return { errors: [{ text: err.message }] };
         }
       });
 
@@ -84,16 +95,24 @@ export function deps({ log = console.log, baseUrl = "https://unpkg.com" }: DepsO
         // Should we test external here?
         const url = new URL(args.path, args.importer).href;
         log(`resolving ${url}`);
-        const path = await follow_redirects(url);
-        return { path, namespace: "deps" };
+        try {
+          const path = await follow_redirects(url);
+          return { path, namespace: "deps" };
+        } catch (err) {
+          return { errors: [{ text: err.message }] };
+        }
       });
 
       onLoad({ filter: /.*/, namespace: "deps" }, async (args) => {
         if (!fetch_cache.has(args.path)) {
           log(`resolving ${args.path}`);
         }
-        const { body } = await cached_fetch(args.path);
-        return { contents: body, loader: "default" };
+        try {
+          const { body } = await cached_fetch(args.path);
+          return { contents: body, loader: "default" };
+        } catch (err) {
+          return { errors: [{ text: err.message }] };
+        }
       });
     },
   };

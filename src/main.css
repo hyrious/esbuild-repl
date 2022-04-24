@@ -15,6 +15,7 @@
   --dim: #777;
   --white: #fff;
   --mono: "Noto Sans Mono", monospace;
+  --border: rgba(127, 127, 127, 0.5);
 }
 
 body {
@@ -94,7 +95,7 @@ input,
 select {
   outline: none;
   background-color: rgba(127, 127, 127, 0.1);
-  border: 1px solid rgba(127, 127, 127, 0.5);
+  border: 1px solid var(--border);
   border-radius: var(--gap);
   padding: calc(var(--gap) * 1.5);
 }
@@ -115,4 +116,11 @@ textarea {
 
 strong {
   color: var(--fg-on);
+}
+
+#app {
+  display: flex;
+  flex-grow: 1;
+  flex-flow: column nowrap;
+  overflow: hidden;
 }

@@ -10,12 +10,3 @@
 <Repl />
 <Footer />
 {#if $debug}<Debug />{/if}
-
-<style>
-  :global(#app) {
-    display: flex;
-    flex-grow: 1;
-    flex-flow: column nowrap;
-    overflow: hidden;
-  }
-</style>

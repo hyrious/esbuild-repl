@@ -8,6 +8,7 @@ specifiers:
   '@hyrious/shellwords': ^0.1.1
   '@hyrious/w7': ^0.1.8
   '@iconify-json/mdi': ^1.1.9
+  '@iconify-json/ph': ^1.1.1
   '@iconify/utils': ^1.0.32
   '@tsconfig/svelte': ^3.0.0
   '@types/codemirror': ^5.60.5
@@ -40,6 +41,7 @@ devDependencies:
   '@hyrious/rimraf': 0.1.0
   '@hyrious/w7': 0.1.8
   '@iconify-json/mdi': 1.1.9
+  '@iconify-json/ph': 1.1.1
   '@iconify/utils': 1.0.32
   '@tsconfig/svelte': 3.0.0
   '@types/codemirror': 5.60.5
@@ -115,6 +117,12 @@ packages:
 
   /@iconify-json/mdi/1.1.9:
     resolution: {integrity: sha512-iZY3d7nLmEhSxLU5YBHIxVVPySqNjj6zYcf448TXGBPp2PyToITCOuLEaub0rQ9jBAPOlupQsuPX9ylBfgIJ1w==}
+    dependencies:
+      '@iconify/types': 1.1.0
+    dev: true
+
+  /@iconify-json/ph/1.1.1:
+    resolution: {integrity: sha512-sIHTY+c1F8x29BM49IqoccJ3T8mvVXPcrE4WOpJ3GsBaip2YqFJRYU60rw64UL6GEI13vWSD7NsZKq8ytTO87g==}
     dependencies:
       '@iconify/types': 1.1.0
     dev: true

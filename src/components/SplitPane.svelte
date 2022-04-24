@@ -5,6 +5,8 @@
   const dispatch = createEventDispatcher();
 
   export let show = true;
+  export let show_right = true;
+  export let show_divider = false;
 
   let pos = 50;
   let dragging = false;
@@ -62,20 +64,25 @@
 </script>
 
 <section style={show ? "" : "display: none"} use:measure>
-  <div class="pane" style="width: {pos}%">
+  <div class="pane" style="width: {show_right ? pos : 100}%">
     <slot name="left" />
   </div>
-  <div class="pane" style="width: {100 - pos}%">
+  <div
+    class="pane"
+    class:show-divider={show_divider}
+    style="width: {100 - pos}%"
+    style:display={show_right ? "" : "none"}
+  >
     <slot name="right" />
   </div>
   <div
     class="divider"
-    class:is-mobile={isMobile}
+    class:is-mobile={!show_right || isMobile}
     style="left: calc({pos}% - 8px); height: {height}px"
     use:drag={move_divider}
   />
 </section>
-{#if dragging}<div class="cat" />{/if}
+<div class="cat" style:display={dragging ? "" : "none"} />
 
 <style>
   section {
@@ -83,11 +90,16 @@
     position: relative;
     overflow: hidden;
     overflow-y: auto;
+    height: 100%;
   }
   .pane {
     float: left;
     overflow: auto;
     position: relative;
+    height: 100%;
+  }
+  .show-divider {
+    border-left: 1px solid var(--border);
   }
   :global(.pane > section) {
     padding: var(--gap);
@@ -136,6 +148,7 @@
       display: block;
       width: 100% !important;
       max-height: unset;
+      height: auto;
       overflow: visible;
     }
     :global(.pane > section) {

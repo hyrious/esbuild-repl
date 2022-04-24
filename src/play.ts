@@ -1,6 +1,6 @@
 import "./main.css";
 import "./behaviors";
-import Playground from "./components/Playground.svelte";
+import Playground from "./playground/Playground.svelte";
 
 Object.assign(window, {
   app: new Playground({
