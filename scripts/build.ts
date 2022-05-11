@@ -52,7 +52,6 @@ const compilerOptions: Options["compilerOptions"] = {
 
   await Promise.all([
     renderHTML("src/App.svelte", "src/index.html"),
-    renderHTML("src/components/Playground.svelte", "src/play.html"),
     copy("src/favicon.svg", "dist/favicon.svg"),
   ]);
 }
@@ -60,7 +59,7 @@ const compilerOptions: Options["compilerOptions"] = {
 // build js
 {
   const result = await build({
-    entryPoints: ["src/main.ts", "./src/play.ts", "src/sw.ts", "src/hljs.ts"],
+    entryPoints: ["src/main.ts", "src/sw.ts", "src/hljs.ts"],
     bundle: true,
     format: "esm",
     plugins: [
@@ -68,7 +67,7 @@ const compilerOptions: Options["compilerOptions"] = {
       icons({ glob: "src/**/*.svelte", ssr: true }),
       svelte({ emitCss: true, compilerOptions }),
       noMap,
-      alsoEmits(["dist/index.html", "dist/play.html", "dist/favicon.svg"]),
+      alsoEmits(["dist/index.html", "dist/favicon.svg"]),
     ],
     splitting: true,
     minify: true,

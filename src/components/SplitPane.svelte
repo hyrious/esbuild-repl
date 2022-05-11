@@ -83,11 +83,13 @@
     position: relative;
     overflow: hidden;
     overflow-y: auto;
+    height: 100%;
   }
   .pane {
     float: left;
     overflow: auto;
     position: relative;
+    height: 100%;
   }
   :global(.pane > section) {
     padding: var(--gap);
@@ -136,6 +138,7 @@
       display: block;
       width: 100% !important;
       max-height: unset;
+      height: auto;
       overflow: visible;
     }
     :global(.pane > section) {

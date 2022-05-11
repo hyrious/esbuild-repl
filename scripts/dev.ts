@@ -12,7 +12,7 @@ let port = 3000;
 const clients: ServerResponse[] = [];
 
 const { stop: stopWatch } = await build({
-  entryPoints: ["./src/main.ts", "./src/play.ts", "./src/hljs.ts"],
+  entryPoints: ["./src/main.ts", "./src/hljs.ts"],
   bundle: true,
   format: "esm",
   plugins: [icons({ glob: "src/**/*.svelte" }), svelte()],
@@ -45,7 +45,7 @@ const { stop: stopServe } = await serve(
     servedir: "./src",
   },
   {
-    entryPoints: ["./src/main.ts", "./src/play.ts", "./src/hljs.ts"],
+    entryPoints: ["./src/main.ts", "./src/hljs.ts"],
     bundle: true,
     format: "esm",
     splitting: true,

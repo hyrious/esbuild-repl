@@ -83,7 +83,7 @@
         {m}
       </label>
     {/each}
-    <a class="playground" href="./play.html" title="play your code">playground</a>
+    <!-- <a class="playground" href="./play.html" title="play your code">playground</a> -->
   </nav>
   <select value={$version} title="change version" on:change={switch_version}>
     {#each $versions as v}
@@ -140,14 +140,14 @@
   label[for="mode-build"] {
     min-width: 50px;
   }
-  a.playground {
+  /* a.playground {
     min-width: 100px;
     text-align: center;
     text-transform: capitalize;
   }
   a.playground:hover {
     text-decoration: underline;
-  }
+  } */
   input[type="radio"] {
     display: none;
   }
@@ -179,8 +179,8 @@
     select {
       display: none;
     }
-    a.playground {
+    /* a.playground {
       display: none;
-    }
+    } */
   }
 </style>

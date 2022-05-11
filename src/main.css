@@ -116,3 +116,10 @@ textarea {
 strong {
   color: var(--fg-on);
 }
+
+#app {
+  display: flex;
+  flex-grow: 1;
+  flex-flow: column nowrap;
+  overflow: hidden;
+}
