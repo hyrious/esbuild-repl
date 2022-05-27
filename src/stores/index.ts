@@ -1,5 +1,8 @@
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 import { isBrowser } from "../helpers";
+import { bundle, get_modules } from "../helpers/bundle";
+import { buildOptions, outputs } from "./build";
+import { optionsObj, result } from "./transform";
 
 // header
 export const theme = writable<"light" | "dark">("dark");
@@ -11,12 +14,22 @@ export const status = writable("Loading...");
 // essential
 export const version = writable("latest");
 export const esbuild = writable<typeof import("esbuild") | null>(null);
-export const mode = writable<"transform" | "build" | "playground">("transform");
+export const mode = writable<"transform" | "build">("transform");
+export const play = writable(false);
 
 // other
 export const debug = writable(import.meta.env.DEV);
 export const versions = writable(["latest"]);
-export const scripts = writable<{ name: string; code: string }[]>([]);
+export const scripts = derived(
+  [play, esbuild, mode, buildOptions, optionsObj, result, outputs],
+  ([$play, $esbuild, $mode, $buildOptions, $optionsObj, $result, $outputs], set) => {
+    if ($play && $esbuild && ($result || $outputs)) {
+      bundle(get_modules(), $mode === "build" ? $buildOptions : $optionsObj)
+        .then(set)
+        .catch(status.set);
+    }
+  }
+);
 
 let timer = 0;
 export function time() {

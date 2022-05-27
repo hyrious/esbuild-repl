@@ -1,7 +1,7 @@
 import type { BuildOptions } from "esbuild";
 import { derived, Readable } from "svelte/store";
 import { configToString, getQuery, setQuery } from "../helpers";
-import { debug, mode, version } from "../stores";
+import { debug, mode, play, version } from "../stores";
 import { buildOptions, Module, modules } from "../stores/build";
 import { input, options } from "../stores/transform";
 
@@ -37,14 +37,16 @@ function decodeBuildOptions(raw: string): BuildOptions {
 }
 
 const query: Readable<string> = derived(
-  [version, mode, input, options, modules, buildOptions],
-  ([$version, $mode, $input, $options, $modules, $buildOptions], set) => {
+  [version, mode, input, options, modules, buildOptions, play],
+  ([$version, $mode, $input, $options, $modules, $buildOptions, $play], set) => {
     if (!$version || $version === "latest") return;
-    if ($mode === "playground") return;
     const params: [string, string][] = [
       ["version", $version],
       ["mode", $mode],
     ];
+    if ($play) {
+      params.push(["play", "1"]);
+    }
     if ($mode === "transform") {
       $input && params.push(["input", $input]);
       $options && params.push(["options", $options]);
@@ -87,4 +89,5 @@ if (shared.input) input.set(shared.input);
 if (shared.options) options.set(shared.options);
 if (shared.modules) modules.set(decodeModules(shared.modules));
 if (shared.buildOptions) buildOptions.set(decodeBuildOptions(shared.buildOptions));
+if (shared.play) play.set(true);
 if (shared.debug) debug.set(true);

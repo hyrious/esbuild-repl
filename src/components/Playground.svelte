@@ -1,29 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte";
-
   import { scripts, status, theme } from "../stores";
 
   export let show = false;
 
   let iframe: HTMLIFrameElement;
-  let waiting = false;
+  let waiting = true;
 
-  function clear_waiting() {
-    waiting = false;
-  }
-
-  $: if (show && iframe && iframe.contentWindow) {
-    waiting = true;
-    iframe.src = "";
-    iframe.src = "play.html";
-  }
+  $: iframe && iframe.contentWindow?.postMessage($theme, "*");
+  $: iframe && iframe.contentWindow?.postMessage($scripts, "*");
 
   onMount(() => {
     const listener = (ev: MessageEvent) => {
       if (ev.data === "ready") {
+        waiting = false;
         iframe.contentWindow!.postMessage($theme, "*");
         iframe.contentWindow!.postMessage($scripts, "*");
-        clear_waiting();
         return;
       }
       if (typeof ev.data === "string" && ev.data.startsWith("error:")) {
@@ -46,7 +38,7 @@
   <iframe
     width="0"
     class="playground"
-    class:waiting
+    style:display={waiting ? "none" : ""}
     bind:this={iframe}
     title="playground"
     sandbox="allow-same-origin allow-scripts"
@@ -70,9 +62,6 @@
   }
   .placeholder {
     padding: 8px;
-  }
-  .waiting {
-    display: none;
   }
   @media screen and (max-width: 720px) {
     .playground-wrapper {

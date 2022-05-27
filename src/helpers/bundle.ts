@@ -1,6 +1,8 @@
 import type { BuildOptions, Plugin, TransformOptions } from "esbuild";
-import { status, time, timeEnd } from "../stores";
-import { normalizeName, stripExt } from "../stores/build";
+import { derived, get } from "svelte/store";
+import { esbuild, mode, play, status, time, timeEnd } from "../stores";
+import { buildOptions, normalizeName, outputs, stripExt } from "../stores/build";
+import { optionsObj, result } from "../stores/transform";
 
 export type Modules = { name: string; code: string }[];
 
@@ -51,7 +53,7 @@ const unpkg_plugin: Plugin = {
     });
 
     onResolve({ filter: /^[@\w]/ }, async (args) => {
-      status.set(`resolving ${args.path} ...`);
+      status.set(`Resolving ${args.path} ...`);
       const [pkg_bare, subpath] = split(args.path);
       const hint = `${base_url}/${pkg_bare}/package.json`;
       const pkg_url = await follow_redirects(hint);
@@ -86,14 +88,14 @@ const unpkg_plugin: Plugin = {
 
     onResolve({ filter: /^\./, namespace: "unpkg" }, async (args) => {
       const url = new URL(args.path, args.importer).href;
-      status.set(`resolving ${url} ...`);
+      status.set(`Resolving ${url} ...`);
       const path = await follow_redirects(url);
       return { path, namespace: "unpkg" };
     });
 
     onLoad({ filter: /.*/, namespace: "unpkg" }, async (args) => {
       if (!fetch_cache.has(args.path)) {
-        status.set(`resolving ${args.path} ...`);
+        status.set(`Resolving ${args.path} ...`);
       }
       const { body } = await fetch_if_uncached(args.path);
       return { contents: body, loader: "default" };
@@ -154,4 +156,26 @@ export async function bundle(
   timeEnd();
 
   return outputFiles.map((f) => ({ name: f.path, code: f.text }));
+}
+
+export function get_modules() {
+  const query = new URLSearchParams(location.search);
+  let modules: any = query.get("modules");
+  if (modules) {
+    modules = JSON.parse(modules).map((m: [string, string, number]) => ({
+      name: m[0],
+      code: m[1],
+      isEntry: !!m[2],
+    }));
+  } else {
+    const loader = get(optionsObj).loader || "js";
+    modules = [
+      {
+        name: ["ts", "tsx", "jsx"].includes(loader) ? `main.${loader}` : "main.js",
+        code: query.get("input"),
+        isEntry: true,
+      },
+    ];
+  }
+  return modules as Array<{ name: string; code: string; isEntry: boolean }>;
 }

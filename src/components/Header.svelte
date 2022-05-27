@@ -1,10 +1,8 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
   import { getQuery } from "../helpers";
-  import { bundle } from "../helpers/bundle";
-  import { mode, scripts, status, theme, version, versions } from "../stores";
-  import { optionsObj } from "../stores/transform";
-  import { buildOptions } from "../stores/build";
+  import { get_modules } from "../helpers/bundle";
+  import { mode, play, scripts, theme, version, versions } from "../stores";
 
   const modes = ["transform", "build"] as const;
 
@@ -23,28 +21,6 @@
       await navigator.clipboard?.writeText(url);
       alert("Sharable URL has been copied to clipboard.");
     } catch {}
-  }
-
-  function get_modules() {
-    const query = new URLSearchParams(location.search);
-    let modules: any = query.get("modules");
-    if (modules) {
-      modules = JSON.parse(modules).map((m: [string, string, number]) => ({
-        name: m[0],
-        code: m[1],
-        isEntry: !!m[2],
-      }));
-    } else {
-      const loader = $optionsObj.loader || "js";
-      modules = [
-        {
-          name: ["ts", "tsx", "jsx"].includes(loader) ? `main.${loader}` : "main.js",
-          code: query.get("input"),
-          isEntry: true,
-        },
-      ];
-    }
-    return modules as Array<{ name: string; code: string; isEntry: boolean }>;
   }
 
   function share_as_rollup() {
@@ -72,13 +48,7 @@
   }
 
   async function run() {
-    $scripts = [];
-    $mode = "playground";
-    try {
-      $scripts = await bundle(get_modules(), $mode === "build" ? $buildOptions : $optionsObj);
-    } catch (err) {
-      $status = String(err);
-    }
+    $play = !$play;
   }
 </script>
 
@@ -109,7 +79,7 @@
     {/each}
   </select>
   <button on:click={run} title="run">
-    <i class="i-mdi-play-circle-outline" class:active={$mode === "playground"} />
+    <i class="i-mdi-play-circle-outline" class:active={$play} />
   </button>
   <button on:click={github} title="hyrious/esbuild-repl">
     <i class="i-mdi-github" />
