@@ -13,19 +13,20 @@
   <link rel="stylesheet" href="./main.css">
 </head>
 <body>
-  <div id="app"><header class="svelte-5v49kb"><h1 class="svelte-5v49kb"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-5v49kb">esbuild</a>
+  <div id="app"><header class="svelte-a03p5k"><h1 class="svelte-a03p5k"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-a03p5k">esbuild</a>
     <span>.</span>
-    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer" class="svelte-5v49kb">repl</a></h1>
-  <nav class="svelte-5v49kb"><input type="radio" name="mode" id="mode-transform" value="transform" checked class="svelte-5v49kb">
-      <label for="mode-transform" tabindex="0" title="esbuild.transform()" class="svelte-5v49kb">transform
-      </label><input type="radio" name="mode" id="mode-build" value="build"  class="svelte-5v49kb">
-      <label for="mode-build" tabindex="0" title="esbuild.build()" class="svelte-5v49kb">build
+    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" class="svelte-a03p5k">repl</a></h1>
+  <nav class="svelte-a03p5k"><input type="radio" name="mode" id="mode-transform" value="transform" checked class="svelte-a03p5k">
+      <label for="mode-transform" tabindex="0" title="esbuild.transform()" class="svelte-a03p5k">transform
+      </label><input type="radio" name="mode" id="mode-build" value="build"  class="svelte-a03p5k">
+      <label for="mode-build" tabindex="0" title="esbuild.build()" class="svelte-a03p5k">build
       </label>
     </nav>
-  <select value="latest" title="change version" class="svelte-5v49kb"><option value="latest">latest</option></select>
-  <button title="hyrious/esbuild-repl" class="svelte-5v49kb"><i class="i-mdi-github"></i></button>
-  <button title="share (press shift for rollup url)" class="svelte-5v49kb"><i class="i-mdi-share-variant"></i></button>
-  <button title="theme: dark" class="svelte-5v49kb"><i class="i-mdi-moon-waxing-crescent"></i></button>
+  <select value="latest" title="change version" class="svelte-a03p5k"><option value="latest">latest</option></select>
+  <button title="run" class="svelte-a03p5k"><i class="i-mdi-play-circle-outline svelte-a03p5k"></i></button>
+  <button title="hyrious/esbuild-repl" class="svelte-a03p5k"><i class="i-mdi-github"></i></button>
+  <button title="share (press shift for rollup url)" class="svelte-a03p5k"><i class="i-mdi-share-variant"></i></button>
+  <button title="theme: dark" class="svelte-a03p5k"><i class="i-mdi-moon-waxing-crescent"></i></button>
 </header>
 <main data-mode="transform"><section style="" class="svelte-ur4phb"><div class="pane svelte-ur4phb" style="width: 50%"><section slot="left" class="input"><textarea class="editor" rows="2" spellcheck="false">let a = 1</textarea>
     <input placeholder="--loader=js" spellcheck="false" autocomplete="off" value=""></section></div>
@@ -53,7 +54,10 @@
 </article>
     </section></div>
   <div class="divider svelte-ur4phb" style="left: calc(50% - 8px); height: 0px"></div></section>
-</main>
+
+  <div class="playground-wrapper svelte-vsdmg3" style="display: none;"><div class="placeholder svelte-vsdmg3" style="display: none;">Bundling…</div>
+  <iframe width="0" class="playground svelte-vsdmg3" title="playground" sandbox="allow-same-origin allow-scripts" frameborder="0" src="play.html"></iframe>
+</div></main>
 <footer class="svelte-9g49lf"><i class="i-mdi-loading svelte-9g49lf"></i>
   <span>Loading...</span>
 </footer></div>

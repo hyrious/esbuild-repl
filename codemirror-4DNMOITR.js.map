@@ -2,6 +2,6 @@
   "version": 3,
   "sources": ["../src/behaviors/codemirror.ts"],
   "sourcesContent": ["import \"./codemirror.css\";\nimport CodeMirror from \"codemirror\";\n\nimport \"codemirror/mode/javascript/javascript.js\";\nimport \"codemirror/mode/css/css.js\";\nimport \"codemirror/mode/jsx/jsx.js\";\nimport \"codemirror/mode/meta.js\";\n\nexport default CodeMirror;\n"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;grrEACA,OAAuB,SAEvB,GAAO,SACP,GAAO,SACP,GAAO,SACP,GAAO,SAEA,GAAQ",
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;y2qEACA,OAAuB,SAEvB,GAAO,SACP,GAAO,SACP,GAAO,SACP,GAAO,SAEA,GAAQ",
   "names": []
 }
