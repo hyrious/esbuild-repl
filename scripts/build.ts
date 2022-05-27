@@ -53,6 +53,7 @@ const compilerOptions: Options["compilerOptions"] = {
   await Promise.all([
     renderHTML("src/App.svelte", "src/index.html"),
     copy("src/favicon.svg", "dist/favicon.svg"),
+    copy("src/play.html", "dist/play.html"),
   ]);
 }
 
@@ -67,7 +68,7 @@ const compilerOptions: Options["compilerOptions"] = {
       icons({ glob: "src/**/*.svelte", ssr: true }),
       svelte({ emitCss: true, compilerOptions }),
       noMap,
-      alsoEmits(["dist/index.html", "dist/favicon.svg"]),
+      alsoEmits(["dist/index.html", "dist/play.html", "dist/favicon.svg"]),
     ],
     splitting: true,
     minify: true,
