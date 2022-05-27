@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
   import { getQuery } from "../helpers";
-  import { mode, theme, version, versions } from "../stores";
+  import { bundle } from "../helpers/bundle";
+  import { mode, scripts, status, theme, version, versions } from "../stores";
+  import { optionsObj } from "../stores/transform";
+  import { buildOptions } from "../stores/build";
 
   const modes = ["transform", "build"] as const;
 
@@ -22,7 +25,7 @@
     } catch {}
   }
 
-  function share_as_rollup() {
+  function get_modules() {
     const query = new URLSearchParams(location.search);
     let modules: any = query.get("modules");
     if (modules) {
@@ -32,17 +35,22 @@
         isEntry: !!m[2],
       }));
     } else {
+      const loader = $optionsObj.loader || "js";
       modules = [
         {
-          name: "main.js",
+          name: ["ts", "tsx", "jsx"].includes(loader) ? `main.${loader}` : "main.js",
           code: query.get("input"),
           isEntry: true,
         },
       ];
     }
+    return modules as Array<{ name: string; code: string; isEntry: boolean }>;
+  }
+
+  function share_as_rollup() {
     const rollup_share = {
       example: null,
-      modules,
+      modules: get_modules(),
       options: { amd: { id: "" }, format: "es", globals: {}, name: "a" },
     };
     return `https://rollupjs.org/repl/?shareable=${btoa(
@@ -62,13 +70,23 @@
       location.search = new URLSearchParams(query).toString();
     }
   }
+
+  async function run() {
+    $scripts = [];
+    $mode = "playground";
+    try {
+      $scripts = await bundle(get_modules(), $mode === "build" ? $buildOptions : $optionsObj);
+    } catch (err) {
+      $status = String(err);
+    }
+  }
 </script>
 
 <header>
   <h1>
     <a href="https://esbuild.github.io" target="_blank" rel="noreferrer">esbuild</a>
     <span>.</span>
-    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer">repl</a>
+    <a href="https://github.com/hyrious/esbuild-repl" target="_blank">repl</a>
   </h1>
   <nav>
     {#each modes as m (m)}
@@ -90,6 +108,9 @@
       <option value={v}>{v}</option>
     {/each}
   </select>
+  <button on:click={run} title="run">
+    <i class="i-mdi-play-circle-outline" class:active={$mode === "playground"} />
+  </button>
   <button on:click={github} title="hyrious/esbuild-repl">
     <i class="i-mdi-github" />
   </button>
@@ -140,14 +161,9 @@
   label[for="mode-build"] {
     min-width: 50px;
   }
-  /* a.playground {
-    min-width: 100px;
-    text-align: center;
-    text-transform: capitalize;
+  .i-mdi-play-circle-outline.active {
+    color: var(--fg-on);
   }
-  a.playground:hover {
-    text-decoration: underline;
-  } */
   input[type="radio"] {
     display: none;
   }
@@ -179,8 +195,5 @@
     select {
       display: none;
     }
-    /* a.playground {
-      display: none;
-    } */
   }
 </style>

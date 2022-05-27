@@ -24,11 +24,11 @@ export interface Outputs {
   warnings?: Message[];
 }
 
-function normalizeName(path: string) {
+export function normalizeName(path: string) {
   return "/" + path.replace(/^[.\/]*/g, "");
 }
 
-function stripExt(path: string) {
+export function stripExt(path: string) {
   const i = path.lastIndexOf(".");
   return i !== -1 ? path.slice(0, i) : path;
 }

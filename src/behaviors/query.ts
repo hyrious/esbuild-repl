@@ -40,6 +40,7 @@ const query: Readable<string> = derived(
   [version, mode, input, options, modules, buildOptions],
   ([$version, $mode, $input, $options, $modules, $buildOptions], set) => {
     if (!$version || $version === "latest") return;
+    if ($mode === "playground") return;
     const params: [string, string][] = [
       ["version", $version],
       ["mode", $mode],

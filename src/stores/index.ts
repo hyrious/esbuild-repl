@@ -16,6 +16,7 @@ export const mode = writable<"transform" | "build" | "playground">("transform");
 // other
 export const debug = writable(import.meta.env.DEV);
 export const versions = writable(["latest"]);
+export const scripts = writable<{ name: string; code: string }[]>([]);
 
 let timer = 0;
 export function time() {
@@ -23,7 +24,11 @@ export function time() {
 }
 export function timeEnd() {
   const elapsed = performance.now() - timer;
-  status.set(`Finished in ${elapsed.toFixed(2)}ms.`);
+  if (elapsed > 1000) {
+    status.set(`Finished in ${(elapsed / 1000).toFixed(2)}s.`);
+  } else {
+    status.set(`Finished in ${elapsed.toFixed(2)}ms.`);
+  }
 }
 
 isBrowser && Object.assign(window, { stores: { theme, loading, status, esbuild, mode } });
