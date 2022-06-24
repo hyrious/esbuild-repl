@@ -36,7 +36,7 @@ function stripExt(path: string) {
 function repl($modules: Module[]): Plugin {
   return {
     name: "repl",
-    setup({ onResolve, onLoad }) {
+    setup({ onResolve, onLoad, initialOptions }) {
       onResolve({ filter: /.*/ }, (args) => {
         const absPath = normalizeName(args.path);
 
@@ -45,6 +45,9 @@ function repl($modules: Module[]): Plugin {
 
         mod = $modules.find((e) => stripExt(normalizeName(e.name)) === stripExt(absPath));
         if (mod) return { path: normalizeName(mod.name), pluginData: mod };
+
+        // pass "node:xxx" to default behavior, esbuild will strip the "node:" prefix
+        if (initialOptions.platform === "node" && args.path.startsWith("node:")) return null;
 
         return { path: args.path, external: true };
       });

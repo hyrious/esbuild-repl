@@ -28,6 +28,10 @@
 
   const dispatch = createEventDispatcher();
 
+  function focus_editor() {
+    editor && editor.focus();
+  }
+
   onMount(async () => {
     if (!editorEl) return;
     ({ default: CodeMirror } = await getCodeMirror());
@@ -83,7 +87,7 @@
     {/if}
   </header>
   {#if isBrowser && !isMobile && !readonly}
-    <div class="codemirror-container">
+    <div class="codemirror-container" on:click|self={focus_editor}>
       <textarea tabindex="0" value={contents} bind:this={editorEl} />
     </div>
   {:else if readonly}
@@ -97,6 +101,7 @@
   article {
     border: 1px solid rgba(127, 127, 127, 0.5);
     border-radius: var(--gap);
+    overflow: hidden;
   }
   header {
     position: relative;
@@ -164,5 +169,10 @@
   }
   .entry {
     bottom: 0;
+  }
+  .codemirror-container {
+    min-height: 60px;
+    background-color: var(--bg);
+    cursor: text;
   }
 </style>
