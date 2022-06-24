@@ -29,7 +29,10 @@
   const dispatch = createEventDispatcher();
 
   function focus_editor() {
-    editor && editor.focus();
+    if (editor) {
+      editor.focus();
+      editor.setCursor(editor.lineCount(), 9999);
+    }
   }
 
   onMount(async () => {
@@ -171,7 +174,7 @@
     bottom: 0;
   }
   .codemirror-container {
-    min-height: 60px;
+    min-height: 48px;
     background-color: var(--bg);
     cursor: text;
   }
