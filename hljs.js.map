@@ -2,6 +2,6 @@
   "version": 3,
   "sources": ["../src/hljs.ts"],
   "sourcesContent": ["declare var hljs: typeof import(\"highlight.js\").default;\n\nimportScripts(\"https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.5.1/highlight.min.js\");\n\naddEventListener(\n  \"message\",\n  ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {\n    const { id, code, lang } = data;\n    const { value } = hljs.highlight(code, { language: lang || \"js\" });\n    postMessage({ id, value });\n  }\n);\n"],
-  "mappings": "AAEA,cAAc,8EAA8E,EAE5F,iBACE,UACA,CAAC,CAAE,UAAsE,CACvE,GAAM,CAAE,KAAI,OAAM,QAAS,EACrB,CAAE,SAAU,KAAK,UAAU,EAAM,CAAE,SAAU,GAAQ,IAAK,CAAC,EACjE,YAAY,CAAE,KAAI,OAAM,CAAC,CAC3B,CACF",
+  "mappings": "aAEA,cAAc,8EAA8E,EAE5F,iBACE,UACA,CAAC,CAAE,UAAsE,CACvE,GAAM,CAAE,KAAI,OAAM,QAAS,EACrB,CAAE,SAAU,KAAK,UAAU,EAAM,CAAE,SAAU,GAAQ,IAAK,CAAC,EACjE,YAAY,CAAE,KAAI,OAAM,CAAC,CAC3B,CACF",
   "names": []
 }
