@@ -1,10 +1,40 @@
 <script lang="ts">
+  import { tick } from "svelte";
+  import { status } from "../stores";
   import { buildOptions, modules } from "../stores/build";
 
   let fold = true;
+  let edit_mode: "ui" | "json" = "ui";
+  let editorEl: HTMLTextAreaElement;
+
+  function toggle_mode() {
+    if (fold) {
+      edit_mode = "json";
+      fold = false;
+    } else {
+      edit_mode = edit_mode === "json" ? "ui" : "json";
+    }
+    if (edit_mode === "json") {
+      tick().then(focus_editor);
+    }
+  }
+
+  function focus_editor() {
+    editorEl.focus();
+    editorEl.dispatchEvent(new InputEvent("input"));
+  }
 
   function reset_build_options() {
     $buildOptions = { bundle: true };
+  }
+
+  function update_build_options() {
+    try {
+      $buildOptions = JSON.parse(editorEl.value);
+    } catch (err) {
+      console.error(err);
+      $status = String(err);
+    }
   }
 
   $: entriesHTML = `[${$modules
@@ -12,22 +42,34 @@
     .map((e) => e.name)
     .map((e) => `<span class="hljs-string">"${e}"</span>`)
     .join(", ")}]`;
+
+  $: show_ui = edit_mode === "ui" && !fold;
+
+  $: show_json = edit_mode === "json" && !fold;
+
+  $: if (editorEl && $buildOptions && document.activeElement !== editorEl) {
+    editorEl.value = JSON.stringify($buildOptions, null, 2);
+    editorEl.dispatchEvent(new InputEvent("input"));
+  }
 </script>
 
 <article class:expanded={!fold} aria-expanded={!fold}>
   <header on:click={() => (fold = !fold)}>
     <h2>Build Options</h2>
-    <i
-      class="i-mdi-reload"
-      title="Reset Build Options"
-      on:click|stopPropagation={reset_build_options}
-    />
-    <i
-      class="i-mdi-information"
-      title="not all options are supported, try use esbuild in the browser console or install it locally."
-    />
+    <button class="icon code-json" on:click|stopPropagation={toggle_mode}>
+      <i class="i-mdi-code-json" title="Edit As JSON" />
+    </button>
+    <button class="icon reload" on:click|stopPropagation={reset_build_options}>
+      <i class="i-mdi-reload" title="Reset Build Options" />
+    </button>
+    <span class="icon information">
+      <i
+        class="i-mdi-information"
+        title="not all options are supported, try use esbuild in the browser console or install it locally."
+      />
+    </span>
   </header>
-  <pre style={fold ? "display: none" : ""}>result = <span class="hljs-keyword">await</span
+  <pre style={show_ui ? "" : "display: none"}>result = <span class="hljs-keyword">await</span
     > esbuild.build(&#123;
     entryPoints: {@html entriesHTML},
     bundle: <div class="option">
@@ -181,6 +223,12 @@
       <label for="opt-tree-shaking" class="hljs-keyword">{$buildOptions.treeShaking}</label>
     </div>,
 &#125;)</pre>
+  <textarea
+    class="editor"
+    class:is-active={show_json}
+    bind:this={editorEl}
+    on:change={update_build_options}
+  />
 </article>
 
 <style>
@@ -203,17 +251,42 @@
     cursor: pointer;
     user-select: none;
   }
-  header i {
+  header .icon {
     position: absolute;
     top: 0;
     bottom: 0;
-    right: calc(var(--gap) * 1.5);
+    width: 24px;
+    height: 24px;
+    font-size: 0;
+    appearance: none;
+    border: none;
+    border-radius: var(--gap);
+    padding: 0;
+    background-color: transparent;
     margin: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  header .icon:hover {
+    background-color: rgba(127, 127, 127, 0.2);
+  }
+  header .icon i {
+    font-size: 16px;
+  }
+  header .icon.information {
+    right: calc(var(--gap) * 1.5);
     cursor: help;
   }
-  .i-mdi-reload {
+  header .icon.information:hover {
+    background-color: revert;
+  }
+  header .icon.reload {
     right: calc(32px + var(--gap) * 1.5);
-    cursor: pointer;
+  }
+  header .icon.code-json {
+    right: calc(64px + var(--gap) * 1.5);
   }
   pre {
     max-height: calc(100vh - 96px);
@@ -251,6 +324,13 @@
   }
   input[type="text"]:focus {
     border-bottom: 1px solid rgba(127, 127, 127, 0.5);
+  }
+  textarea {
+    border: none;
+    display: none;
+  }
+  textarea.is-active {
+    display: block;
   }
   .hljs-hidden {
     width: 0;
