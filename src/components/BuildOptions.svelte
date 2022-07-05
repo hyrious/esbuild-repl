@@ -226,6 +226,7 @@
   <textarea
     class="editor"
     class:is-active={show_json}
+    spellcheck="false"
     bind:this={editorEl}
     on:change={update_build_options}
   />
