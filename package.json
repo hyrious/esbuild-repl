@@ -16,24 +16,24 @@
     "p-retry": "^5.1.1",
     "sanitize.css": "^13.0.0",
     "selector-observer": "^2.1.6",
-    "svelte": "^3.48.0"
+    "svelte": "^3.49.0"
   },
   "devDependencies": {
-    "@hyrious/esbuild-dev": "^0.7.7",
+    "@hyrious/esbuild-dev": "^0.8.0",
     "@hyrious/esbuild-plugin-svelte": "^0.1.6",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.10",
-    "@iconify-json/mdi": "^1.1.22",
+    "@iconify-json/mdi": "^1.1.29",
     "@iconify/utils": "^1.0.33",
     "@tsconfig/svelte": "^3.0.0",
     "@types/codemirror": "^5.60.5",
-    "@types/node": "^18.0.0",
-    "esbuild": "^0.14.47",
-    "esbuild-wasm": "^0.14.47",
+    "@types/node": "^18.0.6",
+    "esbuild": "^0.14.49",
+    "esbuild-wasm": "^0.14.49",
     "fast-glob": "^3.2.11",
-    "highlight.js": "^11.5.1",
+    "highlight.js": "^11.6.0",
     "prettier": "^2.7.1",
     "prettier-plugin-svelte": "^2.7.0",
-    "svelte-check": "^2.7.2"
+    "svelte-check": "^2.8.0"
   }
 }

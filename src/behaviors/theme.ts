@@ -2,6 +2,7 @@ import { isBrowser } from "../helpers";
 import { theme } from "../stores";
 
 const mediaQuery =
+  // @ts-expect-error
   isBrowser && window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
 
 if (mediaQuery) {
