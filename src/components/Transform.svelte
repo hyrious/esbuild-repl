@@ -5,6 +5,7 @@
   // ^ "input as code" see https://github.com/sveltejs/svelte/issues/5712
   // seems you can not use an import name the same as html tags
   import SplitPane from "./SplitPane.svelte";
+  import Features from "./Features.svelte";
 
   export let show = true;
 
@@ -26,6 +27,7 @@
     {#if $errorsHTML}
       <pre class="result error">{@html $errorsHTML}</pre>
     {/if}
+    <Features />
   </section>
 </SplitPane>
 
