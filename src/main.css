@@ -123,3 +123,29 @@ strong {
   flex-flow: column nowrap;
   overflow: hidden;
 }
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  border: none;
+  border-radius: var(--gap);
+  outline: none;
+  background-color: rgba(127, 127, 127, 0.1);
+  color: var(--fg);
+  padding: calc(var(--gap) * 2) calc(var(--gap) * 2);
+  cursor: pointer;
+  line-height: 1;
+}
+.btn:disabled {
+  cursor: progress;
+}
+.btn:not(:disabled):hover {
+  --fg: var(--fg-on);
+  background-color: rgba(127, 127, 127, 0.2);
+}
+.btn:not(:disabled):active {
+  --fg: var(--fg-on);
+  background-color: rgba(127, 127, 127, 0.1);
+}

@@ -42,7 +42,7 @@
   <section slot="left" class="input">
     <h3>
       <span>ES6 modules go in&hellip;</span>
-      <button on:click={reset}>Start over</button>
+      <button class="btn" on:click={reset}>Start over</button>
     </h3>
     {#each $modules as file, i}
       <Editor
@@ -52,7 +52,7 @@
         bind:isEntry={file.isEntry}
       />
     {/each}
-    <button on:click={add}>
+    <button class="btn" on:click={add}>
       <i class="i-mdi-plus" />
       <span>add module</span>
     </button>
@@ -90,28 +90,6 @@
   h3 button {
     display: inline-flex;
     padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2);
-  }
-  button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3em;
-    border: none;
-    border-radius: var(--gap);
-    outline: none;
-    background-color: rgba(127, 127, 127, 0.1);
-    color: var(--fg);
-    padding: calc(var(--gap) * 2) calc(var(--gap) * 2);
-    cursor: pointer;
-    line-height: 1;
-  }
-  button:hover {
-    --fg: var(--fg-on);
-    background-color: rgba(127, 127, 127, 0.2);
-  }
-  button:active {
-    --fg: var(--fg-on);
-    background-color: rgba(127, 127, 127, 0.1);
   }
   .result {
     cursor: text;

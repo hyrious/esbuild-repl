@@ -9,6 +9,15 @@
 
   export let show = true;
 
+  let url = new URL("https://evanw.github.io/source-map-visualization");
+  function view_sourcemap() {
+    let code = result_code || "";
+    let map = $result.map || "";
+    let data = [code.length, "\0", code, map.length, "\0", map].join("");
+    url.hash = btoa(data);
+    window.open(url, "_blank");
+  }
+
   $: result_code = $loading ? "// initializing" : $result.code;
 </script>
 
@@ -23,6 +32,7 @@
     {/if}
     {#if $result.map}
       <pre class="result map" use:hljs_action={{ code: $result.map, loader: "json" }} />
+      <button class="btn" on:click={view_sourcemap}>Visualize Source Map</button>
     {/if}
     {#if $errorsHTML}
       <pre class="result error">{@html $errorsHTML}</pre>
