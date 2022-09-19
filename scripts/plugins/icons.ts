@@ -10,7 +10,7 @@ import { compile } from "svelte/compiler";
 import { IconifyJSON } from "@iconify/types";
 import { iconToSVG } from "@iconify/utils/lib/svg/build";
 import { getIconData } from "@iconify/utils/lib/icon-set/get-icon";
-import { defaults as DefaultIconCustomizations } from "@iconify/utils/lib/customisations";
+import { defaultIconCustomisations } from "@iconify/utils/lib/customisations/defaults";
 import { warnOnce } from "./utils";
 import { join } from "path";
 
@@ -55,10 +55,10 @@ function mergeIconProps(svg: string, props: Record<string, string>) {
 
 function searchForIcon(iconSet: IconifyJSON, ids: string[]) {
   for (const id of ids) {
-    const iconData = getIconData(iconSet, id, true);
+    const iconData = getIconData(iconSet, id);
     if (iconData) {
       const { attributes, body } = iconToSVG(iconData, {
-        ...DefaultIconCustomizations,
+        ...defaultIconCustomisations,
         width: "1em",
         height: "1em",
       });
