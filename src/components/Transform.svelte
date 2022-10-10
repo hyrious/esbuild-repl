@@ -37,7 +37,9 @@
     {#if $errorsHTML}
       <pre class="result error">{@html $errorsHTML}</pre>
     {/if}
-    <Features />
+    {#if result_code}
+      <Features />
+    {/if}
   </section>
 </SplitPane>
 

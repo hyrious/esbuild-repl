@@ -171,6 +171,10 @@
     font-size: 14px;
     font-family: var(--mono);
   }
+  button:hover > i,
+  select:hover {
+    color: var(--fg-on);
+  }
   @media screen and (max-width: 720px) {
     header {
       padding: var(--gap);

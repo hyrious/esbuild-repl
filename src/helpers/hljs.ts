@@ -80,6 +80,24 @@ export function hljs_action(node: HTMLPreElement, params: Params) {
       node.innerText = "";
     }
   };
+  const select_all = (ev: MouseEvent) => {
+    ev.preventDefault();
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  };
+  node.addEventListener("dblclick", select_all);
+  const destroy = () => {
+    node.removeEventListener("dblclick", select_all);
+    if (last) {
+      last.cancel();
+      last = null;
+    }
+  };
   update(params);
-  return { update };
+  return { update, destroy };
 }
