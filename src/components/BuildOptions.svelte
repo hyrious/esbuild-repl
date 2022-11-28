@@ -7,6 +7,10 @@
   let edit_mode: "ui" | "json" = "ui";
   let editorEl: HTMLTextAreaElement;
 
+  function toggle_head() {
+    fold = !fold;
+  }
+
   function toggle_mode() {
     if (fold) {
       edit_mode = "json";
@@ -54,7 +58,7 @@
 </script>
 
 <article class:expanded={!fold} aria-expanded={!fold}>
-  <header on:click={() => (fold = !fold)}>
+  <header on:click={toggle_head} on:keyup={toggle_head}>
     <h2>Build Options</h2>
     <button class="icon code-json" on:click|stopPropagation={toggle_mode}>
       <i class="i-mdi-code-json" title="Edit As JSON" />

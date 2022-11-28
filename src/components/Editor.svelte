@@ -28,6 +28,8 @@
 
   const dispatch = createEventDispatcher();
 
+  function noop() {}
+
   function focus_editor() {
     if (editor) {
       editor.focus();
@@ -90,7 +92,7 @@
     {/if}
   </header>
   {#if isBrowser && !isMobile && !readonly}
-    <div class="codemirror-container" on:click|self={focus_editor}>
+    <div class="codemirror-container" on:click|self={focus_editor} on:keydown={noop}>
       <textarea tabindex="0" value={contents} bind:this={editorEl} />
     </div>
   {:else if readonly}

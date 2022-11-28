@@ -1,10 +1,10 @@
+import { resolve } from "path";
 import { createReadStream, statSync } from "fs";
 import { build, serve } from "esbuild";
 import { createServer, ServerResponse } from "http";
 import { svelte } from "@hyrious/esbuild-plugin-svelte";
 import { clearWarns } from "./plugins/utils";
 import { icons } from "./plugins/icons";
-import { resolve } from "path";
 // import { fixture } from "./plugins/fixture";
 
 let port = 3000;

@@ -73,6 +73,7 @@
   <nav>
     {#each modes as m (m)}
       <input type="radio" name="mode" id="mode-{m}" value={m} checked={$mode === m} />
+      <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
       <label
         for="mode-{m}"
         tabindex="0"
