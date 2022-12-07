@@ -1,4 +1,4 @@
-// https://github.com/evanw/esbuild/blob/master/internal/logger/logger.go
+// https://github.com/evanw/esbuild/blob/main/internal/logger/logger.go
 const ESCAPE_TO_COLOR = {
   "37": "dim",
   "31": "red",

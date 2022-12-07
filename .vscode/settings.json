@@ -1,6 +1,8 @@
 {
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
+  "prettier.enable": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "svelte.enable-ts-plugin": true,
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"

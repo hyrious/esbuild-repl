@@ -1,7 +1,7 @@
 import type { Loader, TransformOptions } from "esbuild";
 import { tick } from "svelte/internal";
 
-// https://github.com/evanw/esbuild/blob/master/internal/compat/js_table.go
+// https://github.com/evanw/esbuild/blob/main/internal/compat/js_table.go
 const js_features = [
   "arbitrary-module-namespace-names",
   "array-spread",
@@ -32,6 +32,7 @@ const js_features = [
   "hashbang",
   "import-assertions",
   "import-meta",
+  "inline-script",
   "logical-assignment",
   "nested-rest-binding",
   "new-target",
@@ -56,7 +57,14 @@ const js_features = [
   "unicode-escapes",
 ];
 
-const css_features = ["hex-rgba", "rebecca-purple", "modern-rgb-hsl", "inset-property", "nesting"];
+const css_features = [
+  "hex-rgba",
+  "inline-style",
+  "rebecca-purple",
+  "modern-rgb-hsl",
+  "inset-property",
+  "nesting",
+];
 
 const js_loaders: Loader[] = ["js", "jsx", "ts", "tsx"];
 
