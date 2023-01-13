@@ -30,6 +30,11 @@
     {#if result_code}
       <pre class="result code" use:hljs_action={{ code: result_code, loader: $loader }} />
     {/if}
+    {#if $result.legalComments}
+      <pre
+        class="result legal-comments hljs-comment"
+        title="legal comments">{$result.legalComments}</pre>
+    {/if}
     {#if $result.map}
       <pre class="result map" use:hljs_action={{ code: $result.map, loader: "json" }} />
       <button class="btn" on:click={view_sourcemap}>Visualize Source Map</button>

@@ -30,6 +30,7 @@ export const loader: Readable<Loader | undefined> = derived(optionsObj, ($option
 export const result: Readable<{
   code?: string;
   map?: string;
+  legalComments?: string;
   errors?: Message[];
   warnings?: Message[];
 }> = derived(
