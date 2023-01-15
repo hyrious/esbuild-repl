@@ -7,6 +7,7 @@ import { clearWarns } from "./plugins/utils";
 import { icons } from "./plugins/icons";
 // import { fixture } from "./plugins/fixture";
 
+let host = "localhost";
 let port = 3000;
 
 const liveReload: Plugin = {
@@ -42,21 +43,28 @@ const ctx = await context({
 });
 
 ctx.watch();
-await ctx.serve({
+({ host, port } = await ctx.serve({
   host: "localhost",
   port,
   servedir: "./src",
-});
+}));
 
 // This server only serves the esbuild.wasm file from local fs.
+
 const server = createServer((req, res) => {
   if (req.url === "/esbuild.wasm") {
     const path = resolve("node_modules/esbuild-wasm/esbuild.wasm");
     const stats = statSync(path);
+    const Etag = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+    if (req.headers["if-none-match"] === Etag) {
+      res.statusCode = 304;
+      return res.end();
+    }
     res.writeHead(200, {
       "Content-Length": stats.size,
       "Content-Type": "application/wasm",
       "Last-Modified": stats.mtime.toUTCString(),
+      "Etag": Etag,
       "Cache-Control": "no-cache",
       "Access-Control-Allow-Origin": `http://localhost:${port}`,
     });
@@ -65,7 +73,10 @@ const server = createServer((req, res) => {
     res.statusCode = 404;
     res.end();
   }
-}).listen(30000);
+}).listen(30000, () => {
+  if (host === "127.0.0.1") host = "localhost";
+  console.log(`serving http://${host}:${port}`);
+});
 
 process.once("SIGTERM", async () => {
   await ctx.dispose();
