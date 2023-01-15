@@ -1,7 +1,7 @@
 import { resolve } from "path";
 import { createReadStream, statSync } from "fs";
-import { build, serve } from "esbuild";
-import { createServer, ServerResponse } from "http";
+import { context, Plugin } from "esbuild";
+import { createServer } from "http";
 import { svelte } from "@hyrious/esbuild-plugin-svelte";
 import { clearWarns } from "./plugins/utils";
 import { icons } from "./plugins/icons";
@@ -9,73 +9,48 @@ import { icons } from "./plugins/icons";
 
 let port = 3000;
 
-const clients: ServerResponse[] = [];
+const liveReload: Plugin = {
+  name: "live-reload",
+  setup({ onEnd }) {
+    onEnd(clearWarns);
+  },
+};
 
-const { stop: stopWatch } = await build({
+const ctx = await context({
   entryPoints: ["./src/main.ts", "./src/hljs.ts"],
   bundle: true,
   format: "esm",
-  plugins: [icons({ glob: "src/**/*.svelte" }), svelte()],
-  watch: {
-    onRebuild() {
-      clearWarns();
-      clients.forEach((res) => res.write("data: update\n\n"));
-      clients.length = 0;
-    },
+  splitting: true,
+  plugins: [
+    // fixture({ filter: /playground\.ts$/ }),
+    icons({ glob: "src/**/*.svelte" }),
+    svelte(),
+    liveReload,
+  ],
+  sourcemap: "inline",
+  define: {
+    "import.meta.env.DEV": "true",
+    "__SSR__": "false",
   },
-  logLevel: "silent",
+  // Don't write to disk, but still accessible from the dev server mode
+  // In our case, we are serving the ./src folder, the ./src/index.html
+  // requests './src/main.js', so the outdir is './src'
+  // Be aware that in build mode, the index.html is moved to ./dist,
+  // and the outdir should be adjusted to './dist' too
+  outdir: "./src",
   write: false,
-  outdir: "dist",
 });
 
-const banner = `// hot-reload
-;((source) => {
-  if (source && source.onmessage) return;
-  let count = 0; source && (source.onmessage = (ev) => {
-    if (ev.data === 'init') count ? location.reload() : count++
-    if (ev.data === 'update') location.reload()
-  }, console.log("[dev] hot reload enabled"))
-})(typeof window !== 'undefined' && (window.source ||= new EventSource("http://localhost:30000")));
-`;
+ctx.watch();
+await ctx.serve({
+  host: "localhost",
+  port,
+  servedir: "./src",
+});
 
-const { stop: stopServe } = await serve(
-  {
-    host: "localhost",
-    port,
-    servedir: "./src",
-  },
-  {
-    entryPoints: ["./src/main.ts", "./src/hljs.ts"],
-    bundle: true,
-    format: "esm",
-    splitting: true,
-    plugins: [
-      // fixture({ filter: /playground\.ts$/ }),
-      icons({ glob: "src/**/*.svelte" }),
-      svelte(),
-    ],
-    sourcemap: true,
-    banner: {
-      js: banner,
-    },
-    define: {
-      "import.meta.env.DEV": "true",
-      __SSR__: "false",
-    },
-  }
-);
-
-createServer((req, res) => {
-  if (req.url === "/") {
-    const client = res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "Access-Control-Allow-Origin": `http://localhost:${port}`,
-      Connection: "keep-alive",
-    });
-    res.write("data: init\n\n");
-    clients.push(client);
-  } else if (req.url === "/esbuild.wasm") {
+// This server only serves the esbuild.wasm file from local fs.
+const server = createServer((req, res) => {
+  if (req.url === "/esbuild.wasm") {
     const path = resolve("node_modules/esbuild-wasm/esbuild.wasm");
     const stats = statSync(path);
     res.writeHead(200, {
@@ -85,18 +60,16 @@ createServer((req, res) => {
       "Cache-Control": "no-cache",
       "Access-Control-Allow-Origin": `http://localhost:${port}`,
     });
-    createReadStream(path).pipe(res);
+    createReadStream(path).pipe(res, { end: true });
   } else {
     res.statusCode = 404;
     res.end();
   }
-}).listen(30000, () => console.log(`serving http://localhost:${port}`));
+}).listen(30000);
 
 process.once("SIGTERM", async () => {
-  try {
-    stopWatch && stopWatch();
-    stopServe && stopServe();
-  } finally {
+  await ctx.dispose();
+  server.close(() => {
     process.exit(0);
-  }
+  });
 });

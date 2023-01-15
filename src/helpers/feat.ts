@@ -48,6 +48,7 @@ const js_features = [
   "regexp-lookbehind-assertions",
   "regexp-match-indices",
   "regexp-named-capture-groups",
+  "regexp-set-notation",
   "regexp-sticky-and-unicode-flags",
   "regexp-unicode-property-escapes",
   "rest-argument",

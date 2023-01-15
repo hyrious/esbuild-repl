@@ -2,5 +2,6 @@
   "tabWidth": 2,
   "printWidth": 100,
   "endOfLine": "auto",
-  "bracketSameLine": false
+  "bracketSameLine": false,
+  "quoteProps": "consistent"
 }

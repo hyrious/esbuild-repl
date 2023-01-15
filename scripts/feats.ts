@@ -1,6 +1,7 @@
 import https from "https";
 
 const prefix = "https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat";
+// const prefix = "https://raw.fastgit.org/evanw/esbuild/main/internal/compat";
 
 // https.get(`${prefix}/js_table.go`, async (res) => {
 https.get(`${prefix}/css_table.go`, async (res) => {
