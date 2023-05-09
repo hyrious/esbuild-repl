@@ -71,6 +71,14 @@
     {#if $errorsHTML}
       <pre class="result error">{@html $errorsHTML}</pre>
     {/if}
+    {#if $outputs.metafile}
+      <Editor
+        name="metafile"
+        contents={JSON.stringify($outputs.metafile, null, 2)}
+        readonly
+        download="metafile.json"
+      />
+    {/if}
   </section>
 </SplitPane>
 

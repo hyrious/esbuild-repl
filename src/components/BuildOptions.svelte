@@ -57,7 +57,7 @@
   }
 </script>
 
-<article class:expanded={!fold} aria-expanded={!fold}>
+<article class:expanded={!fold}>
   <header on:click={toggle_head} on:keyup={toggle_head}>
     <h2>Build Options</h2>
     <button class="icon code-json" on:click|stopPropagation={toggle_mode}>
@@ -225,6 +225,10 @@
     treeShaking: <div class="option">
       <input id="opt-tree-shaking" type="checkbox" bind:checked={$buildOptions.treeShaking} />
       <label for="opt-tree-shaking" class="hljs-keyword">{$buildOptions.treeShaking}</label>
+    </div>,
+    metafile: <div class="option">
+      <input id="opt-metafile" type="checkbox" bind:checked={$buildOptions.metafile} />
+      <label for="opt-metafile" class="hljs-keyword">{$buildOptions.metafile}</label>
     </div>,
 &#125;)</pre>
   <textarea

@@ -1,4 +1,4 @@
-import type { BuildOptions, Message, Plugin } from "esbuild";
+import type { BuildOptions, Message, Metafile, Plugin } from "esbuild";
 import { derived, Readable, writable } from "svelte/store";
 import { isBrowser, render } from "../helpers";
 import { esbuild, time, timeEnd } from "./index";
@@ -20,6 +20,7 @@ export const buildOptions = writable<BuildOptions>({
 
 export interface Outputs {
   files?: Module[];
+  metafile?: Metafile;
   errors?: Message[];
   warnings?: Message[];
 }
@@ -80,7 +81,7 @@ export const outputs: Readable<Outputs> = derived(
     time();
     $esbuild
       .build(buildOptions as BuildOptions & { write: false })
-      .then(({ outputFiles, errors, warnings }) => {
+      .then(({ outputFiles, metafile, errors, warnings }) => {
         const files = outputFiles.map(
           (file) =>
             ({
@@ -89,7 +90,7 @@ export const outputs: Readable<Outputs> = derived(
               isEntry: false,
             } as Module)
         );
-        set({ files, errors, warnings });
+        set({ files, metafile, errors, warnings });
       })
       .catch(set)
       .finally(timeEnd);

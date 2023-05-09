@@ -24,7 +24,7 @@
 {#if show}
   <pre transition:fade={{ duration: 50 }}>{JSON.stringify(data, null, 2)}</pre>
 {/if}
-<button aria-checked={show} on:click={() => (show = !show)}>Debug</button>
+<button on:click={() => (show = !show)}>Debug</button>
 
 <style>
   button {
