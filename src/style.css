@@ -1,0 +1,46 @@
+@import 'sanitize.css';
+@import 'icons.css';
+
+:where(:root) {
+  tab-size: 2;
+}
+
+html {
+  --code-font: 13px/18px 'Noto Sans Mono', monospace;
+  --active: #ffcf00;
+  --error: #e24834;
+  --pre: rgba(127, 127, 127, 0.1);
+  --border: rgba(127, 127, 127, 0.5);
+}
+
+html:not([data-theme='dark']) {
+  --bg: #fff;
+  --fg-on: #000;
+  --fg: #222;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #191919;
+  --fg-on: #ddd;
+  --fg: #aaa;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #191919;
+    --fg-on: #ddd;
+    --fg: #aaa;
+  }
+}
+
+body {
+  font: 16px/20px sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+a {
+  color: inherit;
+}

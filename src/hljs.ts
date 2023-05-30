@@ -1,12 +1,15 @@
-declare var hljs: typeof import("highlight.js").default;
+declare const hljs: typeof import('highlight.js').default
 
-importScripts("https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.5.1/highlight.min.js");
+importScripts('https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.8.0/highlight.min.js')
 
-addEventListener(
-  "message",
-  ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {
-    const { id, code, lang } = data;
-    const { value } = hljs.highlight(code, { language: lang || "js" });
-    postMessage({ id, value });
-  }
-);
+interface Payload {
+  id: number
+  code: string
+  lang?: string
+}
+
+addEventListener('message', ({ data }: MessageEvent<Payload>) => {
+  const { id, code, lang } = data
+  const { value } = hljs.highlight(code, { language: lang || 'js' })
+  postMessage({ id, value })
+})

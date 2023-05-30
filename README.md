@@ -6,7 +6,8 @@
   <samp>Try esbuild in your browser</samp>
 </p>
 
-**Warning:** It downloads a 10 MB wasm file for each esbuild version. Make sure you have enough data.
+> **Warning**: It downloads a 10 MB wasm file for each esbuild version.
+> Make sure you have enough data.
 
 ## Develop
 
@@ -15,11 +16,7 @@ pnpm i && pnpm dev
 pnpm build && pnpm preview
 ```
 
-### Todo
-
 PRs are welcome!
-
-- codepen/playground
 
 ### License
 

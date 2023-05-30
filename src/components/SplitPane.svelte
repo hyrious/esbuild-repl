@@ -1,148 +1,126 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import { clamp, isMobile } from "../helpers";
+  import type { Action } from 'svelte/action'
+  import { clamp } from '@hyrious/utils'
+  import { stop } from '../helpers/dom'
 
-  const dispatch = createEventDispatcher();
+  export let show = true
 
-  export let show = true;
+  let pos = 50
+  let dragging = false
+  let left = 0
+  let width = 0
 
-  let pos = 50;
-  let dragging = false;
-  let left: number, width: number, height: number;
-
-  left = width = height = 0;
-
-  function measure(node: HTMLElement) {
+  const measure: Action = function measure(node: HTMLElement) {
     const refresh = () => {
-      ({ left, width, height } = node.getBoundingClientRect());
-    };
+      const rect = node.getBoundingClientRect()
+      const padding = parseInt(getComputedStyle(node).paddingLeft) || 0
+      left = rect.left + padding
+      width = rect.width - padding * 2
+    }
 
-    const observer = new ResizeObserver(refresh);
-    observer.observe(node);
-    refresh();
+    const observer = new ResizeObserver(refresh)
+    observer.observe(node)
+    refresh()
 
     return {
       destroy() {
-        observer.disconnect();
+        observer.disconnect()
       },
-    };
+    }
   }
 
-  function drag(node: HTMLElement, callback: (ev: PointerEvent) => void) {
-    const down = (ev: PointerEvent) => {
-      if (!ev.isPrimary) return;
+  const drag: Action = function drag(node: HTMLElement, callback: (ev: PointerEvent) => void) {
+    const down = (event: PointerEvent) => {
+      if (!event.isPrimary) return
 
-      ev.preventDefault();
-      dragging = true;
+      stop(event)
+      node.setPointerCapture(event.pointerId)
+      dragging = true
 
       const up = () => {
-        dragging = false;
-        window.removeEventListener("pointermove", callback, false);
-        window.removeEventListener("pointerup", up, false);
-      };
+        dragging = false
+        node.releasePointerCapture(event.pointerId)
+        window.removeEventListener('pointermove', callback, false)
+        window.removeEventListener('pointerup', up, false)
+        window.removeEventListener('pointercancel', up, false)
+      }
 
-      window.addEventListener("pointermove", callback, false);
-      window.addEventListener("pointerup", up, false);
-    };
+      window.addEventListener('pointermove', callback, false)
+      window.addEventListener('pointerup', up, false)
+      window.addEventListener('pointercancel', up, false)
+    }
 
-    node.addEventListener("pointerdown", down);
+    node.addEventListener('pointerdown', down)
 
     return {
       destroy() {
-        node.removeEventListener("pointerdown", down);
+        node.removeEventListener('pointerdown', down)
       },
-    };
+    }
   }
 
-  function move_divider(ev: PointerEvent) {
-    const px = ev.clientX - left;
-    pos = clamp((100 * px) / width, 0, 100);
-    dispatch("change");
+  function move(event: PointerEvent) {
+    const px = event.clientX - left
+    pos = clamp((100 * px) / width, 0, 100)
   }
 </script>
 
-<section style={show ? "" : "display: none"} use:measure>
-  <div class="pane" style="width: {pos}%">
+<section style={show ? '' : 'display: none'} use:measure>
+  <div class="left" style:width={pos + '%'}>
     <slot name="left" />
   </div>
-  <div class="pane" style="width: {100 - pos}%">
+  <div class="divider" style:left="calc({pos}% - 12.5px)" use:drag={move} />
+  <div class="right" style:width={100 - pos + '%'}>
     <slot name="right" />
   </div>
-  <div
-    class="divider"
-    class:is-mobile={isMobile}
-    style="left: calc({pos}% - 8px); height: {height}px"
-    use:drag={move_divider}
-  />
 </section>
-{#if dragging}<div class="cat" />{/if}
+<div class="mask" style={dragging ? '' : 'display: none'} />
 
 <style>
   section {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    overflow-y: auto;
-    height: 100%;
-  }
-  .pane {
-    float: left;
-    overflow: auto;
-    position: relative;
-    height: 100%;
-  }
-  :global(.pane > section) {
-    padding: var(--gap);
     display: flex;
-    flex-flow: column nowrap;
-    gap: var(--gap);
+    position: relative;
+  }
+  section div:not(.divider) {
+    overflow: hidden;
   }
   .divider {
-    display: block;
     position: absolute;
-    padding-inline: 8px;
-    inline-size: 0;
+    width: 25px;
+    height: calc(max(100dvh - 150px, 100%));
     cursor: col-resize;
     z-index: 10;
-  }
-  .divider.is-mobile {
-    display: none;
+    touch-action: none;
   }
   .divider::after {
-    content: "";
+    content: '';
     position: absolute;
-    inset-inline-start: 6px;
-    inset-block-start: 0;
-    inline-size: 4px;
+    inset-inline-start: 11.5px;
+    inline-size: 2px;
     block-size: 100%;
-    background-color: var(--fg);
-    opacity: 0;
-    transition: opacity 0.2s;
+    background: var(--active);
   }
-  .divider:hover::after {
-    opacity: 1;
-  }
-  .cat {
+  .mask {
     position: absolute;
     inset: 0;
   }
-  @media screen and (max-width: 720px) {
+  @media (max-width: 800px) {
     section {
-      display: flex;
-      flex-flow: column nowrap;
+      display: block;
+    }
+    section div:not(.divider) {
+      width: auto !important;
     }
     .divider {
-      display: none;
-    }
-    .pane {
-      display: block;
-      width: 100% !important;
-      max-height: unset;
+      position: relative;
+      width: auto;
       height: auto;
-      overflow: visible;
+      left: auto !important;
+      pointer-events: none;
+      border-bottom: 2px solid var(--active);
     }
-    :global(.pane > section) {
-      padding-top: 0;
+    .divider::after {
+      content: none;
     }
   }
 </style>

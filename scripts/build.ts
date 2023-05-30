@@ -1,85 +1,86 @@
-import { build, analyzeMetafile } from "esbuild";
-import { mkdirSync, promises, rmSync } from "fs";
-import { importFile } from "@hyrious/esbuild-dev";
-import { svelte, Options } from "@hyrious/esbuild-plugin-svelte";
-import { icons } from "./plugins/icons";
-import { noMap } from "./plugins/no-map";
-import { alsoEmits } from "./plugins/emits";
-import { trimNodeModules } from "./plugins/utils";
-// import { fixture } from "./plugins/fixture";
-const read = promises.readFile;
-const write = promises.writeFile;
-const copy = promises.copyFile;
+import fs from 'node:fs'
+import { svelte } from '@hyrious/esbuild-plugin-svelte'
+import { BuildOptions, Metafile, analyzeMetafile, build, context } from 'esbuild'
+import { icons } from './plugins/icons'
+import { svelte_ssr } from './plugins/svelte-ssr'
+import { inspector } from './plugins/inspector'
+import { open_in_editor } from './plugins/open-in-editor'
+import { sourcemap } from './plugins/sourcemap'
 
-rmSync("dist", { recursive: true, force: true, maxRetries: 3 });
-mkdirSync("dist", { recursive: true });
+const panic = () => process.exit(1)
 
-const compilerOptions: Options["compilerOptions"] = {
-  hydratable: true,
-  css: false,
-  enableSourcemap: { js: true, css: false },
-};
+const args = process.argv.slice(2)
+const serve = args.includes('--serve')
 
-// build html
-{
-  async function renderHTML(svelteFile: string, templateFile: string) {
-    const { default: App } = await importFile(svelteFile, {
-      plugins: [
-        // fixture({ filter: /playground\.ts$/ }),
-        icons({ glob: "src/**/*.svelte", ssr: true }),
-        svelte({ compilerOptions: { generate: "ssr", ...compilerOptions } }),
-      ],
-      define: {
-        "import.meta.env.DEV": "false",
-        __SSR__: "true",
-      },
-    }).catch(() => process.exit(1));
-
-    const { html, head } = App.render();
-    const template = await read(templateFile, "utf8");
-
-    const beforeHead = template.indexOf("</head>");
-    const inApp = template.indexOf('<div id="app">') + '<div id="app">'.length;
-
-    let result = template.slice(0, beforeHead);
-    result += head;
-    result += template.slice(beforeHead, inApp);
-    result += html.trim();
-    result += template.slice(inApp);
-
-    await write(templateFile.replace(/^src\//, "dist/"), result);
-  }
-
-  await Promise.all([
-    renderHTML("src/App.svelte", "src/index.html"),
-    copy("src/favicon.svg", "dist/favicon.svg"),
-  ]);
+const options: BuildOptions = {
+  entryPoints: [
+    'src/index.html',
+    'src/favicon.svg',
+    'src/main.ts',
+    'src/hljs.ts',
+    'src/sw.ts',
+    'src/worker.ts',
+  ],
+  bundle: true,
+  format: 'esm',
+  splitting: true,
+  sourcemap: true,
+  outdir: 'dist',
+  define: {
+    'import.meta.env.DEV': JSON.stringify(serve),
+    'import.meta.env.SSR': 'false',
+  },
+  loader: {
+    '.svg': 'copy',
+  },
+  plugins: [
+    icons({ glob: 'src/**/*.svelte' }),
+    svelte_ssr({ entryPoints: { 'src/index.html': 'src/App.svelte' } }),
+    svelte({ emitCss: true, compilerOptions: { dev: serve, hydratable: true } }),
+    inspector(),
+    sourcemap(),
+  ],
 }
 
-// build js
-{
-  const result = await build({
-    entryPoints: ["src/main.ts", "src/sw.ts", "src/hljs.ts"],
-    bundle: true,
-    format: "esm",
-    plugins: [
-      // fixture({ filter: /playground\.ts$/ }),
-      icons({ glob: "src/**/*.svelte", ssr: true }),
-      svelte({ emitCss: true, compilerOptions }),
-      noMap,
-      alsoEmits(["dist/index.html", "dist/favicon.svg"]),
-    ],
-    splitting: true,
-    minify: true,
-    sourcemap: true,
-    outdir: "dist",
-    define: {
-      "import.meta.env.DEV": "false",
-      __SSR__: "false",
-    },
-    legalComments: "none",
-    metafile: true,
-  }).catch(() => process.exit(1));
+fs.rmSync('dist', { recursive: true, force: true, maxRetries: 3 })
 
-  console.log(await analyzeMetafile(trimNodeModules(result.metafile), { color: true }));
+if (serve) {
+  const editor = open_in_editor()
+  editor.listen(3001, 'localhost', () => {
+    console.log('serving http://localhost:3001/__open-in-editor')
+  })
+
+  options.write = false
+  options.sourcemap = 'inline'
+  const ctx = await context(options)
+  const { port } = await ctx.serve({ host: 'localhost', port: 3000, servedir: 'dist' })
+  await ctx.watch()
+  console.log('serving http://localhost:' + port)
+
+  process.on('SIGTERM', () => {
+    editor.close()
+    ctx.dispose()
+  })
+} else {
+  options.minify = true
+  options.mangleProps = /[^_]_$/
+  options.metafile = true
+  options.logLevel = 'info'
+  const result = await build(options).catch(panic)
+  const metafile = result.metafile as Metafile
+
+  const outfiles = Object.keys(metafile.outputs)
+  for (const file of outfiles) {
+    const info = metafile.outputs[file].inputs
+    for (const path of Object.keys(info)) {
+      const index = path.lastIndexOf('node_modules/')
+      if (index !== -1) {
+        const short = path.slice(index)
+        info[short] = info[path]
+        delete info[path]
+      }
+    }
+  }
+
+  console.log(await analyzeMetafile(metafile, { color: true }))
 }

@@ -1,215 +1,161 @@
-// credits:
-// https://github.com/antfu/unplugin-icons
-// https://github.com/antfu/unocss
+// Credits: https://github.com/unocss/unocss/tree/main/packages/preset-icons
+import fs from 'node:fs'
+import fg from 'fast-glob'
+import { Plugin } from 'esbuild'
+import { resolve } from 'node:path'
+import { PartialMessage } from 'esbuild'
+import { searchForIcon } from '@iconify/utils/lib/loader/modern'
+import { encodeSvgForCss } from '@iconify/utils/lib/svg/encode-svg-for-css'
 
-import fg from "fast-glob";
-import { existsSync, promises } from "fs";
-import { Plugin } from "esbuild";
-import { createRequire } from "module";
-import { compile } from "svelte/compiler";
-import { IconifyJSON } from "@iconify/types";
-import { iconToSVG } from "@iconify/utils/lib/svg/build";
-import { getIconData } from "@iconify/utils/lib/icon-set/get-icon";
-import { defaultIconCustomisations } from "@iconify/utils/lib/customisations/defaults";
-import { warnOnce } from "./utils";
-import { join } from "path";
-
-const read = promises.readFile;
-
-const SvelteCompiler = (svg: string) => {
-  const openTagEnd = svg.indexOf(">", svg.indexOf("<svg "));
-  const closeTagStart = svg.lastIndexOf("</svg");
-  const openTag = `${svg.slice(0, openTagEnd)} {...$$props}>`;
-  const content = escapeSvelte(svg.slice(openTagEnd + 1, closeTagStart));
-  const closeTag = svg.slice(closeTagStart);
-  return `${openTag}${content}${closeTag}`;
-};
-
-function escapeSvelte(str: string): string {
-  return str
-    .replace(/{/g, "&#123;")
-    .replace(/}/g, "&#125;")
-    .replace(/`/g, "&#96;")
-    .replace(/\\([trn])/g, " ");
+interface IconsPluginOptions {
+  glob?: string
+  custom?: Record<string, string>
 }
 
-const require = createRequire(import.meta.url);
+interface IconifyJSON {
+  prefix: string
+  icons: Record<string, { body: string }>
+}
 
-const collections: Record<string, Promise<IconifyJSON | undefined>> = {};
-async function loadCollection(name: string) {
-  return (collections[name] ||= task());
-  async function task() {
-    let jsonPath = require.resolve(`@iconify-json/${name}/icons.json`);
-    if (jsonPath) return JSON.parse(await read(jsonPath, "utf8"));
+export const icons = ({ glob = 'src/**/*.{tsx,vue,svelte}', custom }: IconsPluginOptions = {}): Plugin => {
+  const root_package_json = resolve(__dirname, '../../package.json')
+
+  // .cache/icons/mdi.json
+  const cache_dir = resolve(root_package_json, '../node_modules/.cache/icons')
+  fs.mkdirSync(cache_dir, { recursive: true })
+  const save_cache = (collection: string, json: IconifyJSON) => {
+    fs.writeFileSync(resolve(cache_dir, `${collection}.json`), JSON.stringify(json))
   }
-}
 
-function mergeIconProps(svg: string, props: Record<string, string>) {
-  return svg.replace(
-    "<svg",
-    `<svg ${Object.keys(props)
-      .map((p) => `${p}="${props[p]}"`)
-      .join(" ")}`
-  );
-}
-
-function searchForIcon(iconSet: IconifyJSON, ids: string[]) {
-  for (const id of ids) {
-    const iconData = getIconData(iconSet, id);
-    if (iconData) {
-      const { attributes, body } = iconToSVG(iconData, {
-        ...defaultIconCustomisations,
-        width: "1em",
-        height: "1em",
-      });
-      return mergeIconProps(`<svg>${body}</svg>`, attributes);
+  // in-memory cache, eagerly load on startup
+  const cache = new Map<string, IconifyJSON | Promise<IconifyJSON>>()
+  for (const file of fs.readdirSync(cache_dir)) {
+    if (file.endsWith('.json')) {
+      cache.set(file.slice(0, -5), JSON.parse(fs.readFileSync(resolve(cache_dir, file), 'utf8')))
     }
   }
-}
-
-const validateFilterRE = /(?!\d|-{2}|-\d)[a-zA-Z0-9\u00A0-\uFFFF-_:%-?]/;
-
-function isValidSelector(selector = ""): selector is string {
-  return validateFilterRE.test(selector);
-}
-
-function splitCode(code: string) {
-  return code.split(/[\s'"`;>=]+/g).filter(isValidSelector);
-}
-
-async function searchForIconSvg(collection: string, icon: string) {
-  const ids = [
-    icon,
-    icon.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase(),
-    icon.replace(/([a-z])(\d+)/g, "$1-$2"),
-  ];
-  const iconSet = await loadCollection(collection);
-  return iconSet && searchForIcon(iconSet, ids);
-}
-
-function encodeSvg(svg: string) {
-  return svg
-    .replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"')
-    .replace(/"/g, "'")
-    .replace(/%/g, "%25")
-    .replace(/#/g, "%23")
-    .replace(/{/g, "%7B")
-    .replace(/}/g, "%7D")
-    .replace(/</g, "%3C")
-    .replace(/>/g, "%3E");
-}
-
-const classRE = /^i-(\w+)-([-\w]+)$/;
-async function generate(cls: string, warn: boolean) {
-  const match = cls.match(classRE);
-  if (match) {
-    const [, collection, icon] = match;
-    const svg = await searchForIconSvg(collection, icon);
-    if (!svg) {
-      warn && warnOnce(`failed to load icon "${cls}"`);
-      return;
+  if (custom) {
+    const icons: Record<string, { body: string }> = {}
+    for (const icon in custom) {
+      const file = custom[icon]
+      icons[icon] = { body: fs.readFileSync(resolve(root_package_json, '../', file), 'utf8') }
     }
-    const mode = svg.includes("currentColor") ? "mask" : "background-img";
-    const url = `url("data:image/svg+xml;utf8,${encodeSvg(svg)}")`;
-    let css: [string, string][] = [
-      ["width", "1em"],
-      ["height", "1em"],
-      ["display", "inline-block"],
-      ["vertical-align", "middle"],
-    ];
-    if (mode === "mask") {
-      css = css.concat([
-        ["--icon", url],
-        ["mask", "var(--icon) no-repeat"],
-        ["mask-size", "100% 100%"],
-        ["-webkit-mask", "var(--icon) no-repeat"],
-        ["-webkit-mask-size", "100% 100%"],
-        ["background-color", "currentColor"],
-        ["color", "var(--fg)"],
-      ]);
-    } else {
-      css = css.concat([
-        ["background", url],
-        ["background-size", "100% 100%"],
-        ["background-color", "transparent"],
-      ]);
-    }
-    return (
-      `.${cls.replace(":", "\\:")} {\n` + `${css.map(([k, v]) => `  ${k}: ${v};\n`).join("")}}`
-    );
+    cache.set('custom', { prefix: 'custom', icons })
   }
-}
 
-interface Options {
-  glob: string;
-  ssr?: boolean;
-}
+  const do_fetch_collection = async (collection: string): Promise<IconifyJSON> => {
+    console.log(`fetching icons "${collection}"`)
+    const cdn_bases = ['https://esm.sh/', 'https://cdn.jsdelivr.net/npm/', 'https://unpkg.com/']
+    for (const cdn of cdn_bases) {
+      const url = `${cdn}@iconify-json/${collection}/icons.json`
+      const res = await fetch(url).catch(() => ({ ok: false, json: () => void 0 }))
+      if (res.ok) {
+        const json = await res.json()
+        console.log(`cached icons "${collection}" from ${url}`)
+        save_cache(collection, json)
+        return json
+      }
+    }
+    throw new Error(`failed to fetch icons "${collection}"`)
+  }
 
-/**
- * ```svelte
- * import Plus from "~icons/mdi/plus.svelte"
- * <div class="i-mdi-plus"><Plus /></div>
- * ```
- */
-export function icons({ glob, ssr = false }: Options): Plugin {
+  const fetch_collection = async (collection: string): Promise<IconifyJSON> => {
+    if (!cache.has(collection)) {
+      cache.set(collection, do_fetch_collection(collection))
+    }
+    return cache.get(collection) as Promise<IconifyJSON>
+  }
+
+  const fetch_svg = async (collection: string, icon: string): Promise<string | undefined> => {
+    const icon_set = await fetch_collection(collection)
+    return await searchForIcon(icon_set, collection, [
+      icon,
+      icon.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(),
+      icon.replace(/([a-z])(\d+)/g, '$1-$2'),
+    ])
+  }
+
   return {
-    name: "icons",
-    setup({ onResolve, onLoad, initialOptions }) {
-      let collected = new Set<string>();
-      async function scanClass(path: string) {
-        if (existsSync(path)) {
-          const text = await read(path, "utf8");
-          splitCode(text)
-            .map((e) => (e.startsWith("class:") ? e.slice(6) : e))
-            .filter((e) => e.startsWith("i-"))
-            .forEach((e) => collected.add(e));
+    name: 'icons',
+    setup({ onStart, onResolve, onLoad }) {
+      const collected = new Set<string>()
+
+      const selector_re = /(?!\d|-{2}|-\d)[a-zA-Z0-9\u00A0-\uFFFF-_:%-?]/
+      const is_valid_selector = (text: string) => selector_re.test(text)
+      const scan_icon_classes = (text: string) => {
+        const pieces = text.split(/[\s'"`;>=]+/g).filter(is_valid_selector)
+        for (let name of pieces) {
+          if (name.startsWith('class:')) name = name.slice(6)
+          if (name.startsWith('i-')) collected.add(name)
         }
       }
-      let prepare = fg(glob).then((files) => Promise.all(files.map((path) => scanClass(path))));
 
-      // ~icons/mdi/plus.svelte -> mdi/plus.svelte
-      onResolve({ filter: /^~icons\/.+\.svelte$/ }, (args) => {
-        return {
-          path: args.path.slice(7),
-          namespace: "icons",
-          pluginData: { resolveDir: args.resolveDir },
-        };
-      });
-
-      onLoad({ filter: /.+\.svelte$/, namespace: "icons" }, async (args) => {
-        const [collection, icon] = args.path.slice(0, -7).split("/");
-        const svg = await searchForIconSvg(collection, icon);
-        if (svg) {
-          const svelte = SvelteCompiler(svg);
-          const filename = "/icons/" + args.path;
-          const { js } = compile(svelte, {
-            filename,
-            generate: ssr ? "ssr" : "dom",
-          });
-          js.map.sources = [filename];
-          js.map.sourcesContent = [svelte];
-          const contents = js.code + `\n//# sourceMappingURL=` + js.map.toUrl();
-          return { contents, resolveDir: args.pluginData.resolveDir };
+      const class_re = /^i-(\w+)-([-\w]+)$/
+      const generate = async (cls: string, warnings: PartialMessage[]): Promise<string | undefined> => {
+        let match: RegExpMatchArray | null
+        if ((match = cls.match(class_re))) {
+          const [, collection, icon] = match
+          const svg = await fetch_svg(collection, icon)
+          if (svg) {
+            const url = `url("data:image/svg+xml;utf8,${encodeSvgForCss(svg)}")`
+            const css: Record<string, string> = {
+              'width': '1em',
+              'height': '1em',
+              'display': 'inline-block',
+              'vertical-align': 'middle',
+            }
+            if (svg.includes('currentColor')) {
+              Object.assign(css, {
+                '--icon': url,
+                '-webkit-mask': 'var(--icon) no-repeat',
+                'mask': 'var(--icon) no-repeat',
+                '-webkit-mask-size': '100% 100%',
+                'mask-size': '100% 100%',
+                'background-color': 'currentColor',
+                'color': 'inherit',
+              })
+            } else {
+              Object.assign(css, {
+                'background': `${url} no-repeat`,
+                'background-size': '100% 100%',
+                'background-color': 'transparent',
+              })
+            }
+            return `.${cls.replace(':', '\\:')} {\n${Object.entries(css)
+              .map(([k, v]) => `  ${k}: ${v};\n`)
+              .join('')}}`
+          } else {
+            warnings.push({ text: `failed to load icon "${cls}"` })
+          }
         }
-      });
+      }
 
-      onLoad({ filter: /\.svelte$/ }, (args) => {
-        scanClass(args.path);
-        return null;
-      });
+      let prepare = Promise.resolve()
+      let watchFiles: string[] = []
 
-      onResolve({ filter: /^icons\.css$/ }, (args) => {
-        return { path: join(args.resolveDir, args.path) };
-      });
+      onStart(async () => {
+        collected.clear()
+        watchFiles = await fg(glob)
+        watchFiles.unshift(root_package_json)
+        const tasks: Promise<void>[] = []
+        for (const file of watchFiles) {
+          tasks.push(fs.promises.readFile(file, 'utf8').then(scan_icon_classes))
+        }
+        prepare = Promise.all(tasks).then(() => void 0)
+      })
 
-      const warn = initialOptions.logLevel !== "silent";
+      onResolve({ filter: /^icons\.css$/ }, () => ({ path: 'index.css', namespace: 'icons' }))
 
-      onLoad({ filter: /icons\.css$/ }, async () => {
-        await prepare;
-        const tasks = [...collected].map((e) => generate(e, warn));
-        const contents = (await Promise.all(tasks)).filter(Boolean).join("\n");
-        return { contents, loader: "css" };
-      });
+      onLoad({ filter: /(?:)/, namespace: 'icons' }, async () => {
+        const warnings: PartialMessage[] = []
+        await prepare
+        let contents = ''
+        for (const cls of collected) {
+          const css = await generate(cls, warnings)
+          if (css) contents += css + '\n'
+        }
+        return { contents, loader: 'css', watchFiles, warnings }
+      })
     },
-  };
+  }
 }

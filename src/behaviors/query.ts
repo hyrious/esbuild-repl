@@ -1,89 +1,119 @@
-import type { BuildOptions } from "esbuild";
-import { derived, Readable } from "svelte/store";
-import { configToString, getQuery, setQuery } from "../helpers";
-import { debug, mode, version } from "../stores";
-import { buildOptions, Module, modules } from "../stores/build";
-import { input, options } from "../stores/transform";
+import { is_client } from 'svelte/internal'
 
-function encodeModules($modules: Module[]) {
-  return JSON.stringify($modules.map((m) => [m.name, m.contents, Number(m.isEntry)]));
+interface Query {
+  version?: string
+  t?: string // transform input, like 'let a = 1'
+  b?: [entry: boolean, path: string, content: string][] // build input, encoded as [e,n,c,...]
+  o?: string // options, can be '--minify' or '{minify:true}' (json5 value)
+  d?: true // debug
 }
 
-function decodeModules(raw: string): Module[] {
+function json_parse(raw: any, def: any = {}): any {
   try {
-    return JSON.parse(raw).map(
-      (e: string[]) =>
-        ({
-          name: e[0],
-          contents: e[1],
-          isEntry: Boolean(e[2]),
-        } as Module)
-    );
-  } catch {
-    return [];
+    return JSON.parse(raw)
+  } catch (e) {
+    return def
   }
 }
 
-function encodeBuildOptions($buildOptions: BuildOptions) {
-  return JSON.stringify($buildOptions);
-}
+export function load_query(): Query {
+  const search = is_client ? new URLSearchParams(location.search) : new Map<string, string>()
 
-function decodeBuildOptions(raw: string): BuildOptions {
-  try {
-    return JSON.parse(raw) || {};
-  } catch {
-    return {};
-  }
-}
+  const query: Query = Object.create(null)
 
-const query: Readable<string> = derived(
-  [version, mode, input, options, modules, buildOptions],
-  ([$version, $mode, $input, $options, $modules, $buildOptions], set) => {
-    if (!$version || $version === "latest") return;
-    const params: [string, string][] = [
-      ["version", $version],
-      ["mode", $mode],
-    ];
-    if ($mode === "transform") {
-      $input && params.push(["input", $input]);
-      $options && params.push(["options", $options]);
+  const version = search.get('version')
+  if (version && /^\d[.\d]+$/.test(version)) query.version = version
+
+  const shareable = search.get('shareable')
+  if (shareable) {
+    const legacy = json_parse(decodeURIComponent(atob(shareable))) as {
+      code?: string
+      config?: Record<string, any>
+      modules?: { name: string; code: string; isEntry: boolean }[]
     }
-    if ($mode === "build") {
-      $modules.length && params.push(["modules", encodeModules($modules)]);
-      Object.keys($buildOptions).length &&
-        params.push(["buildOptions", encodeBuildOptions($buildOptions)]);
+    if (legacy.code) query.t = legacy.code
+    if (legacy.config) query.o = JSON.stringify(legacy.config)
+    if (legacy.modules) query.b = legacy.modules.map((m) => [m.isEntry, m.name, m.code])
+  }
+
+  if (search.get('mode') === 'build') {
+    const modules = search.get('module')
+    if (modules) query.b = json_parse(modules, []).map((e: any) => [Boolean(e[2]), e[0], e[1]])
+  } else {
+    const input = search.get('input')
+    if (input) query.t = input
+  }
+
+  const options = search.get('o') || search.get('options') || search.get('buildOptions')
+  if (options) query.o = options
+
+  if (search.has('d') || search.has('debug')) query.d = true
+
+  const t = search.get('t')
+  if (t) query.t = t
+
+  const b = search.get('b')
+  if (b) {
+    if (b[0] === '[') {
+      query.b = json_parse(b, [])
+    } else {
+      const parts = atob(b).split('\0')
+      query.b = []
+      for (let i = 0; i < parts.length; i += 3) {
+        query.b.push([parts[i] === 'e', parts[i + 1], parts[i + 2]])
+      }
     }
-    const search = new URLSearchParams(params);
-    set(search.toString());
   }
-);
 
-query.subscribe((value) => {
-  if (value) setQuery(value);
-});
+  const hash = is_client ? location.hash.slice(1) : ''
+  if (hash) {
+    const parts = atob(hash).split('\0')
 
-const { shareable, ...shared } = getQuery();
-// legacy shareable url
-if (shareable) {
-  const legacy = JSON.parse(decodeURIComponent(atob(shareable)));
-  console.log("legacy shareable:", legacy);
-  if (legacy.code) input.set(legacy.code);
-  if (legacy.config) options.set(configToString(legacy.config));
-  if (legacy.modules) {
-    mode.set("build");
-    modules.set(
-      legacy.modules.map(({ code: contents, ...rest }: any) => {
-        return { contents, ...rest } as Module;
-      })
-    );
+    if (parts[0] === 't' && parts.length === 4) {
+      query.version = parts[1]
+      query.o = parts[2]
+      query.t = parts[3]
+    }
+
+    if (parts[0] === 'b' && parts.length % 3 === 0) {
+      query.version = parts[1]
+      query.o = parts[2]
+      query.b = []
+      for (let i = 3; i < parts.length; i += 3) {
+        query.b.push([parts[i] === 'e', parts[i + 1], parts[i + 2]])
+      }
+    }
   }
-  if (legacy.options) buildOptions.set(legacy.options);
+
+  return query
 }
 
-Object.keys(shared).length && console.log(shared);
-if (shared.mode) mode.set(shared.mode as "build");
-if (shared.input) input.set(shared.input);
-if (shared.options) options.set(shared.options);
-if (shared.modules) modules.set(decodeModules(shared.modules));
-if (shared.buildOptions) buildOptions.set(decodeBuildOptions(shared.buildOptions));
-if (shared.debug) debug.set(true);
+export function save_query(query: Query): void {
+  if (!is_client) return
+
+  const search = new URLSearchParams()
+
+  if (query.version) search.set('version', query.version)
+
+  if (query.t) search.set('t', query.t)
+
+  if (query.b) {
+    try {
+      const parts: string[] = []
+      for (const [entry, path, content] of query.b) {
+        parts.push(entry ? 'e' : '', path, content)
+      }
+      search.set('b', btoa(parts.join('\0')).replace(/=+$/, ''))
+    } catch {
+      search.set('b', JSON.stringify(query.b))
+    }
+  }
+
+  if (query.o) search.set('o', query.o)
+
+  if (query.d) search.set('d', '')
+
+  const pathname = location.pathname
+  const querystring = search.toString()
+  history.replaceState({}, '', querystring ? pathname + '?' + querystring : pathname)
+}
