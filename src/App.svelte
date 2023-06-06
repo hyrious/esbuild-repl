@@ -1,17 +1,10 @@
 <script lang="ts">
+  import { mode } from './stores'
   import Header from './components/Header.svelte'
   import SplitPane from './components/SplitPane.svelte'
   import Transform from './components/Transform.svelte'
   import Build from './components/Build.svelte'
   import Footer from './components/Footer.svelte'
-  import { onMount } from 'svelte'
-  import { sendIPC } from './ipc'
-  import { emitter } from './global'
-  import { mode } from './stores'
-
-  onMount(() => {
-    window.sendIPC = sendIPC
-  })
 </script>
 
 <Header />

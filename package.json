@@ -11,8 +11,10 @@
     "check": "svelte-check"
   },
   "dependencies": {
+    "@github/textarea-autosize": "^0.3.1",
     "@hyrious/utils": "^0.0.6",
     "sanitize.css": "^13.0.0",
+    "selector-observer": "^2.1.6",
     "svelte": "^3.59.1"
   },
   "devDependencies": {
@@ -29,7 +31,6 @@
     "eslint-plugin-case-police": "^0.6.1",
     "fast-glob": "^3.2.12",
     "highlight.js": "^11.8.0",
-    "launch-editor-middleware": "^2.6.0",
-    "svelte-check": "^3.4.3"
+    "launch-editor-middleware": "^2.6.0"
   }
 }
