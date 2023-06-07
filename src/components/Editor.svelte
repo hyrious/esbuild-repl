@@ -10,7 +10,7 @@
   export let placeholder = ''
   export let entry = false
   export let readonly = false
-  export let download = false
+  export let download: boolean | string = false
   export let lang = 'js'
 
   const dispatch = createEventDispatcher()
@@ -19,9 +19,9 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<article tabindex="0" data-label={label}>
+<article data-label={label}>
   {#if header}
-    <header>
+    <header class:entry>
       {#if readonly}
         <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
       {:else}
@@ -62,30 +62,66 @@
     opacity: 0.5;
     font-weight: 700;
     color: var(--fg);
+    pointer-events: none;
+  }
+  [data-label]:has(header)::after {
+    top: 32px;
   }
   article {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--pre);
-    overflow: hidden;
     color: var(--fg);
   }
   article:not(:last-child) {
     margin-bottom: 10px;
   }
-  article:focus,
-  article:has(:focus) {
+  header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  header input {
+    flex: 1;
+    width: 100%;
+    appearance: none;
+    background: transparent;
+    border: none;
     outline: none;
-    border-color: var(--fg);
-    color: var(--fg-on);
+    padding: 0 1px;
+    font: var(--code-font);
+    color: inherit;
+  }
+  header.entry input,
+  header.entry button.entry {
+    color: #58a549;
+  }
+  header.entry input {
+    font-weight: 700;
+  }
+  header button {
+    appearance: none;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font-size: 20px;
+  }
+  button.entry {
+    position: absolute;
+    right: 100%;
+    z-index: 10;
+  }
+  button.remove {
+    color: #e24834;
   }
   pre {
     margin: 0;
     padding: 8px;
     min-height: 34px;
     font: var(--code-font);
+    background: var(--pre);
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
@@ -97,13 +133,57 @@
     height: 100%;
     font: var(--code-font);
     color: inherit;
-    background: none;
-    border: none;
+    background: var(--pre);
+    border: 1px solid var(--border);
+    border-radius: 4px;
     outline: none;
     padding: 8px;
     white-space: pre;
+    overscroll-behavior: contain;
+    overflow: auto;
+    overflow-y: scroll;
+    overflow-y: overlay;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    scrollbar-width: auto;
+  }
+  textarea:focus {
+    color: var(--fg-on);
+    border-color: var(--fg);
   }
   textarea[rows='2'] {
     min-height: 54px;
+  }
+  /* chrome only styles :D */
+  textarea::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  textarea::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  textarea::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+  textarea::-webkit-scrollbar-thumb {
+    background-color: var(--pre);
+    background-color: transparent;
+    border-radius: 4px;
+    transition: background-color 0.4s;
+  }
+  textarea:hover::-webkit-scrollbar-thumb {
+    background-color: var(--pre);
+  }
+  textarea::-webkit-scrollbar-thumb:hover {
+    background-color: var(--border);
+  }
+  textarea::-webkit-scrollbar-thumb:active {
+    background-color: var(--fg);
+  }
+  textarea::-webkit-scrollbar-thumb:vertical {
+    min-height: 50px;
+  }
+  textarea::-webkit-scrollbar-thumb:horizontal {
+    min-width: 50px;
   }
 </style>

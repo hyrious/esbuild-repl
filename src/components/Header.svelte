@@ -26,7 +26,7 @@
       modules = [{ name: 'main.js', code: query.t, isEntry: true }]
     }
     if (query.b) {
-      modules = query.b.map(([e, p, c]) => ({ name: p, code: c, isEntry: e }))
+      modules = query.b.map(({ entry, path, content }) => ({ name: path, code: content, isEntry: entry }))
     }
     if (modules) {
       const shareable = { example: null, modules, options: { output: { format: 'es' }, treeshake: true } }
@@ -44,7 +44,7 @@
     }
     if (query.b) {
       parts = ['b', $version, query.o || '']
-      for (const [entry, path, content] of query.b) {
+      for (const { entry, path, content } of query.b) {
         parts.push(entry ? 'e' : '', path, content)
       }
     }
@@ -193,6 +193,9 @@
     header h1,
     header select {
       display: none;
+    }
+    header nav label:first-child {
+      text-align: left;
     }
   }
   @media (max-width: 300px) {

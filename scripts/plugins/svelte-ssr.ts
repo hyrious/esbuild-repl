@@ -20,8 +20,11 @@ export const svelte_ssr = ({
 }: SvelteSSRPluginOptions = {}): Plugin => {
   return {
     name: 'svelte-ssr',
-    setup({ onResolve, onLoad, initialOptions }) {
+    setup({ onResolve, onLoad, onEnd, initialOptions }) {
       const dev = !initialOptions.minify
+
+      // This cache only lives for 1 second
+      const cache: Record<string, { t: number; r: string }> = Object.create(null)
 
       const search_entry = (path: string) => {
         for (const key in entryPoints) {
@@ -76,6 +79,10 @@ export const svelte_ssr = ({
       }
 
       onLoad({ filter: /(?:)/, namespace: 'svelte-ssr' }, async (args) => {
+        if (cache[args.path] && Date.now() - cache[args.path].t < 1000) {
+          return { contents: cache[args.path].r, loader: 'copy' }
+        }
+
         const read_template = fs.promises.readFile(args.path, 'utf8')
 
         const path = await build_into_cache(args.pluginData, {
@@ -100,7 +107,15 @@ export const svelte_ssr = ({
         result += html.trim()
         result += template.slice(inApp)
 
+        cache[args.path] = { r: result, t: Date.now() }
+
         return { contents: result, loader: 'copy' }
+      })
+
+      onEnd(({ errors }) => {
+        if (errors.length === 0) {
+          console.log('\x1B[2J\x1B[0;0H\x1B[32mSvelte SSR runs succesfully.\x1B[m')
+        }
       })
     },
   }

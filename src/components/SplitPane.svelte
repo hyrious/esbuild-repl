@@ -81,9 +81,6 @@
     display: flex;
     position: relative;
   }
-  section div:not(.divider) {
-    overflow: hidden;
-  }
   .divider {
     position: absolute;
     width: 25px;

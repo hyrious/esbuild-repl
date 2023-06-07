@@ -3,7 +3,7 @@ import { is_client } from 'svelte/internal'
 interface Query {
   version?: string
   t?: string // transform input, like 'let a = 1'
-  b?: [entry: boolean, path: string, content: string][] // build input, encoded as [e,n,c,...]
+  b?: { entry: boolean; path: string; content: string }[] // build input, multiple 'e,path,content'
   o?: string // options, can be '--minify' or '{minify:true}' (json5 value)
   d?: true // debug
 }
@@ -17,7 +17,7 @@ function json_parse(raw: any, def: any = {}): any {
 }
 
 export function load_query(): Query {
-  const search = is_client ? new URLSearchParams(location.search) : new Map<string, string>()
+  const search = new URLSearchParams(is_client ? location.search : '')
 
   const query: Query = Object.create(null)
 
@@ -33,7 +33,12 @@ export function load_query(): Query {
     }
     if (legacy.code) query.t = legacy.code
     if (legacy.config) query.o = JSON.stringify(legacy.config)
-    if (legacy.modules) query.b = legacy.modules.map((m) => [m.isEntry, m.name, m.code])
+    if (legacy.modules)
+      query.b = legacy.modules.map((m) => ({
+        entry: m.isEntry,
+        path: m.name,
+        content: m.code,
+      }))
   }
 
   if (search.get('mode') === 'build') {
@@ -52,16 +57,16 @@ export function load_query(): Query {
   const t = search.get('t')
   if (t) query.t = t
 
-  const b = search.get('b')
-  if (b) {
-    if (b[0] === '[') {
-      query.b = json_parse(b, [])
-    } else {
-      const parts = atob(b).split('\0')
-      query.b = []
-      for (let i = 0; i < parts.length; i += 3) {
-        query.b.push([parts[i] === 'e', parts[i + 1], parts[i + 2]])
+  const b = search.getAll('b')
+  if (b.length > 0) {
+    query.b = []
+    for (const raw of b) {
+      const m = raw.match(/^(e?),([^,]+),(.*)$/)
+      if (!m) {
+        console.warn('Unknown query', raw, 'skipped')
+        continue
       }
+      query.b.push({ entry: m[1] === 'e', path: m[2], content: m[3] })
     }
   }
 
@@ -80,7 +85,7 @@ export function load_query(): Query {
       query.o = parts[2]
       query.b = []
       for (let i = 3; i < parts.length; i += 3) {
-        query.b.push([parts[i] === 'e', parts[i + 1], parts[i + 2]])
+        query.b.push({ entry: parts[i] === 'e', path: parts[i + 1], content: parts[i + 2] })
       }
     }
   }
@@ -88,32 +93,30 @@ export function load_query(): Query {
   return query
 }
 
-export function save_query(query: Query): void {
+function escape(raw?: string): string {
+  if (raw === undefined) return ''
+  return raw.replace(/[ ]/g, '+').replace(/&/g, '%26').replace(/#/g, '%23')
+}
+
+export function save_query(mode: string, query: Query): void {
   if (!is_client) return
 
-  const search = new URLSearchParams()
+  let search = ''
 
-  if (query.version) search.set('version', query.version)
+  if (query.version) search += '&version=' + query.version
 
-  if (query.t && query.t !== 'let a = 1') search.set('t', query.t)
+  if (mode === 'transform') search += '&t=' + escape(query.t)
 
-  if (query.b && query.b.length > 0) {
-    try {
-      const parts: string[] = []
-      for (const [entry, path, content] of query.b) {
-        parts.push(entry ? 'e' : '', path, content)
-      }
-      search.set('b', btoa(parts.join('\0')).replace(/=+$/, ''))
-    } catch {
-      search.set('b', JSON.stringify(query.b))
+  if (mode === 'build' && query.b) {
+    for (const { entry, path, content } of query.b) {
+      search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join(',')
     }
   }
 
-  if (query.o) search.set('o', query.o)
+  if (query.o) search += '&o=' + query.o
 
-  if (query.d) search.set('d', '1')
+  if (query.d) search += '&d=1'
 
-  const pathname = location.pathname
-  const querystring = search.toString()
-  history.replaceState({}, '', querystring ? pathname + '?' + querystring : pathname)
+  const base = location.pathname
+  history.replaceState({}, '', search ? base + '?' + search.slice(1) : base)
 }

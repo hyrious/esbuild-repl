@@ -43,7 +43,7 @@ if (is_client) {
 
 export const mode = writable<'transform' | 'build'>(initial_query.b ? 'build' : 'transform')
 export const input = writable(initial_query.t || 'let a = 1')
-export const files = writable(initial_query.b || [])
+export const files = writable(initial_query.b || [{ entry: true, path: 'entry.js', content: '' }])
 export const options = writable(initial_query.o || '')
 
 export const output: Readable<IPCResponse> = derived(
@@ -52,7 +52,7 @@ export const output: Readable<IPCResponse> = derived(
     try {
       if ($mode === 'transform') {
         sendIPC({
-          command_: 'transform',
+          command_: $mode,
           input_: $input,
           options_: parseOptions($options, Mode.Transform),
         }).then(set, () => {
@@ -66,7 +66,7 @@ export const output: Readable<IPCResponse> = derived(
         const input: Record<string, string> = Object.create(null)
         const duplicates = new Set<string>()
 
-        for (const [entry, path, content] of $files) {
+        for (const { entry, path, content } of $files) {
           if (duplicates.has(path)) {
             throw new Error('Duplicate input file: ' + (path ? JSON.stringify(path) : '<stdin>'))
           }
@@ -82,7 +82,7 @@ export const output: Readable<IPCResponse> = derived(
         }
 
         sendIPC({
-          command_: 'build',
+          command_: $mode,
           input_: input,
           options_: o,
         }).then(set, () => {
