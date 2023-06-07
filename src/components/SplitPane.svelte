@@ -112,10 +112,9 @@
       width: auto !important;
     }
     .divider {
-      position: relative;
+      position: static;
       width: auto;
       height: auto;
-      left: auto !important;
       pointer-events: none;
       border-bottom: 2px solid var(--active);
     }

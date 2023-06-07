@@ -6,12 +6,40 @@
 
 import type { TransformOptions, BuildOptions } from "esbuild"
 
-const enum Mode {
+export const enum Mode {
   Transform = 'transform',
   Build = 'build',
 }
 
-type RichError = Error & { location_?: Location, notes_: { text_: string, location_?: Location }[] }
+export type RichError = Error & { location_?: Location, notes_: { text_: string, location_?: Location }[] }
+
+export function prettyPrintErrorAsStderr(err: RichError): string {
+  let text = `\x1B[31m✘ \x1B[41;31m[\x1B[41;97mERROR\x1B[41;31m]\x1B[0m \x1B[1m${(err && err.message) || err}\x1B[0m`
+  const location = err && err.location_
+  const notes = err && err.notes_
+  if (location) text += prettyPrintLocationAsStderr(location)
+  if (notes) {
+    for (const note of notes) {
+      text += `\n  ${note.text_}`
+      if (note.location_) text += prettyPrintLocationAsStderr(note.location_)
+    }
+  }
+  return text
+}
+
+function prettyPrintLocationAsStderr({ file_, line_, column_, length_, lineText_, suggestion_ }: Location): string {
+  let last = length_ < 2 ? '^' : '~'.repeat(length_)
+  let result = `\n\n    ${file_}:${line_}:${column_}:\n`
+  result += `\x1B[37m${line_.toString().padStart(7)} │ ${lineText_.slice(0, column_)}` +
+    `\x1B[32m${lineText_.slice(column_, column_ + length_)}` +
+    `\x1B[37m${lineText_.slice(column_ + length_)}\n`
+  if (suggestion_) {
+    result += `        │ ${' '.repeat(column_)}\x1B[32m${last}\x1B[37m\n`
+    last = suggestion_
+  }
+  result += `        ╵ ${' '.repeat(column_)}\x1B[32m${last}\x1B[0m\n`
+  return result
+}
 
 interface Location {
   file_: string
@@ -71,6 +99,21 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
     }
   }
 
+  const toBooleanValues = (key: OptionKey): void => {
+    if (options[key] !== undefined && typeof options[key] === 'object') {
+      const record = options[key]
+      for (const key in record) {
+        record[key] = record[key] === 'true' ? true : record[key] === 'false' ? false : record[key]
+      }
+    }
+  }
+
+  const toInteger = (key: OptionKey): void => {
+    if (options[key] !== undefined) {
+      options[key] = parseInt(options[key] + '', 10)
+    }
+  }
+
   const splitOnComma = (key: OptionKey): void => {
     if (options[key] !== undefined) {
       options[key] = (options[key] + '').split(',')
@@ -85,6 +128,11 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   // These need to be regular expressions, not strings or booleans
   toRegExp('mangleProps')
   toRegExp('reserveProps')
+
+  toBooleanValues('mangleCache')
+  toBooleanValues('supported')
+
+  toInteger('logLimit')
 
   // These need to be arrays, not comma-separated strings or booleans
   splitOnComma('resolveExtensions')

@@ -95,9 +95,9 @@ export function save_query(query: Query): void {
 
   if (query.version) search.set('version', query.version)
 
-  if (query.t) search.set('t', query.t)
+  if (query.t && query.t !== 'let a = 1') search.set('t', query.t)
 
-  if (query.b) {
+  if (query.b && query.b.length > 0) {
     try {
       const parts: string[] = []
       for (const [entry, path, content] of query.b) {
@@ -111,7 +111,7 @@ export function save_query(query: Query): void {
 
   if (query.o) search.set('o', query.o)
 
-  if (query.d) search.set('d', '')
+  if (query.d) search.set('d', '1')
 
   const pathname = location.pathname
   const querystring = search.toString()

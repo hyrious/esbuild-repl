@@ -16,7 +16,9 @@ html {
 html:not([data-theme='dark']) {
   --bg: #fff;
   --fg-on: #000;
-  --fg: #222;
+  --fg: #555;
+  --pre-dim: #777;
+  --pre-val: #870;
 }
 
 html[data-theme='dark'] {
@@ -24,6 +26,8 @@ html[data-theme='dark'] {
   --bg: #191919;
   --fg-on: #ddd;
   --fg: #aaa;
+  --pre-dim: #999;
+  --pre-val: #cb8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,6 +36,8 @@ html[data-theme='dark'] {
     --bg: #191919;
     --fg-on: #ddd;
     --fg: #aaa;
+    --pre-dim: #999;
+    --pre-val: #cb8;
   }
 }
 
@@ -43,4 +49,49 @@ body {
 
 a {
   color: inherit;
+}
+
+.hljs-comment,
+.hljs-keyword,
+.hljs-literal {
+  color: var(--pre-dim);
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-number,
+.hljs-tag {
+  color: var(--pre-val);
+}
+
+.color-bold {
+  font-weight: bold;
+  color: var(--fg-on);
+}
+.bg-red {
+  background: #e24834;
+}
+.color-red {
+  color: #e24834;
+}
+.bg-yellow {
+  background: #f2d42d;
+}
+.color-yellow {
+  color: #f2d42d;
+}
+.color-green {
+  color: #58a549;
+}
+.color-black {
+  color: #000;
+}
+.color-white {
+  color: #fff;
+}
+.color-dim {
+  color: #777;
+}
+.color-magenta {
+  color: #8e69c9;
 }

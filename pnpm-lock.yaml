@@ -11,6 +11,9 @@ dependencies:
   '@hyrious/utils':
     specifier: ^0.0.6
     version: 0.0.6
+  indent-textarea:
+    specifier: ^3.0.0
+    version: 3.0.0
   sanitize.css:
     specifier: ^13.0.0
     version: 13.0.0
@@ -20,6 +23,9 @@ dependencies:
   svelte:
     specifier: ^3.59.1
     version: 3.59.1
+  text-field-edit:
+    specifier: ^3.2.0
+    version: 3.2.0
 
 devDependencies:
   '@hyrious/esbuild-dev':
@@ -1142,6 +1148,12 @@ packages:
     engines: {node: '>=0.8.19'}
     dev: true
 
+  /indent-textarea@3.0.0:
+    resolution: {integrity: sha512-IdAQbZjGLS9pihZNoBOgWuhbnaYTSQ7YHcNAQRxIhBygGFYnGDeioJk+CCTcA4CGNFkiTA38rFkhfGTWoVIyMA==}
+    dependencies:
+      text-field-edit: 3.2.0
+    dev: false
+
   /inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
     dependencies:
@@ -1607,6 +1619,10 @@ packages:
       '@pkgr/utils': 2.4.1
       tslib: 2.5.2
     dev: true
+
+  /text-field-edit@3.2.0:
+    resolution: {integrity: sha512-HVgVoOMAIgsXFsGuzkghk0NQPO8DrfNeHtRSbKEUQAkLOeY+Mb2ofK/AGZByxObPNo3vqODyghl+9VXUjHypig==}
+    dev: false
 
   /text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}

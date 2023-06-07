@@ -26,6 +26,7 @@ const options: BuildOptions = {
   splitting: true,
   sourcemap: true,
   outdir: 'dist',
+  legalComments: 'none',
   define: {
     'import.meta.env.DEV': JSON.stringify(serve),
     'import.meta.env.SSR': 'false',

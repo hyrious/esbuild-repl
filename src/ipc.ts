@@ -99,6 +99,8 @@ async function reloadWorker(version: string): Promise<Worker> {
       packageFetch(`esbuild-wasm@${version}/lib/browser${min}.js`).then((r) => r.text()),
       packageFetch(`esbuild-wasm@${version}/esbuild.wasm`).then((r) => r.arrayBuffer()),
     ])
+    setupLocal(esbuildJS, esbuildWASM.slice(0))
+
     const parts = [esbuildJS, workerJS]
     const url = URL.createObjectURL(new Blob(parts, { type: 'application/javascript' }))
 
@@ -122,6 +124,22 @@ async function reloadWorker(version: string): Promise<Worker> {
     emitter.emit('status', loadingFailure || err + '')
     throw err
   }
+}
+
+let script: HTMLScriptElement | null = null
+function setupLocal(js: string, wasm: ArrayBuffer): void {
+  const url = URL.createObjectURL(new Blob([js], { type: 'application/javascript' }))
+  if (script) script.remove()
+  script = document.createElement('script')
+  script.onload = async () => {
+    const esbuild: typeof import('esbuild') = (window as any).esbuild
+    await esbuild.initialize({
+      wasmURL: URL.createObjectURL(new Blob([wasm], { type: 'application/wasm' })),
+    })
+    console.log('loaded esbuild @', esbuild.version, esbuild)
+  }
+  script.src = url
+  document.head.appendChild(script)
 }
 
 export function sendIPC(message: IPCRequest): Promise<IPCResponse> {
