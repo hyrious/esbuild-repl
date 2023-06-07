@@ -18,7 +18,7 @@
 </script>
 
 {#if $output}
-  {#if 'code_' in $output}
+  {#if typeof $output.code_ === 'string'}
     <Editor label="OUTPUT" readonly content={$output.code_} lang={guess_lang()} />
   {/if}
   {#if $output.legalComments_}
