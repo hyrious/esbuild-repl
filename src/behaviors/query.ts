@@ -61,12 +61,8 @@ export function load_query(): Query {
   if (b.length > 0) {
     query.b = []
     for (const raw of b) {
-      const m = raw.match(/^(e?)\0([^\0]+)\0(.*)$/)
-      if (!m) {
-        console.warn('Unknown query', raw, 'skipped')
-        continue
-      }
-      query.b.push({ entry: m[1] === 'e', path: m[2], content: m[3] })
+      const [entry, path, content] = raw.split('\0')
+      query.b.push({ entry: entry === 'e', path, content })
     }
   }
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { query_selector_all, tick } from 'svelte/internal'
   import { send_input } from '../helpers/dom'
   import { mode, files, options } from '../stores'
   import Editor from './Editor.svelte'
@@ -38,11 +39,26 @@
       entry: new_file_name === 'entry.js',
     })
     $files = $files
+    tick().then(() => {
+      const inputs = query_selector_all('[data-label="INPUT"] input')
+      const last = inputs[inputs.length - 1] as HTMLInputElement | undefined
+      if (last) {
+        last.focus()
+        last.select()
+      }
+    })
   }
 
   function remove_file(index: number) {
     $files.splice(index, 1)
     $files = $files
+  }
+
+  function npm_install() {
+    const name = prompt('Enter package name:')
+    if (!name) return
+
+    console.log('TODO: install', name)
   }
 </script>
 
@@ -76,6 +92,10 @@
       <i class="i-mdi-plus" />
       <span>{new_file_name}</span>
     </button>
+    <button on:click={npm_install}>
+      <i class="i-mdi-bash" />
+      <span>npm i &hellip;</span>
+    </button>
   </footer>
 </div>
 
@@ -102,6 +122,7 @@
     height: 20px;
     border: none;
     padding: 0 1px;
+    margin-bottom: 10px;
     outline: none;
     font: var(--code-font);
     color: var(--fg);
@@ -117,7 +138,7 @@
   }
   footer {
     display: flex;
-    align-items: center;
+    flex-direction: column;
   }
   footer button i {
     position: absolute;
