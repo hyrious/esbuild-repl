@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { query_selector_all, tick } from 'svelte/internal'
-  import { send_input } from '../helpers/dom'
-  import { mode, files, options } from '../stores'
+  import { onMount, tick } from 'svelte'
+  import { focus_last, send_input } from '../helpers/dom'
+  import { get, set } from '../helpers/idb'
+  import { read_tarball } from '../helpers/tarball'
+  import { mode, files, options, status, initial_query, installed } from '../stores'
   import Editor from './Editor.svelte'
+  import NpmPackage from './NpmPackage.svelte'
 
   export let show = true
 
-  const default_options = "{\n\toutdir: '/',\n\tbundle: true,\n\tformat: 'esm',\n\tsplitting: true\n}"
+  const default_options = '--bundle --format=esm --splitting --outdir=/'
   let build_options = ($mode === 'build' && $options) || default_options
   $: if ($mode === 'build') {
     $options = build_options
@@ -39,14 +42,7 @@
       entry: new_file_name === 'entry.js',
     })
     $files = $files
-    tick().then(() => {
-      const inputs = query_selector_all('[data-label="INPUT"] input')
-      const last = inputs[inputs.length - 1] as HTMLInputElement | undefined
-      if (last) {
-        last.focus()
-        last.select()
-      }
-    })
+    focus_last('[data-label="INPUT"] input')
   }
 
   function remove_file(index: number) {
@@ -54,19 +50,110 @@
     $files = $files
   }
 
-  function npm_install() {
-    const name = prompt('Enter package name:')
+  async function npm_install(raw?: MouseEvent | string | null) {
+    if (typeof raw !== 'string') {
+      raw = prompt('Enter package name:')
+      if (!raw) return
+    }
+
+    const i = raw.indexOf('@', 1)
+    const name = i === -1 ? raw : raw.slice(0, i)
     if (!name) return
 
-    console.log('TODO: install', name)
+    if ($installed.some((e) => e.name === name)) {
+      // Already installed.
+      return
+    }
+
+    const spec = i === -1 ? 'latest' : raw.slice(i + 1)
+    const version = await resolve_version(name, spec)
+
+    let buffer: ArrayBuffer | Uint8Array
+    let url = `https://registry.npmjs.org/${name}/-/${name.split('/').pop()}-${version}.tgz`
+
+    try {
+      $status = `Installing ${name}@${version} …`
+      const cached = await get(name, version)
+      if (cached) {
+        buffer = cached.buffer
+      } else {
+        buffer = await fetch(url).then((r) => r.arrayBuffer())
+        await set(name, version, new Uint8Array(buffer))
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return
+      $status = err + ''
+      throw err
+    }
+
+    $status = `Extracting ${name}@${version} …`
+    const files = await read_tarball(new Uint8Array(buffer))
+    const package_json = files.find((e) => e.path === 'package.json')
+    if (package_json) {
+      tick().then(install_dependencies.bind(null, package_json.content))
+    }
+
+    if (!$installed.some((e) => e.name === name)) {
+      $installed.push({ name, version, files })
+      $installed = $installed
+    }
+
+    $status = `Extracted ${files.length} files.`
   }
+
+  function install_dependencies(json: string) {
+    const pkg = JSON.parse(json)
+    if (pkg.dependencies) {
+      for (const name of Object.keys(pkg.dependencies)) {
+        npm_install(`${name}@${pkg.dependencies[name]}`).catch(console.error)
+      }
+    }
+  }
+
+  const semver_loose =
+    /^[\s=v]*(\d+)\.(\d+)\.(\d+)(?:-?((?:\d+|\d*[A-Za-z-][\dA-Za-z-]*)(?:\.(?:\d+|\d*[A-Za-z-][\dA-Za-z-]*))*))?(?:\+([\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*))?$/
+
+  async function resolve_version(name: string, spec: string): Promise<string> {
+    if (!semver_loose.test(spec)) {
+      spec = await follow_redirects(`https://unpkg.com/${name}@${spec}/package.json`)
+      spec = spec.slice(18 + name.length + 1)
+      spec = spec.slice(0, spec.indexOf('/'))
+    }
+    return spec
+  }
+
+  const fetch_cache = new Map<string, Promise<string>>()
+  async function follow_redirects(url: string): Promise<string> {
+    if (fetch_cache.has(url)) {
+      return fetch_cache.get(url)!
+    }
+
+    const promise = fetch(url)
+      .then(async (r) => {
+        if (r.ok) return r.url
+        else throw new Error(await r.text())
+      })
+      .catch((err) => {
+        fetch_cache.delete(url)
+        throw err
+      })
+
+    fetch_cache.set(url, promise)
+    return promise
+  }
+
+  onMount(() => {
+    for (const spec of initial_query.i || []) {
+      npm_install(spec).catch(console.error)
+    }
+  })
 </script>
 
 <div data-build style={show ? '' : 'display: none'}>
   <Editor
     bind:content={build_options}
     label="OPTIONS"
-    rows={build_options.split('\n').length}
+    rows={1}
     placeholder="e.g. --minify or {'{'} minify: true {'}'}"
   >
     <aside class:show={build_options !== default_options} slot="header">
@@ -92,8 +179,11 @@
       <i class="i-mdi-plus" />
       <span>{new_file_name}</span>
     </button>
-    <button on:click={npm_install}>
-      <i class="i-mdi-bash" />
+    {#each $installed as { name, version } (name)}
+      <NpmPackage {name} {version} />
+    {/each}
+    <button on:click={npm_install} title="npm install &hellip;">
+      <i class="i-mdi-package-variant-closed-plus" />
       <span>npm i &hellip;</span>
     </button>
   </footer>
@@ -109,9 +199,17 @@
     opacity: 0;
     transition: opacity 0.2s;
   }
+  aside button {
+    padding: 0;
+  }
   aside:hover,
   aside.show {
     opacity: 1;
+  }
+  @media (max-width: 800px) {
+    aside {
+      top: 8px;
+    }
   }
   button {
     position: relative;
@@ -122,13 +220,15 @@
     height: 20px;
     border: none;
     padding: 0 1px;
-    margin-bottom: 10px;
     outline: none;
     font: var(--code-font);
     color: var(--fg);
     opacity: 0.5;
     transition: opacity 0.2s;
     cursor: pointer;
+  }
+  button:not(:last-child) {
+    margin-bottom: 10px;
   }
   button:hover {
     opacity: 1;

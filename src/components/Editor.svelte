@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
+  import prettyBytes from 'pretty-bytes'
   import { highlight } from '../helpers/hljs'
 
   export let header = false
@@ -30,12 +31,13 @@
       <header class:entry>
         {#if readonly}
           <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
+          <span class="size">{prettyBytes(content.length, { binary: true })}</span>
         {:else}
-          <button class="entry" title={'entry: ' + (entry ? 'yes' : 'no')} on:click={() => (entry = !entry)}>
+          <button class="entry" title="entry: {entry ? 'yes' : 'no'}" on:click={() => (entry = !entry)}>
             <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
           </button>
           <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
-          <button class="remove" title={'remove ' + (name || 'it')} on:click={() => dispatch('remove')}>
+          <button class="remove" title="remove {name || 'it'}" on:click={() => dispatch('remove')}>
             <i class="i-mdi-close" />
           </button>
         {/if}
@@ -142,6 +144,9 @@
   button.remove:hover {
     opacity: 1;
   }
+  span.size {
+    font: 14px/20px sans-serif;
+  }
   pre {
     margin: 0;
     padding: 8px;
@@ -151,6 +156,12 @@
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
+    max-height: 400px;
+  }
+  @media (max-width: 800px) {
+    pre {
+      white-space: pre;
+    }
   }
   textarea {
     appearance: none;
@@ -180,7 +191,6 @@
   textarea[rows='2'] {
     min-height: 54px;
   }
-  /* chrome only styles :D */
   textarea::-webkit-scrollbar {
     height: 8px;
     width: 8px;

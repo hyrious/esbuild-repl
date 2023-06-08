@@ -75,7 +75,7 @@ if (serve) {
     const info = metafile.outputs[file].inputs
     for (const path of Object.keys(info)) {
       const index = path.lastIndexOf('node_modules/')
-      if (index !== -1) {
+      if (index >= 0) {
         const short = path.slice(index)
         info[short] = info[path]
         delete info[path]

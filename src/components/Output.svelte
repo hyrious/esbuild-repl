@@ -13,8 +13,6 @@
     }
     return 'js'
   }
-
-  $: console.log($output)
 </script>
 
 {#if $output}

@@ -4,6 +4,7 @@ import url from 'node:url'
 import { build, BuildOptions, Plugin } from 'esbuild'
 import { join, normalize } from 'node:path'
 import { svelte } from '@hyrious/esbuild-plugin-svelte'
+import prettyBytes from 'pretty-bytes'
 
 interface SvelteSSRPluginOptions {
   entryPoints?: Record<string, string>
@@ -112,9 +113,25 @@ export const svelte_ssr = ({
         return { contents: result, loader: 'copy' }
       })
 
-      onEnd(({ errors }) => {
+      onEnd(({ errors, outputFiles }) => {
         if (errors.length === 0) {
-          console.log('\x1B[2J\x1B[0;0H\x1B[32mSvelte SSR runs succesfully.\x1B[m')
+          console.log('\x1B[2J\x1B[0;0H\x1B[32mSvelte SSR runs successfully.\x1B[m')
+          if (outputFiles) {
+            const table: [string, string][] = []
+            for (const { path, contents } of outputFiles) {
+              table.push([
+                path.slice(path.lastIndexOf('dist')),
+                prettyBytes(contents.byteLength, { binary: true }),
+              ])
+            }
+            let w = 1
+            for (const [path] of table) {
+              w = Math.max(w, path.length)
+            }
+            for (const [path, size] of table) {
+              console.log(`  ${path.padEnd(w)}  ${size}`)
+            }
+          }
         }
       })
     },

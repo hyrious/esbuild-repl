@@ -46,9 +46,16 @@ export const input = writable(initial_query.t || 'let a = 1')
 export const files = writable(initial_query.b || [{ entry: true, path: 'entry.js', content: '' }])
 export const options = writable(initial_query.o || '')
 
+interface InstalledPackage {
+  name: string
+  version: string
+  files: { path: string; content: string }[]
+}
+export const installed = writable<InstalledPackage[]>([])
+
 export const output: Readable<IPCResponse> = derived(
-  [mode, input, files, options],
-  ([$mode, $input, $files, $options], set) => {
+  [mode, input, files, options, installed],
+  ([$mode, $input, $files, $options, $installed], set) => {
     try {
       if ($mode === 'transform') {
         sendIPC({
@@ -81,6 +88,17 @@ export const output: Readable<IPCResponse> = derived(
           }
         }
 
+        for (const { name, files } of $installed) {
+          const base = 'node_modules/' + name + '/'
+          for (const { path, content } of files) {
+            const resolved = base + path
+            if (duplicates.has(resolved)) {
+              throw new Error('Duplicate input file: ' + JSON.stringify(resolved))
+            }
+            input[resolved] = content
+          }
+        }
+
         sendIPC({
           command_: $mode,
           input_: input,
@@ -109,6 +127,6 @@ export const debug = writable(import.meta.env.DEV || initial_query.d)
 
 if (is_client) {
   Object.assign(window, {
-    stores: { theme, version, versions, mode, input, files, options, output, status, debug },
+    stores: { theme, version, versions, mode, input, files, options, installed, output, status, debug },
   })
 }

@@ -5,6 +5,7 @@ interface Query {
   t?: string // transform input, like 'let a = 1'
   b?: { entry: boolean; path: string; content: string }[] // build input, multiple 'e,path,content'
   o?: string // options, can be '--minify' or '{minify:true}' (json5 value)
+  i?: string[] // installed npm packages, like '&i=jquery&i=react'
   d?: true // debug
 }
 
@@ -66,6 +67,9 @@ export function load_query(): Query {
     }
   }
 
+  const i = search.getAll('i')
+  if (i.length > 0) query.i = i
+
   const hash = is_client ? location.hash.slice(1) : ''
   if (hash) {
     const parts = atob(hash).split('\0')
@@ -115,6 +119,10 @@ export function save_query(mode: string, query: Query): void {
   }
 
   if (query.o) search += '&o=' + escape(query.o)
+
+  if (query.i) {
+    for (const i of query.i) search += '&i=' + escape(i)
+  }
 
   if (query.d) search += '&d=1'
 

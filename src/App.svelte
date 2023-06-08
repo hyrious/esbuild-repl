@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { version, mode, input, files, options, debug } from './stores'
+  import { version, mode, input, files, options, debug, installed } from './stores'
   import { save_query } from './behaviors/query'
   import Header from './components/Header.svelte'
   import SplitPane from './components/SplitPane.svelte'
@@ -8,7 +8,14 @@
   import Output from './components/Output.svelte'
   import Footer from './components/Footer.svelte'
 
-  $: save_query($mode, { version: $version, t: $input, b: $files, o: $options, d: $debug })
+  $: save_query($mode, {
+    version: $version,
+    t: $input,
+    b: $files,
+    o: $options,
+    d: $debug,
+    i: $installed.map((e) => `${e.name}@${e.version}`),
+  })
 </script>
 
 <Header />

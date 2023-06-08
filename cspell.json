@@ -4,6 +4,9 @@
     "hyrious",
     "iconify",
     "IFDIR",
-    "IFREG"
+    "IFREG",
+    "nums",
+    "pako",
+    "ustar"
   ]
 }
