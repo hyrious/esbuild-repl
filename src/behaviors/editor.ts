@@ -1,278 +1,152 @@
-// stolen from github's source code :p
-import autosize from "@github/textarea-autosize";
-import { observe } from "selector-observer";
+// Stolen from github's source code :D
+import { observe } from 'selector-observer'
+import { default as autosize } from '@github/textarea-autosize'
+import { tabToIndentListener } from 'indent-textarea'
+import { insert, wrapSelection } from 'text-field-edit'
+import { stop } from '../helpers/dom'
 
-export function fire(target: Element, name: string, detail?: any) {
-  return target.dispatchEvent(new CustomEvent(name, { bubbles: true, cancelable: true, detail }));
+interface Subscriber {
+  unsubscribe(): void
 }
 
-type UpdatedText = {
-  text: string;
-  selection: SelectionRange;
-};
-
-type SelectionRange = [number | null, number | null];
-
-const INDENTATION_RE = /^(\s*)/;
-function addSortNewLine(
-  text: string,
-  selection: SelectionRange,
-  at: "here" | "begin" | "end"
-): UpdatedText | undefined {
-  const offset = selection[0];
-  if (!offset || !text) return;
-  const selectionEnd = selection[1] || offset;
-
-  const lines = text.slice(0, offset).split("\n");
-  const currentLine = lines[lines.length - 1];
-  const match = currentLine?.match(INDENTATION_RE);
-  if (!match) return;
-
-  const indentation = match[1] || "";
-  const insert = `\n${indentation}`;
-
-  if (at === "here") {
-    return {
-      text: text.slice(0, offset) + insert + text.slice(selectionEnd),
-      selection: [offset + insert.length, selectionEnd + insert.length],
-    };
-  } else if (at === "begin") {
-    const begin = offset - currentLine.length;
-    return {
-      text: text.slice(0, begin) + `${indentation}\n` + text.slice(begin),
-      selection: [begin + indentation.length, begin + indentation.length],
-    };
-  } else {
-    const end_ = text.indexOf("\n", selectionEnd);
-    const end = end_ < 0 ? text.length : end_;
-    return {
-      text: text.slice(0, end) + insert + text.slice(end),
-      selection: [end + insert.length, end + insert.length],
-    };
-  }
+interface SubscribeFn {
+  (el: Element): Subscriber
 }
 
-function indent(
-  text: string,
-  selection: SelectionRange,
-  substract: boolean
-): UpdatedText | undefined {
-  const selectionStart = selection[0] || 0;
-  const selectionEnd = selection[1] || selectionStart;
-  if (selection[0] === null) return;
-
-  if (selectionStart === selectionEnd) {
-    if (substract) {
-      const lines = text.slice(0, selectionEnd).split("\n");
-      const currentLine = lines[lines.length - 1];
-      const match = currentLine?.match(INDENTATION_RE);
-      if (!match) return;
-
-      let indentation = match[0];
-      const indent = indentation.length;
-      const lineText = currentLine.slice(indentation.length);
-      indentation = indentation.slice(0, -2);
-      const diff = indent - indentation.length;
-      lines[lines.length - 1] = indentation + lineText;
-
-      return {
-        text: lines.join("\n") + text.slice(selectionEnd),
-        selection: [selectionEnd - diff, selectionEnd - diff],
-      };
-    } else {
-      return {
-        text: text.slice(0, selectionStart) + "  " + text.slice(selectionEnd),
-        selection: [selectionEnd + 2, selectionEnd + 2],
-      };
-    }
-  }
-
-  const startOffset = text.slice(0, selectionStart).lastIndexOf("\n") + 1;
-  const endOffset_ = text.indexOf("\n", selectionEnd - 1);
-  const endOffset = endOffset_ > 0 ? endOffset_ : text.length - 1;
-  const selectedLines = text.slice(startOffset, endOffset).split("\n");
-
-  let startUpdated = false;
-  let selectionStartDiff = 0;
-  let selectionEndDiff = 0;
-  const updatedSelectedLines: string[] = [];
-  for (const line of selectedLines) {
-    const match = line.match(INDENTATION_RE);
-    if (match) {
-      let indentation = match[0];
-      const lineText = line.slice(indentation.length);
-      if (substract) {
-        const prevLength = indentation.length;
-        indentation = indentation.slice(0, -2);
-        selectionStartDiff = startUpdated ? selectionStartDiff : indentation.length - prevLength;
-        startUpdated = true;
-        selectionEndDiff += indentation.length - prevLength;
-      } else {
-        indentation += "  ";
-        selectionStartDiff = 2;
-        selectionEndDiff += 2;
+function compose(...subs: Subscriber[]): Subscriber {
+  return {
+    unsubscribe() {
+      for (const sub of subs) {
+        sub.unsubscribe()
       }
-      updatedSelectedLines.push(indentation + lineText);
-    }
-  }
-
-  const linesString = updatedSelectedLines.join("\n");
-  const newText = text.slice(0, startOffset) + linesString + text.slice(endOffset);
-  const newRange: SelectionRange = [
-    Math.max(startOffset, selectionStart + selectionStartDiff),
-    selectionEnd + selectionEndDiff,
-  ];
-  return { text: newText, selection: newRange };
-}
-
-function deselectText(ev: Event) {
-  const event = ev as KeyboardEvent;
-  const element = event.target as HTMLInputElement;
-  if (element.selectionDirection === "backward") {
-    element.selectionEnd = element.selectionStart;
-  } else {
-    element.selectionStart = element.selectionEnd;
-  }
-}
-
-let isIMEVisible = false;
-
-function onCompositionStart() {
-  isIMEVisible = true;
-}
-
-function onCompositionEnd() {
-  isIMEVisible = false;
-}
-
-function updateText(element: HTMLInputElement, result: UpdatedText, event: KeyboardEvent) {
-  element.value = result.text;
-  element.selectionStart = result.selection[0];
-  element.selectionEnd = result.selection[1];
-
-  event.preventDefault();
-  fire(element, "input");
-}
-
-function handleEnter(ev: Event) {
-  if (isIMEVisible) {
-    return;
-  }
-
-  const event = ev as KeyboardEvent;
-
-  if (event.key === "Enter") {
-    const element = event.target as HTMLInputElement;
-
-    let at: "here" | "begin" | "end" | undefined;
-    const ctrl = event.metaKey || event.ctrlKey;
-    const shift = event.shiftKey;
-    if (shift && !ctrl) {
-      at = "here";
-    } else if (ctrl && !shift) {
-      at = "end";
-    } else if (ctrl && shift) {
-      at = "begin";
-    }
-    if (!at) return;
-
-    const result = addSortNewLine(
-      element.value,
-      [element.selectionStart, element.selectionEnd],
-      at
-    );
-    if (result === undefined) return;
-
-    updateText(element, result, event);
-  }
-}
-
-// stolen from refined-github source/features/one-key-formatting.tsx :p
-const FormattingChars = ["`", "'", '"', "[", "(", "{", "*", "_", "~", "“", "‘"];
-const MatchingChars = ["`", "'", '"', "]", ")", "}", "*", "_", "~", "”", "’"];
-
-function handleFormat(ev: Event) {
-  if (isIMEVisible) {
-    return;
-  }
-
-  const event = ev as KeyboardEvent;
-
-  if (!FormattingChars.includes(event.key)) {
-    return;
-  }
-
-  const element = event.target as HTMLInputElement;
-
-  const [start, end] = [element.selectionStart, element.selectionEnd];
-
-  if (start === end) {
-    return;
-  }
-
-  const result = wrapSelection(element.value, [start, end], event.key);
-  if (result === undefined) return;
-
-  updateText(element, result, event);
-}
-
-function wrapSelection(
-  text: string,
-  [start, end]: SelectionRange,
-  left: string
-): UpdatedText | undefined {
-  if (start == null || end == null || start === end) return;
-
-  const right = MatchingChars[FormattingChars.indexOf(left)];
-  const selection = text.slice(start, end);
-
-  return {
-    text: text.slice(0, start) + left + selection + right + text.slice(end),
-    selection: [start + left.length, end + left.length],
-  };
-}
-
-function updateIndentation(ev: Event) {
-  if (isIMEVisible) {
-    return;
-  }
-
-  const event = ev as KeyboardEvent;
-  if (event.key === "Escape") {
-    deselectText(ev);
-    return;
-  }
-
-  if (event.key !== "Tab") return;
-
-  const element = event.target as HTMLInputElement;
-  const result = indent(
-    element.value,
-    [element.selectionStart, element.selectionEnd],
-    event.shiftKey
-  );
-  if (result === undefined) return;
-
-  updateText(element, result, event);
-}
-
-export function subscribe(el: Element) {
-  el.addEventListener("keydown", updateIndentation);
-  el.addEventListener("keydown", handleEnter);
-  el.addEventListener("keydown", handleFormat);
-  el.addEventListener("compositionstart", onCompositionStart);
-  el.addEventListener("compositionend", onCompositionEnd);
-  const { unsubscribe } = autosize(el);
-  return {
-    unsubscribe: () => {
-      el.removeEventListener("keydown", updateIndentation);
-      el.removeEventListener("keydown", handleEnter);
-      el.removeEventListener("keydown", handleFormat);
-      el.removeEventListener("compositionstart", onCompositionStart);
-      el.removeEventListener("compositionend", onCompositionEnd);
-      unsubscribe();
     },
-  };
+  }
 }
 
-export const abortController = observe("textarea.editor", { subscribe });
+let isIMEVisible = false
+const onCompositionStart = () => {
+  isIMEVisible = true
+}
+const onCompositionEnd = () => {
+  isIMEVisible = false
+}
+
+function detectIME(el: Element): Subscriber {
+  const textarea = el as HTMLTextAreaElement
+  textarea.addEventListener('compositionstart', onCompositionStart)
+  textarea.addEventListener('compositionstart', onCompositionEnd)
+  return {
+    unsubscribe() {
+      textarea.removeEventListener('compositionstart', onCompositionStart)
+      textarea.removeEventListener('compositionstart', onCompositionEnd)
+      onCompositionEnd()
+    },
+  }
+}
+
+function onKeydown(handler: (event: KeyboardEvent) => void): SubscribeFn {
+  return function subscribe(el: Element): Subscriber {
+    const textarea = el as HTMLTextAreaElement
+    textarea.addEventListener('keydown', handler)
+    return {
+      unsubscribe() {
+        textarea.removeEventListener('keydown', handler)
+      },
+    }
+  }
+}
+
+const handleEnterAndEscape = onKeydown((event) => {
+  if (isIMEVisible) return
+
+  const textarea = event.target as HTMLTextAreaElement
+
+  if (event.key === 'Enter') {
+    const primary = event.metaKey || event.ctrlKey
+    const shift = event.shiftKey
+    if (!primary && !shift) return
+
+    stop(event)
+    const text = textarea.value
+    const offset = textarea.selectionStart
+    if (text === '' || offset === 0) return
+
+    const lines = text.slice(0, offset).split('\n')
+    const current = lines[lines.length - 1]
+    const match = current?.match(/^(\s*)/)
+    if (!match) return
+
+    const indentation = match[1] || ''
+    if (shift && !primary) {
+      insert(textarea, '\n' + indentation)
+    } else if (primary && !shift) {
+      let i = Math.max(textarea.selectionStart, textarea.selectionEnd)
+      i = text.indexOf('\n', i)
+      if (i === -1) i = text.length
+      textarea.selectionStart = textarea.selectionEnd = i
+      insert(textarea, '\n' + indentation)
+    } else if (primary && shift) {
+      let i = Math.min(textarea.selectionStart, textarea.selectionEnd)
+      i = text.lastIndexOf('\n', i)
+      if (i === -1) i = 0
+      textarea.selectionStart = textarea.selectionEnd = i
+      insert(textarea, indentation + '\n')
+      textarea.selectionStart = textarea.selectionEnd = i
+    }
+
+    return
+  }
+
+  if (event.key === 'Escape') {
+    if (textarea.selectionDirection === 'backward') {
+      textarea.selectionEnd = textarea.selectionStart
+    } else {
+      textarea.selectionStart = textarea.selectionEnd
+    }
+  }
+})
+
+// Stolen from refined-github source/features/tab-to-indent.tsx :D
+const tabToIndent = onKeydown(tabToIndentListener)
+
+// Stolen from refined-github source/features/one-key-formatting.tsx :D
+const formattingCharacters = ['`', "'", '"', '[', '(', '{', '*', '_', '~', '“', '‘']
+const matchingCharacters = ['`', "'", '"', ']', ')', '}', '*', '_', '~', '”', '’']
+const quoteCharacters = new Set(['`', "'", '"'])
+
+const oneKeyFormatting = onKeydown((event) => {
+  if (isIMEVisible) return
+
+  const textarea = event.target as HTMLTextAreaElement
+  const formattingChar = event.key
+
+  if (!formattingCharacters.includes(formattingChar)) return
+
+  const [start, end] = [textarea.selectionStart, textarea.selectionEnd]
+  if (start === end) return
+
+  if (
+    quoteCharacters.has(formattingChar) &&
+    end - start === 1 &&
+    quoteCharacters.has(textarea.value.at(start) as string)
+  ) {
+    // Skip quote if it's already there
+    return
+  }
+
+  stop(event)
+  const matchingEndChar = matchingCharacters[formattingCharacters.indexOf(formattingChar)]
+  wrapSelection(textarea, formattingChar, matchingEndChar)
+})
+
+observe('textarea.editor', {
+  constructor: HTMLTextAreaElement,
+  // prettier-ignore
+  subscribe: (el: Element) => compose(
+    detectIME(el),
+    autosize(el),
+    tabToIndent(el),
+    handleEnterAndEscape(el),
+    oneKeyFormatting(el),
+  ),
+})

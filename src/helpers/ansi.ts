@@ -1,106 +1,76 @@
-// https://github.com/evanw/esbuild/blob/main/internal/logger/logger.go
-const ESCAPE_TO_COLOR = {
-  "37": "dim",
-  "31": "red",
-  "32": "green",
-  "34": "blue",
-  "36": "cyan",
-  "35": "magenta",
-  "33": "yellow",
-  "41;31": "red-bg-red",
-  "41;97": "red-bg-white",
-  "42;32": "green-bg-green",
-  "42;97": "green-bg-white",
-  "44;34": "blue-bg-blue",
-  "44;97": "blue-bg-white",
-  "46;36": "cyan-bg-cyan",
-  "46;30": "cyan-bg-black",
-  "45;35": "magenta-bg-magenta",
-  "45;30": "magenta-bg-black",
-  "43;33": "yellow-bg-yellow",
-  "43;30": "yellow-bg-black",
-} as const;
-
-type Escape = "0" | "1" | "4" | keyof typeof ESCAPE_TO_COLOR;
-
-type Color = typeof ESCAPE_TO_COLOR[keyof typeof ESCAPE_TO_COLOR];
-
-// https://github.com/sindresorhus/escape-goat
-function htmlEscape(string: string) {
-  return string
-    .replace(/\&/g, "&amp;")
-    .replace(/\"/g, "&quot;")
-    .replace(/\'/g, "&#39;")
-    .replace(/\</g, "&lt;")
-    .replace(/\>/g, "&gt;");
-}
-
 class AnsiBuffer {
-  result = "";
-  _stack: string[] = [];
-  _bold = false;
-  _underline = false;
-  text(text: string) {
-    this.result += htmlEscape(text);
+  result_ = ''
+  stack_: string[] = []
+  bold_ = false
+  underline_ = false
+  escape_(text: string) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   }
-  reset() {
-    let close: string | undefined;
-    while ((close = this._stack.pop())) {
-      this.result += close;
+  text_(text: string) {
+    this.result_ += this.escape_(text)
+  }
+  reset_() {
+    let close: string | undefined
+    while ((close = this.stack_.pop())) {
+      this.result_ += close
     }
   }
-  bold() {
-    if (!this._bold) {
-      this._bold = true;
-      this.result += "<strong>";
-      this._stack.push("</strong>");
+  strong_() {
+    if (!this.bold_) {
+      this.bold_ = true
+      this.result_ += '<strong>'
+      this.stack_.push('</strong>')
     }
   }
-  underline() {
-    if (!this._underline) {
-      this._underline = true;
-      this.result += "<ins>";
-      this._stack.push("</ins>");
+  ins_() {
+    if (!this.underline_) {
+      this.underline_ = true
+      this.result_ += '</ins>'
+      this.stack_.push('</ins>')
     }
   }
-  last() {
-    return this._stack[this._stack.length - 1];
+  last_() {
+    return this.stack_[this.stack_.length - 1]
   }
-  color(color: Color) {
-    let close: string | undefined;
-    while ((close = this.last()) === "</span>") {
-      this._stack.pop();
-      this.result += close;
+  color_(color: string) {
+    let close: string | undefined
+    while ((close = this.last_()) === '</span>') {
+      this.stack_.pop()
+      this.result_ += close
     }
-    this.result += `<span class="color-${color}">`;
-    this._stack.push("</span>");
+    this.result_ += `<span class="${color}">`
+    this.stack_.push('</span>')
   }
-  done() {
-    this.reset();
-    return this.result;
+  done_() {
+    this.reset_()
+    return this.result_
   }
 }
 
-export function render(ansi: string) {
-  ansi = ansi.trimEnd();
-  let i = 0;
-  const buffer = new AnsiBuffer();
-  for (let m of ansi.matchAll(/\x1B\[([\d;]+)m/g)) {
-    const escape = m[1] as Escape;
-    buffer.text(ansi.slice(i, m.index));
-    i = m.index! + m[0].length;
-    /*  */ if (escape === "0") {
-      buffer.reset();
-    } else if (escape === "1") {
-      buffer.bold();
-    } else if (escape === "4") {
-      buffer.underline();
-    } else if (ESCAPE_TO_COLOR[escape]) {
-      buffer.color(ESCAPE_TO_COLOR[escape]);
+export function terminal_to_html(ansi: string): string {
+  ansi = ansi.trimEnd()
+  let i = 0
+  const buffer = new AnsiBuffer()
+  for (const m of ansi.matchAll(/\033\[([^m]*)m/g)) {
+    const escape = m[1]
+    buffer.text_(ansi.slice(i, m.index))
+    i = (m.index as number) + m[0].length
+    // prettier-ignore
+    switch (escape) {
+      case '0': buffer.reset_(); break;
+      case '1': buffer.strong_(); break;
+      case '31': buffer.color_('color-red'); break;
+      case '32': buffer.color_('color-green'); break;
+      case '33': buffer.color_('color-yellow'); break;
+      case '34': buffer.color_('color-blue'); break;
+      case '35': buffer.color_('color-magenta'); break
+      case '37': buffer.color_('color-dim'); break;
+      case '41;31': buffer.color_('bg-red color-red'); break;
+      case '41;97': buffer.color_('bg-red color-white'); break;
+      case '43;33': buffer.color_('bg-yellow color-yellow'); break;
+      case '43;30': buffer.color_('bg-yellow color-black'); break;
     }
   }
-  if (i < ansi.length) {
-    buffer.text(ansi.slice(i));
-  }
-  return buffer.done();
+  if (i < ansi.length) buffer.text_(ansi.slice(i))
+  return buffer.done_()
 }

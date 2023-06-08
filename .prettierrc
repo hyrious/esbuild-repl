@@ -1,7 +1,9 @@
 {
-  "tabWidth": 2,
-  "printWidth": 100,
+  "printWidth": 110,
   "endOfLine": "auto",
-  "bracketSameLine": false,
-  "quoteProps": "consistent"
+  "quoteProps": "consistent",
+  "singleQuote": true,
+  "semi": false,
+  "trailingComma": "all",
+  "htmlWhitespaceSensitivity": "ignore"
 }

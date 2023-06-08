@@ -1,89 +1,130 @@
-import type { BuildOptions } from "esbuild";
-import { derived, Readable } from "svelte/store";
-import { configToString, getQuery, setQuery } from "../helpers";
-import { debug, mode, version } from "../stores";
-import { buildOptions, Module, modules } from "../stores/build";
-import { input, options } from "../stores/transform";
+import { is_client } from 'svelte/internal'
 
-function encodeModules($modules: Module[]) {
-  return JSON.stringify($modules.map((m) => [m.name, m.contents, Number(m.isEntry)]));
+interface Query {
+  version?: string
+  t?: string // transform input, like 'let a = 1'
+  b?: { entry: boolean; path: string; content: string }[] // build input, multiple 'e,path,content'
+  o?: string // options, can be '--minify' or '{minify:true}' (json5 value)
+  i?: string[] // installed npm packages, like '&i=jquery&i=react'
+  d?: true // debug
 }
 
-function decodeModules(raw: string): Module[] {
+function json_parse(raw: any, def: any = {}): any {
   try {
-    return JSON.parse(raw).map(
-      (e: string[]) =>
-        ({
-          name: e[0],
-          contents: e[1],
-          isEntry: Boolean(e[2]),
-        } as Module)
-    );
-  } catch {
-    return [];
+    return JSON.parse(raw)
+  } catch (e) {
+    return def
   }
 }
 
-function encodeBuildOptions($buildOptions: BuildOptions) {
-  return JSON.stringify($buildOptions);
-}
+export function load_query(): Query {
+  const search = new URLSearchParams(is_client ? location.search : '')
 
-function decodeBuildOptions(raw: string): BuildOptions {
-  try {
-    return JSON.parse(raw) || {};
-  } catch {
-    return {};
-  }
-}
+  const query: Query = Object.create(null)
 
-const query: Readable<string> = derived(
-  [version, mode, input, options, modules, buildOptions],
-  ([$version, $mode, $input, $options, $modules, $buildOptions], set) => {
-    if (!$version || $version === "latest") return;
-    const params: [string, string][] = [
-      ["version", $version],
-      ["mode", $mode],
-    ];
-    if ($mode === "transform") {
-      $input && params.push(["input", $input]);
-      $options && params.push(["options", $options]);
+  const version = search.get('version')
+  if (version && /^\d[.\d]+$/.test(version)) query.version = version
+
+  const shareable = search.get('shareable')
+  if (shareable) {
+    const legacy = json_parse(decodeURIComponent(atob(shareable))) as {
+      code?: string
+      config?: Record<string, any>
+      modules?: { name: string; code: string; isEntry: boolean }[]
     }
-    if ($mode === "build") {
-      $modules.length && params.push(["modules", encodeModules($modules)]);
-      Object.keys($buildOptions).length &&
-        params.push(["buildOptions", encodeBuildOptions($buildOptions)]);
+    if (legacy.code) query.t = legacy.code
+    if (legacy.config) query.o = JSON.stringify(legacy.config)
+    if (legacy.modules)
+      query.b = legacy.modules.map((m) => ({
+        entry: m.isEntry,
+        path: m.name,
+        content: m.code,
+      }))
+  }
+
+  if (search.get('mode') === 'build') {
+    const modules = search.get('module')
+    if (modules) query.b = json_parse(modules, []).map((e: any) => [Boolean(e[2]), e[0], e[1]])
+  } else {
+    const input = search.get('input')
+    if (input) query.t = input
+  }
+
+  const options = search.get('o') || search.get('options') || search.get('buildOptions')
+  if (options) query.o = options
+
+  if (search.has('d') || search.has('debug')) query.d = true
+
+  const t = search.get('t')
+  if (t) query.t = t
+
+  const b = search.getAll('b')
+  if (b.length > 0) {
+    query.b = []
+    for (const raw of b) {
+      const [entry, path, content] = raw.split('\0')
+      query.b.push({ entry: entry === 'e', path, content })
     }
-    const search = new URLSearchParams(params);
-    set(search.toString());
   }
-);
 
-query.subscribe((value) => {
-  if (value) setQuery(value);
-});
+  const i = search.getAll('i')
+  if (i.length > 0) query.i = i
 
-const { shareable, ...shared } = getQuery();
-// legacy shareable url
-if (shareable) {
-  const legacy = JSON.parse(decodeURIComponent(atob(shareable)));
-  console.log("legacy shareable:", legacy);
-  if (legacy.code) input.set(legacy.code);
-  if (legacy.config) options.set(configToString(legacy.config));
-  if (legacy.modules) {
-    mode.set("build");
-    modules.set(
-      legacy.modules.map(({ code: contents, ...rest }: any) => {
-        return { contents, ...rest } as Module;
-      })
-    );
+  const hash = is_client ? location.hash.slice(1) : ''
+  if (hash) {
+    const parts = atob(hash).split('\0')
+
+    if (parts[0] === 't' && parts.length === 4) {
+      query.version = parts[1]
+      query.o = parts[2]
+      query.t = parts[3]
+    }
+
+    if (parts[0] === 'b' && parts.length % 3 === 0) {
+      query.version = parts[1]
+      query.o = parts[2]
+      query.b = []
+      for (let i = 3; i < parts.length; i += 3) {
+        query.b.push({ entry: parts[i] === 'e', path: parts[i + 1], content: parts[i + 2] })
+      }
+    }
   }
-  if (legacy.options) buildOptions.set(legacy.options);
+
+  return query
 }
 
-Object.keys(shared).length && console.log(shared);
-if (shared.mode) mode.set(shared.mode as "build");
-if (shared.input) input.set(shared.input);
-if (shared.options) options.set(shared.options);
-if (shared.modules) modules.set(decodeModules(shared.modules));
-if (shared.buildOptions) buildOptions.set(decodeBuildOptions(shared.buildOptions));
-if (shared.debug) debug.set(true);
+function escape(raw?: string): string {
+  if (raw === undefined) return ''
+  return raw
+    .replace(/[ ]/g, '+')
+    .replace(/\n/g, '%0A')
+    .replace(/\t/g, '%09')
+    .replace(/&/g, '%26')
+    .replace(/#/g, '%23')
+}
+
+export function save_query(mode: string, query: Query): void {
+  if (!is_client) return
+
+  let search = ''
+
+  if (query.version && query.version !== 'latest') search += '&version=' + query.version
+
+  if (mode === 'transform') search += '&t=' + escape(query.t)
+
+  if (mode === 'build' && query.b) {
+    for (const { entry, path, content } of query.b) {
+      search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join('\0')
+    }
+    if (query.i) {
+      for (const i of query.i) search += '&i=' + escape(i)
+    }
+  }
+
+  if (query.o) search += '&o=' + escape(query.o)
+
+  if (query.d) search += '&d=1'
+
+  const base = location.pathname
+  history.replaceState({}, '', search ? base + '?' + search.slice(1) : base)
+}

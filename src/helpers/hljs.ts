@@ -1,103 +1,110 @@
-import type { Loader } from "esbuild";
-import { isBrowser, noop } from "./utils";
+import type { Loader } from 'esbuild'
+import type { Action } from 'svelte/action'
+import { is_client, noop } from 'svelte/internal'
+import { stop } from './dom'
 
-const hljs = isBrowser ? new Worker("./hljs.js") : null;
+const hljs = is_client ? new Worker('hljs.js') : null
 
-interface Payload {
-  id: number;
-  code: string;
-  lang?: string;
+interface Request {
+  id: number
+  code: string
+  lang?: string
 }
 
-interface Result {
-  id: number;
-  value: string;
+interface Response {
+  id: number
+  value: string
 }
 
-const Tasks = new Map<number, (value: string) => void>();
+const Tasks = new Map<number, (value: string) => void>()
 
-let id = 1;
+hljs?.addEventListener('message', (ev: MessageEvent<Response>) => {
+  const { id, value } = ev.data
+  const task = Tasks.get(id)
+  if (task) {
+    task(value)
+    Tasks.delete(id)
+  }
+})
 
-if (hljs) {
-  hljs.addEventListener("message", (ev: MessageEvent<Result>) => {
-    const { id, value } = ev.data;
-    if (Tasks.has(id)) {
-      Tasks.get(id)!(value);
-      Tasks.delete(id);
-    }
-  });
+let id = 1
+
+function request(code: string, lang?: string): Promise<string> {
+  if (!hljs) return new Promise(noop)
+  let resolve!: (value: string) => void
+  const task = new Promise<string>((r) => (resolve = r))
+  Tasks.set(id, resolve)
+  hljs.postMessage({ id, code, lang } satisfies Request)
+  id++
+  return task
 }
 
-export function highlight(code: string, lang?: string) {
-  if (!hljs) return new Promise<string>(noop);
-  let resolve!: (value: string) => void;
-  const task = new Promise<string>((r) => (resolve = r));
-  Tasks.set(id, resolve);
-  hljs.postMessage(<Payload>{ id, code, lang });
-  id++;
-  return task;
-}
-
-class ActionTask {
-  cancelled = false;
-  constructor(readonly node: HTMLPreElement, readonly token: number) {}
-  replaceInnerHTML = (html: string) => {
-    clearTimeout(this.token);
+class Task {
+  cancelled = false
+  constructor(readonly node: HTMLElement, readonly token: number) {}
+  replaceInnerHTML = (html: string): void => {
+    clearTimeout(this.token)
     if (!this.cancelled) {
-      this.node.innerHTML = html;
+      this.node.innerHTML = html
     }
-  };
+  }
   cancel() {
-    clearTimeout(this.token);
-    this.cancelled = true;
+    clearTimeout(this.token)
+    this.cancelled = true
   }
 }
 
-export interface Params {
-  code?: string;
-  loader?: Loader;
+interface Params {
+  code?: string
+  loader?: Loader
 }
 
-const NonJSLoaders = new Set(["css", "json"]);
+const MAX_CODE_SIZE = 100_000 // 100 KB
 
-export function hljs_action(node: HTMLPreElement, params: Params) {
-  let last: ActionTask | null = null;
+export const highlight: Action = function highlight(node: HTMLElement, params: Params) {
+  let activeTask: Task | null = null
+
   const update = ({ code, loader }: Params) => {
-    if (last) {
-      last.cancel();
-      last = null;
+    if (activeTask) {
+      activeTask.cancel()
+      activeTask = null
+    }
+    if (code && code.length > MAX_CODE_SIZE) {
+      node.innerText = code
+      return
     }
     if (code) {
-      last = new ActionTask(
+      activeTask = new Task(
         node,
         setTimeout(() => {
-          node.innerText = code;
-        }, 50)
-      );
-      const lang = loader && NonJSLoaders.has(loader) ? loader : "js";
-      highlight(code, lang).then(last.replaceInnerHTML);
+          node.innerText = code
+        }, 50),
+      )
+      request(code, loader).then(activeTask.replaceInnerHTML)
     } else {
-      node.innerText = "";
+      node.innerText = ''
     }
-  };
-  const select_all = (ev: MouseEvent) => {
-    ev.preventDefault();
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    const selection = window.getSelection();
+  }
+  const select_all = (event: MouseEvent) => {
+    stop(event)
+    const range = document.createRange()
+    range.selectNodeContents(node)
+    const selection = window.getSelection()
     if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(range);
+      selection.removeAllRanges()
+      selection.addRange(range)
     }
-  };
-  node.addEventListener("dblclick", select_all);
+  }
   const destroy = () => {
-    node.removeEventListener("dblclick", select_all);
-    if (last) {
-      last.cancel();
-      last = null;
+    node.removeEventListener('dblclick', select_all)
+    if (activeTask) {
+      activeTask.cancel()
+      activeTask = null
     }
-  };
-  update(params);
-  return { update, destroy };
+  }
+
+  node.addEventListener('dblclick', select_all)
+  update(params)
+
+  return { update, destroy }
 }

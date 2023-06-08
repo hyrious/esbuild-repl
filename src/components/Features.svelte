@@ -1,71 +1,212 @@
 <script lang="ts">
-  import { detect } from "../helpers/feat";
-  import { esbuild, status } from "../stores/index";
-  import { input as code, optionsObj as options, result } from "../stores/transform";
+  import type { TransformOptions } from 'esbuild'
+  import { Mode, parseOptions } from '../helpers/options'
+  import { input, options, status, output } from '../stores'
+  import { tick } from 'svelte'
+  import Editor from './Editor.svelte'
 
-  let phase: "idle" | "detecting" | "detected";
-  let features: string[] = [];
+  let features: string[] = []
+  let phase: 'idle' | 'detecting' | 'detected' = 'idle'
 
-  async function detect_features() {
-    if (!$esbuild) return;
-    phase = "detecting";
-    let task = detect($esbuild, $code, $options);
-    task.then((feats) => {
-      features = feats;
-      phase = "detected";
-    });
-    task.catch((err) => {
-      $status = err.message;
-      phase = "idle";
-      features = [];
-    });
+  $: if ($output) {
+    phase = 'idle'
+    features = []
   }
 
-  $: if ($result) {
-    phase = "idle";
-    features = [];
+  // See https://github.com/evanw/esbuild/blob/main/internal/compat/js_table.go
+  const JS_FEATURES = [
+    'arbitrary-module-namespace-names',
+    'array-spread',
+    'arrow',
+    'async-await',
+    'async-generator',
+    'bigint',
+    'class',
+    'class-field',
+    'class-private-accessor',
+    'class-private-brand-check',
+    'class-private-field',
+    'class-private-method',
+    'class-private-static-accessor',
+    'class-private-static-field',
+    'class-private-static-method',
+    'class-static-blocks',
+    'class-static-field',
+    'const-and-let',
+    'decorators',
+    'default-argument',
+    'destructuring',
+    'dynamic-import',
+    'exponent-operator',
+    'export-star-as',
+    'for-await',
+    'for-of',
+    'function-or-class-property-access',
+    'generator',
+    'hashbang',
+    'import-assertions',
+    'import-meta',
+    'inline-script',
+    'logical-assignment',
+    'nested-rest-binding',
+    'new-target',
+    'node-colon-prefix-import',
+    'node-colon-prefix-require',
+    'nullish-coalescing',
+    'object-accessors',
+    'object-extensions',
+    'object-rest-spread',
+    'optional-catch-binding',
+    'optional-chain',
+    'regexp-dot-all-flag',
+    'regexp-lookbehind-assertions',
+    'regexp-match-indices',
+    'regexp-named-capture-groups',
+    'regexp-set-notation',
+    'regexp-sticky-and-unicode-flags',
+    'regexp-unicode-property-escapes',
+    'rest-argument',
+    'template-literal',
+    'top-level-await',
+    'typeof-exotic-object-is-object',
+    'unicode-escapes',
+  ]
+
+  // See https://github.com/evanw/esbuild/blob/main/internal/compat/css_table.go
+  const CSS_FEATURES = [
+    'hex-rgba',
+    'inline-style',
+    'rebecca-purple',
+    'modern-rgb-hsl',
+    'inset-property',
+    'nesting',
+    'is-pseudo-class',
+  ]
+
+  class Task {
+    cancelled = false
+    resolve?: (features: string[]) => void
+    reject?: (error: Error) => void
+    constructor(
+      esbuild: typeof import('esbuild'),
+      code: string,
+      options: TransformOptions,
+      features: string[],
+    ) {
+      this._run(esbuild, code, options, features)
+    }
+    async _run(
+      esbuild: typeof import('esbuild'),
+      code: string,
+      options: TransformOptions,
+      features: string[],
+    ) {
+      await tick()
+      const detected: string[] = []
+
+      let baseline: string
+      try {
+        await esbuild.transform(code, options).then((r) => (baseline = r.code))
+      } catch (err) {
+        !this.cancelled && this.reject && this.reject(err)
+        return
+      }
+      if (this.cancelled) return
+
+      for (const feat of features) {
+        options.supported = { [feat]: false }
+        try {
+          await esbuild.transform(code, options).then((r) => {
+            if (r.code !== baseline) detected.push(feat)
+          })
+        } catch (err) {
+          if (!err.message.includes('is not a valid feature')) detected.push(feat)
+        }
+        if (this.cancelled) return
+      }
+
+      this.resolve && this.resolve(detected)
+    }
+    cancel() {
+      this.cancelled = true
+    }
+    then(fn: (features: string[]) => void) {
+      this.resolve = fn
+    }
+    catch(fn: (error: Error) => void) {
+      this.reject = fn
+    }
+  }
+
+  let activeTask: Task | null = null
+
+  function detect_features() {
+    const esbuild: typeof import('esbuild') = (window as any).esbuild
+    if (!esbuild) {
+      throw new Error('esbuild has not been initialized')
+    }
+
+    const opts = parseOptions($options, Mode.Transform)
+    const kind = !opts.loader ? 'js' : opts.loader === 'css' ? 'css' : 'js'
+    const feats = kind === 'js' ? JS_FEATURES : CSS_FEATURES
+    opts.supported = {}
+    opts.target = 'esnext'
+
+    phase = 'detecting'
+    activeTask && activeTask.cancel()
+    activeTask = new Task(esbuild, $input, opts, feats)
+    activeTask.then((features_) => {
+      features = features_
+      phase = 'detected'
+    })
+    activeTask.catch((err) => {
+      $status = err + ''
+      phase = 'idle'
+      features = []
+    })
   }
 </script>
 
-<aside class="features">
-  {#if phase !== "detected"}
-    <button disabled={!$esbuild || phase === "detecting"} on:click={detect_features}>
-      {#if phase === "detecting"}Detecting{:else}Detect{/if} Features
-    </button>
-  {:else}<pre class="features-result">Features:
-{features.length ? features.join("\n") : "None"}</pre>{/if}
-</aside>
+<div class="features" style={phase === 'detected' ? 'display: none' : ''}>
+  <button
+    class:detecting={phase === 'detecting'}
+    title="--supported:?"
+    disabled={phase !== 'idle'}
+    on:click={detect_features}
+  >
+    {phase === 'detecting' ? 'Detecting' : 'Detect'} features
+  </button>
+</div>
+{#if phase === 'detected'}
+  <Editor label="FEATURES" readonly content={features.join('\n')} lang="raw" />
+{/if}
 
 <style>
-  aside {
+  .features {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--gap);
+    margin: -6px 0 6px;
   }
   button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3em;
+    appearance: none;
+    background: none;
+    margin-left: auto;
     border: none;
-    border-radius: var(--gap);
+    padding: 0;
     outline: none;
-    background-color: rgba(127, 127, 127, 0.1);
-    color: var(--fg);
-    padding: calc(var(--gap) * 2) calc(var(--gap) * 2);
+    color: inherit;
+    text-decoration: underline;
+    opacity: 0.5;
+    transition: opacity 0.2s;
     cursor: pointer;
-    line-height: 1;
+  }
+  button:hover {
+    opacity: 1;
   }
   button:disabled {
-    cursor: progress;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
-  button:not(:disabled):hover {
-    --fg: var(--fg-on);
-    background-color: rgba(127, 127, 127, 0.2);
-  }
-  button:not(:disabled):active {
-    --fg: var(--fg-on);
-    background-color: rgba(127, 127, 127, 0.1);
+  button.detecting {
+    cursor: wait;
   }
 </style>

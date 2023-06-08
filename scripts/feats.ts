@@ -1,19 +1,16 @@
-import https from "https";
-
-const prefix = "https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat";
-// const prefix = "https://raw.fastgit.org/evanw/esbuild/main/internal/compat";
-
-// https.get(`${prefix}/js_table.go`, async (res) => {
-https.get(`${prefix}/css_table.go`, async (res) => {
-  const chunks = [];
-  for await (const chunk of res) {
-    chunks.push(chunk);
-  }
-  const code = Buffer.concat(chunks).toString();
-  const feats: string[] = [];
+async function main(prefix: string, url: string) {
+  const code = await fetch(url).then((r) => r.text())
+  console.log(prefix + '[')
   code.replace(/^\t"([-a-z]+)":/gm, (_, id) => {
-    feats.push(id);
-    return "";
-  });
-  console.log(JSON.stringify(feats));
-});
+    console.log(`  "${id}",`)
+    return ''
+  })
+  console.log(']')
+}
+
+const js_table = 'https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat/js_table.go'
+const css_table = 'https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat/css_table.go'
+await main('const JS_FEATURES = ', js_table)
+await main('const CSS_FEATURES = ', css_table)
+
+export type {}

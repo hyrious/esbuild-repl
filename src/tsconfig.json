@@ -1,15 +1,19 @@
 {
-  "exclude": ["sw.ts", "hljs.ts"],
+  "exclude": ["sw.ts", "hljs.ts", "worker.ts"],
   "compilerOptions": {
-    "noEmit": true,
     "strict": true,
-    "skipLibCheck": true,
+    "target": "esnext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "module": "esnext",
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "Node",
-    "types": ["svelte"],
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "types": [],
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
     "useUnknownInCatchVariables": false
   }
 }

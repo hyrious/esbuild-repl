@@ -1,235 +1,230 @@
 <script lang="ts">
-  import type { Loader } from "esbuild";
-  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
-  import { delay, isBrowser, isMobile } from "../helpers";
-  import { hljs_action } from "../helpers/hljs";
-  import { getCodeMirror } from "../behaviors/get-codemirror";
-  import { mode, status } from "../stores";
+  import { createEventDispatcher } from 'svelte'
+  import prettyBytes from 'pretty-bytes'
+  import { highlight } from '../helpers/hljs'
 
-  export let name = "";
-  export let contents = "";
-  export let isEntry = false;
-  export let readonly = false;
-  export let download: boolean | string = false;
+  export let header = false
+  export let rows = 1
+  export let name = ''
+  export let label = ''
+  export let content = ''
+  export let placeholder = ''
+  export let entry = false
+  export let readonly = false
+  export let download: boolean | string = false
+  export let lang = ''
 
-  let CodeMirror: typeof import("codemirror") | undefined;
-  let editor: CodeMirror.Editor | undefined;
-  let editorEl: HTMLTextAreaElement | undefined;
-  let previousContents = contents;
-  let loader: Loader;
+  const dispatch = createEventDispatcher()
 
-  $: loader = name.endsWith(".css") ? "css" : name.endsWith(".map") ? "json" : "js";
-  $: if (CodeMirror && editor && name) {
-    const m = /.+\.([^.]+)$/.exec(name);
-    const info = CodeMirror.findModeByExtension((m && m[1]) || "js");
-    if (info) {
-      editor.setOption("mode", info.mime);
-    }
+  function guess_lang(name: string) {
+    if (name.endsWith('.css')) return 'css'
+    if (name.endsWith('.map') || name.endsWith('.json')) return 'json'
+    return 'js'
   }
 
-  const dispatch = createEventDispatcher();
-
-  function noop() {}
-
-  function focus_editor() {
-    if (editor) {
-      editor.focus();
-      editor.setCursor(editor.lineCount(), 9999);
-    }
-  }
-
-  // https://web.dev/patterns/files/save-a-file
-  async function download_it() {
-    const blob = new Blob([contents], { type: "text/plain" });
-    const suggestedName = typeof download === "string" ? download : name;
-    if (window.showSaveFilePicker) {
-      try {
-        const handle = await window.showSaveFilePicker({ suggestedName });
-        const writer = await handle.createWritable();
-        await writer.write(blob);
-        await writer.close();
-        $status = `File ${suggestedName} has been saved.`;
-        return;
-      } catch (err) {
-        if (err.name === "AbortError") {
-          return;
-        } else {
-          console.error(err);
-        }
-      }
-    }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = suggestedName;
-    a.style.display = "none";
-    document.body.append(a);
-    a.click();
-    await delay(1000);
-    URL.revokeObjectURL(url);
-    a.remove();
-  }
-
-  onMount(async () => {
-    if (!editorEl) return;
-    ({ default: CodeMirror } = await getCodeMirror());
-
-    editor = CodeMirror.fromTextArea(editorEl, {
-      lineNumbers: true,
-      lineWrapping: true,
-      indentWithTabs: true,
-      indentUnit: 2,
-      tabSize: 2,
-      dragDrop: false,
-      value: contents,
-      mode: loader === "js" ? "javascript" : loader,
-      readOnly: readonly,
-    });
-
-    editor.on("change", (instance) => {
-      contents = instance.getValue();
-      previousContents = contents;
-    });
-
-    editor.setValue(contents);
-  });
-
-  onDestroy(() => {
-    editor && (editor as any).toTextArea();
-  });
-
-  $: if (previousContents !== contents && editor) {
-    previousContents = contents;
-    editor.setValue(contents);
-  }
-
-  $: if ($mode && editor) {
-    tick().then(editor.refresh.bind(editor));
-  }
+  async function download_it() {}
 </script>
 
-<article class="module" class:is-entry={isEntry}>
-  <header>
-    {#if readonly}
-      <input placeholder="main.js" spellcheck="false" value={name} readonly />
+<article data-label={label}>
+  {#if header || $$slots.header}
+    <slot name="header">
+      <header class:entry>
+        {#if readonly}
+          <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
+          <span class="size">{prettyBytes(content.length, { binary: true })}</span>
+        {:else}
+          <button class="entry" title="entry: {entry ? 'yes' : 'no'}" on:click={() => (entry = !entry)}>
+            <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
+          </button>
+          <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
+          <button class="remove" title="remove {name || 'it'}" on:click={() => dispatch('remove')}>
+            <i class="i-mdi-close" />
+          </button>
+        {/if}
+        {#if download}
+          <button class="download" title="download it" on:click={download_it} />
+        {/if}
+      </header>
+    </slot>
+  {/if}
+  {#if readonly}
+    {#if lang === 'raw'}
+      <pre>{content}</pre>
+    {:else if lang === 'comment'}
+      <pre class="hljs-comment">{content}</pre>
     {:else}
-      <input placeholder="main.js" spellcheck="false" bind:value={name} />
-      <button class="remove" on:click={() => dispatch("remove")}>
-        <span class="label">remove</span>
-        <i class="i-mdi-close" />
-      </button>
-      <button class="entry" on:click={() => (isEntry = !isEntry)}>
-        <span class="label">(entry&nbsp;module)</span>
-        <i class={isEntry ? "i-mdi-minus" : "i-mdi-plus"} />
-      </button>
+      <pre use:highlight={{ code: content, loader: lang || guess_lang(name) }} />
     {/if}
-    {#if download}
-      <button class="download" on:click={download_it} title="download">
-        <i class="i-mdi-download" />
-      </button>
-    {/if}
-  </header>
-  {#if isBrowser && !isMobile && !readonly}
-    <div class="codemirror-container" on:click|self={focus_editor} on:keydown={noop}>
-      <textarea tabindex="0" value={contents} bind:this={editorEl} />
-    </div>
-  {:else if readonly}
-    <pre class="chunk" use:hljs_action={{ code: contents, loader }} />
   {:else}
-    <textarea class="editor" rows="2" spellcheck="false" bind:value={contents} />
+    <textarea class="editor" {rows} spellcheck="false" bind:value={content} {placeholder} />
   {/if}
 </article>
 
 <style>
-  article {
-    border: 1px solid rgba(127, 127, 127, 0.5);
-    border-radius: var(--gap);
-    overflow: hidden;
-  }
-  header {
+  [data-label] {
     position: relative;
-    border-bottom: 1px solid rgba(127, 127, 127, 0.5);
   }
-  input {
-    border: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    outline: none;
-    font: 14px/1.4 var(--mono);
-    background-color: rgba(127, 127, 127, 0.1);
-    padding: calc(var(--gap) * 1.5);
-    cursor: text;
-    line-height: 1;
+  [data-label]::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 8px;
+    top: 5px;
+    font: var(--code-font);
+    opacity: 0.5;
+    font-weight: 700;
+    color: var(--fg);
+    pointer-events: none;
   }
-  input[readonly] {
+  [data-label]:has(header)::after {
+    top: 29px;
+  }
+  article {
+    display: flex;
+    flex-direction: column;
     color: var(--fg);
   }
-  input:not([readonly]):focus {
-    background-color: rgba(0, 0, 0, 0.1);
+  article:not(:last-child) {
+    margin-bottom: 10px;
   }
-  textarea {
-    border: 0;
+  header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  header input {
+    flex: 1;
+    width: 100%;
+    appearance: none;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0 1px;
+    font: var(--code-font);
+    color: inherit;
+  }
+  header input[readonly] {
+    color: var(--fg-on);
+    font-weight: 700;
+  }
+  header.entry input,
+  header.entry button.entry {
+    color: #58a549;
+  }
+  header.entry input {
+    font-weight: 700;
+  }
+  header button {
+    appearance: none;
+    display: inline-flex;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font-size: 20px;
+    transition: opacity 0.2s;
+  }
+  button.entry {
+    position: absolute;
+    right: 100%;
+    z-index: 10;
+    opacity: 0;
+  }
+  :where(header:hover) button.entry {
+    opacity: 0.5;
+  }
+  header:has(input:focus) button.entry,
+  header.entry button.entry,
+  button.entry:hover {
+    opacity: 1;
+  }
+  button.remove {
+    color: #e24834;
+    opacity: 0.5;
+  }
+  button.remove:hover {
+    opacity: 1;
+  }
+  span.size {
+    font: 14px/20px sans-serif;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.5;
   }
   pre {
-    max-height: calc(100vh - 96px);
-    border: none;
+    margin: 0;
+    padding: 8px;
+    border-radius: 4px;
+    min-height: 34px;
+    max-height: 400px;
+    font: var(--code-font);
+    background: var(--pre);
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
   }
-  button {
-    position: absolute;
-    border: none;
-    padding: 0.3em;
+  @media (max-width: 800px) {
+    pre {
+      white-space: pre;
+    }
+  }
+  textarea {
+    appearance: none;
+    resize: none;
+    width: 100%;
+    height: 100%;
+    font: var(--code-font);
+    color: inherit;
+    background: var(--pre);
+    border: 1px solid var(--border);
+    border-radius: 4px;
     outline: none;
-    right: 0;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
+    padding: 8px;
+    white-space: pre;
+    overscroll-behavior: contain;
+    overflow: auto;
+    overflow-y: scroll;
+    overflow-y: overlay;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    scrollbar-width: auto;
+  }
+  textarea:focus {
+    color: var(--fg-on);
+    border-color: var(--fg);
+  }
+  textarea[rows='2'] {
+    min-height: 54px;
+  }
+  textarea::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  textarea::-webkit-scrollbar-track {
     background-color: transparent;
-    color: var(--fg);
-    opacity: 0.4;
-    transition: opacity 0.2s;
-    line-height: 1;
-    cursor: pointer;
   }
-  button:hover {
-    opacity: 1;
+  textarea::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
-  .label {
-    position: absolute;
-    right: 100%;
-    opacity: 0;
-    transition: opacity 0.2s;
+  textarea::-webkit-scrollbar-thumb {
+    background-color: var(--pre);
+    background-color: transparent;
+    border-radius: 4px;
+    transition: background-color 0.4s;
   }
-  button:hover .label,
-  .is-entry .entry .label {
-    opacity: 0.6;
+  textarea:hover::-webkit-scrollbar-thumb {
+    background-color: var(--pre);
   }
-  .remove {
-    --fg: var(--red);
-    top: 0;
+  textarea::-webkit-scrollbar-thumb:hover {
+    background-color: var(--border);
   }
-  .entry {
-    bottom: 0;
+  textarea::-webkit-scrollbar-thumb:active {
+    background-color: var(--fg);
   }
-  .download {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: calc(var(--gap) * 1.5);
-    margin: auto 0;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
+  textarea::-webkit-scrollbar-thumb:vertical {
+    min-height: 50px;
   }
-  .codemirror-container {
-    min-height: 48px;
-    background-color: var(--bg);
-    cursor: text;
+  textarea::-webkit-scrollbar-thumb:horizontal {
+    min-width: 50px;
   }
 </style>
