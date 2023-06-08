@@ -53,9 +53,15 @@ interface InstalledPackage {
 }
 export const installed = writable<InstalledPackage[]>([])
 
+export const ready = writable(0, (set) => {
+  let next = 1
+  emitter.on('ready', () => set(next++))
+})
 export const output: Readable<IPCResponse> = derived(
-  [mode, input, files, options, installed],
-  ([$mode, $input, $files, $options, $installed], set) => {
+  [mode, input, files, options, installed, ready],
+  ([$mode, $input, $files, $options, $installed, $ready], set) => {
+    if (!$ready) return
+
     try {
       if ($mode === 'transform') {
         sendIPC({
