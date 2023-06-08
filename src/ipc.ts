@@ -101,7 +101,9 @@ async function reloadWorker(version: string): Promise<Worker> {
     ])
     setupLocal(esbuildJS, esbuildWASM.slice(0))
 
-    const parts = [esbuildJS, workerJS]
+    const i = workerJS.lastIndexOf('//# sourceMappingURL=')
+    const workerJSWithoutSourceMap = i >= 0 ? workerJS.slice(0, i) : workerJS
+    const parts = [esbuildJS, workerJSWithoutSourceMap]
     const url = URL.createObjectURL(new Blob(parts, { type: 'application/javascript' }))
 
     return await new Promise<Worker>((resolve, reject) => {
