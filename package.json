@@ -35,6 +35,7 @@
     "eslint-plugin-case-police": "^0.6.1",
     "fast-glob": "^3.2.12",
     "highlight.js": "^11.8.0",
-    "launch-editor-middleware": "^2.6.0"
+    "launch-editor-middleware": "^2.6.0",
+    "svelte-check": "^3.4.3"
   }
 }
