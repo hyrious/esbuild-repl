@@ -3,6 +3,7 @@
 
   export let name = ''
   export let version = ''
+  export let size = 0
 
   function npm_browser() {
     const url = `https://hyrious.me/npm-browser/?q=${name}@${version}`
@@ -19,7 +20,7 @@
 </script>
 
 <div class="npm-package">
-  <i class="i-mdi-package-variant-closed-check" />
+  <i class="i-mdi-package-variant-closed-check" title={size ? size + ' files' : ''} />
   <a class="npm-package__name" href="https://www.npmjs.com/package/{name}" target="_blank" rel="noreferrer">
     {name}
   </a>
@@ -54,7 +55,6 @@
     color: #e24834;
   }
   .npm-package {
-    overflow: hidden;
     display: flex;
     align-items: center;
     font: 14px/20px sans-serif;
@@ -80,5 +80,8 @@
   }
   .npm-package__version::before {
     content: '@';
+  }
+  .i-mdi-package-variant-closed-check {
+    cursor: help;
   }
 </style>

@@ -146,6 +146,8 @@
   }
   span.size {
     font: 14px/20px sans-serif;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.5;
   }
   pre {
     margin: 0;

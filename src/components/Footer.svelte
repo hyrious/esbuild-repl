@@ -36,6 +36,7 @@
     align-items: center;
     gap: 10px;
     font: 14px/20px sans-serif;
+    font-variant-numeric: tabular-nums;
     background: var(--bg);
     z-index: 20;
   }

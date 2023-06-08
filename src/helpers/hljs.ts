@@ -59,6 +59,8 @@ interface Params {
   loader?: Loader
 }
 
+const MAX_CODE_SIZE = 100_000 // 100 KB
+
 export const highlight: Action = function highlight(node: HTMLElement, params: Params) {
   let activeTask: Task | null = null
 
@@ -66,6 +68,10 @@ export const highlight: Action = function highlight(node: HTMLElement, params: P
     if (activeTask) {
       activeTask.cancel()
       activeTask = null
+    }
+    if (code && code.length > MAX_CODE_SIZE) {
+      node.innerText = code
+      return
     }
     if (code) {
       activeTask = new Task(

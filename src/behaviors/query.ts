@@ -116,13 +116,12 @@ export function save_query(mode: string, query: Query): void {
     for (const { entry, path, content } of query.b) {
       search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join('\0')
     }
+    if (query.i) {
+      for (const i of query.i) search += '&i=' + escape(i)
+    }
   }
 
   if (query.o) search += '&o=' + escape(query.o)
-
-  if (query.i) {
-    for (const i of query.i) search += '&i=' + escape(i)
-  }
 
   if (query.d) search += '&d=1'
 

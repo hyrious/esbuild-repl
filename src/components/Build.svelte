@@ -9,7 +9,7 @@
 
   export let show = true
 
-  const default_options = '--bundle --format=esm --splitting --outdir=/'
+  const default_options = '--bundle --format=esm --splitting\n--outdir=/ --packages=external'
   let build_options = ($mode === 'build' && $options) || default_options
   $: if ($mode === 'build') {
     $options = build_options
@@ -153,7 +153,7 @@
   <Editor
     bind:content={build_options}
     label="OPTIONS"
-    rows={1}
+    rows={2}
     placeholder="e.g. --minify or {'{'} minify: true {'}'}"
   >
     <aside class:show={build_options !== default_options} slot="header">
@@ -179,8 +179,8 @@
       <i class="i-mdi-plus" />
       <span>{new_file_name}</span>
     </button>
-    {#each $installed as { name, version } (name)}
-      <NpmPackage {name} {version} />
+    {#each $installed as { name, version, files } (name)}
+      <NpmPackage {name} {version} size={files.length} />
     {/each}
     <button on:click={npm_install} title="npm install &hellip;">
       <i class="i-mdi-package-variant-closed-plus" />
@@ -193,7 +193,7 @@
   aside {
     position: absolute;
     display: inline-flex;
-    top: 1px;
+    top: 8px;
     right: 100%;
     border-radius: 4px;
     opacity: 0;
@@ -205,11 +205,6 @@
   aside:hover,
   aside.show {
     opacity: 1;
-  }
-  @media (max-width: 800px) {
-    aside {
-      top: 8px;
-    }
   }
   button {
     position: relative;
