@@ -1,7 +1,8 @@
 {
   "version": 3,
   "sources": ["../src/hljs.ts"],
-  "sourcesContent": ["declare var hljs: typeof import(\"highlight.js\").default;\n\nimportScripts(\"https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.5.1/highlight.min.js\");\n\naddEventListener(\n  \"message\",\n  ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {\n    const { id, code, lang } = data;\n    const { value } = hljs.highlight(code, { language: lang || \"js\" });\n    postMessage({ id, value });\n  }\n);\n"],
-  "mappings": "AAEA,cAAc,8EAA8E,EAE5F,iBACE,UACA,CAAC,CAAE,KAAAA,CAAK,IAAiE,CACvE,GAAM,CAAE,GAAAC,EAAI,KAAAC,EAAM,KAAAC,CAAK,EAAIH,EACrB,CAAE,MAAAI,CAAM,EAAI,KAAK,UAAUF,EAAM,CAAE,SAAUC,GAAQ,IAAK,CAAC,EACjE,YAAY,CAAE,GAAAF,EAAI,MAAAG,CAAM,CAAC,CAC3B,CACF",
-  "names": ["data", "id", "code", "lang", "value"]
+  "sourcesContent": ["declare const hljs: typeof import('highlight.js').default\n\nimportScripts('https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.8.0/highlight.min.js')\n\ninterface Payload {\n  id: number\n  code: string\n  lang?: string\n}\n\naddEventListener('message', ({ data }: MessageEvent<Payload>) => {\n  const { id, code, lang } = data\n  const { value } = hljs.highlight(code, { language: lang || 'js' })\n  postMessage({ id, value })\n})\n"],
+  "mappings": "AAEA,cAAc,8EAA8E,EAQ5F,iBAAiB,UAAW,CAAC,CAAE,KAAAA,CAAK,IAA6B,CAC/D,GAAM,CAAE,GAAAC,EAAI,KAAAC,EAAM,KAAAC,CAAK,EAAIH,EACrB,CAAE,MAAAI,CAAM,EAAI,KAAK,UAAUF,EAAM,CAAE,SAAUC,GAAQ,IAAK,CAAC,EACjE,YAAY,CAAE,GAAAF,EAAI,MAAAG,CAAM,CAAC,CAC3B,CAAC",
+  "names": ["data", "id", "code", "lang", "value"],
+  "x_google_ignoreList": []
 }

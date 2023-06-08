@@ -13,59 +13,48 @@
   <link rel="stylesheet" href="./main.css">
 </head>
 <body>
-  <div id="app"><header class="svelte-pfu2r"><h1 class="svelte-pfu2r"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-pfu2r">esbuild</a>
-    <span>.</span>
-    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" rel="noreferrer" class="svelte-pfu2r">repl</a></h1>
-  <nav class="svelte-pfu2r"><input type="radio" name="mode" id="mode-transform" value="transform" checked class="svelte-pfu2r">
-      
-      <label for="mode-transform" tabindex="0" title="esbuild.transform()" class="svelte-pfu2r">transform
-      </label><input type="radio" name="mode" id="mode-build" value="build"  class="svelte-pfu2r">
-      
-      <label for="mode-build" tabindex="0" title="esbuild.build()" class="svelte-pfu2r">build
-      </label>
-    </nav>
-  <select value="latest" title="change version" class="svelte-pfu2r"><option value="latest">latest</option></select>
-  <button title="hyrious/esbuild-repl" class="svelte-pfu2r"><i class="i-mdi-github svelte-pfu2r"></i></button>
-  <button title="share (press shift for rollup url)" class="svelte-pfu2r"><i class="i-mdi-share-variant svelte-pfu2r"></i></button>
-  <button title="theme: dark" class="svelte-pfu2r"><i class="i-mdi-moon-waxing-crescent svelte-pfu2r"></i></button>
+  <div id="app"><header class="svelte-o6r9mw"><h1 class="svelte-o6r9mw"><a href="https://esbuild.github.io" target="_blank" rel="noreferrer" class="svelte-o6r9mw">esbuild</a>
+    <span class="svelte-o6r9mw">.</span>
+    <a href="https://github.com/hyrious/esbuild-repl" target="_blank" class="svelte-o6r9mw">repl</a></h1>
+  <nav class="svelte-o6r9mw"><label title="esbuild.transform(code)" class="svelte-o6r9mw" style="width: 90px;"><input type="radio" name="mode" value="transform" class="svelte-o6r9mw" checked>
+      <span class="svelte-o6r9mw">Transform</span></label>
+    <label title="esbuild.build(options)" class="svelte-o6r9mw" style="width: 50px;"><input type="radio" name="mode" value="build" class="svelte-o6r9mw">
+      <span class="svelte-o6r9mw">Build</span></label></nav>
+  <select title="change version" class="svelte-o6r9mw"><option value="latest" disabled selected class="svelte-o6r9mw">latest</option></select>
+  <div class="buttons svelte-o6r9mw"><a class="btn svelte-o6r9mw" href="https://github.com/hyrious/esbuild-repl" target="_blank" title="hyrious/esbuild-repl"><i class="i-mdi-github"></i></a>
+    <button data-share class="btn svelte-o6r9mw" title="share (press shift for rollup, alt/option for esbuild.try)"><i class="i-mdi-share-variant"></i></button>
+    <button class="btn svelte-o6r9mw" title="theme: dark"><i class="i-mdi-moon-waxing-crescent"></i></button></div>
 </header>
-<main data-mode="transform"><section style="" class="svelte-ur4phb"><div class="pane svelte-ur4phb" style="width: 50%"><section slot="left" class="input"><textarea class="editor" rows="2" spellcheck="false">let a = 1</textarea>
-    <input placeholder="--loader=js" spellcheck="false" autocomplete="off" value="">
-    <ul class="hint svelte-em9z8s"></ul></section></div>
-  <div class="pane svelte-ur4phb" style="width: 50%"><section slot="right" class="output"><pre class="result code svelte-em9z8s"></pre>
-    
-    
-    
-    <aside class="features svelte-362tup"><button disabled class="svelte-362tup">Detect Features
-    </button>
-</aside></section></div>
-  <div class="divider svelte-ur4phb" style="left: calc(50% - 8px); height: 0px"></div></section>
-
-  <section style="display: none" class="svelte-ur4phb"><div class="pane svelte-ur4phb" style="width: 50%"><section slot="left" class="input"><h3 class="svelte-1stgjcc"><span class="svelte-1stgjcc">ES6 modules go in…</span>
-      <button class="btn svelte-1stgjcc">Start over</button></h3>
-    <article class="module svelte-66lt4u is-entry"><header class="svelte-66lt4u"><input placeholder="main.js" spellcheck="false" class="svelte-66lt4u" value="main.js">
-      <button class="remove svelte-66lt4u"><span class="label svelte-66lt4u">remove</span>
-        <i class="i-mdi-close"></i></button>
-      <button class="entry svelte-66lt4u"><span class="label svelte-66lt4u">(entry module)</span>
-        <i class="i-mdi-minus"></i></button>
-    </header>
-  <textarea class="editor svelte-66lt4u" rows="2" spellcheck="false">export let a = 1</textarea>
+<main data-mode="transform" class="svelte-1hmfj02"><section style="" class="svelte-4kahmv"><div class="left svelte-4kahmv" style="width: 50%;"><section slot="left" class="svelte-1hmfj02"><div data-transform style="" class="svelte-8svfb8"><article data-label="INPUT" class="svelte-2wzth2">
+  <textarea class="editor svelte-2wzth2" rows="2" spellcheck="false" placeholder="(enter your code here)">let a = 1</textarea>
 </article>
-    <button class="btn"><i class="i-mdi-plus"></i>
-      <span>add module</span></button></section></div>
-  <div class="pane svelte-ur4phb" style="width: 50%"><section slot="right" class="output"><h3 class="svelte-1stgjcc">
-      <span class="svelte-1stgjcc">…bundle comes out</span></h3>
-    
-    <article class="module svelte-66lt4u"><header class="svelte-66lt4u"><input placeholder="main.js" spellcheck="false" value="main.js" readonly class="svelte-66lt4u">
-    </header>
-  <pre class="chunk svelte-66lt4u"></pre>
+  <article data-label="OPTIONS" class="svelte-2wzth2">
+  <textarea class="editor svelte-2wzth2" rows="1" spellcheck="false" placeholder="e.g. --minify or { minify: true }"></textarea>
 </article>
+</div>
+      <div data-build style="display: none"><article data-label="OPTIONS" class="svelte-2wzth2"><aside slot="header" class="svelte-hgw8qr"><button title="reset options" class="svelte-hgw8qr"><i class="i-mdi-reload svelte-hgw8qr"></i></button></aside>
+  <textarea class="editor svelte-2wzth2" rows="2" spellcheck="false" placeholder="e.g. --minify or { minify: true }">--bundle --format=esm --splitting
+--outdir=/ --packages=external</textarea>
+</article>
+  <article data-label="INPUT" class="svelte-2wzth2">
+      <header class="svelte-2wzth2 entry"><button class="entry svelte-2wzth2" title="entry: yes"><i class="i-mdi-checkbox-marked-outline"></i></button>
+          <input placeholder="<stdin>" spellcheck="false" class="svelte-2wzth2" value="entry.js">
+          <button class="remove svelte-2wzth2" title="remove entry.js"><i class="i-mdi-close"></i></button>
+        </header>
     
-    </section></div>
-  <div class="divider svelte-ur4phb" style="left: calc(50% - 8px); height: 0px"></div></section>
-</main>
-<footer class="svelte-9g49lf"><i class="i-mdi-loading svelte-9g49lf"></i>
-  <span>Loading...</span>
+  <textarea class="editor svelte-2wzth2" rows="2" spellcheck="false" placeholder="(enter your code here)"></textarea>
+</article>
+  <footer class="svelte-hgw8qr"><button class="svelte-hgw8qr"><i class="i-mdi-plus svelte-hgw8qr"></i>
+      <span>file.js</span></button>
+    
+    <button title="npm install …" class="svelte-hgw8qr"><i class="i-mdi-package-variant-closed-plus svelte-hgw8qr"></i>
+      <span>npm i …</span></button></footer>
+</div></section></div>
+  <div class="divider svelte-4kahmv" style="left: calc(50% - 12.5px);"></div>
+  <div class="right svelte-4kahmv" style="width: 50%;"><section slot="right" class="svelte-1hmfj02"><p class="svelte-178fr2s">(no output)</p></section></div></section>
+<div class="mask svelte-4kahmv" style="display: none"></div></main>
+<footer class="svelte-1re04oy"><i class="i-mdi-loading svelte-1re04oy"></i>
+  <span>Loading esbuild…</span>
 </footer></div>
 </body>
 </html>
