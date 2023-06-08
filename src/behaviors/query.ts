@@ -108,7 +108,7 @@ export function save_query(mode: string, query: Query): void {
 
   let search = ''
 
-  if (query.version) search += '&version=' + query.version
+  if (query.version && query.version !== 'latest') search += '&version=' + query.version
 
   if (mode === 'transform') search += '&t=' + escape(query.t)
 
