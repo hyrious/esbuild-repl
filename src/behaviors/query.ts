@@ -95,7 +95,13 @@ export function load_query(): Query {
 
 function escape(raw?: string): string {
   if (raw === undefined) return ''
-  return raw.replace(/[ ]/g, '+').replace(/&/g, '%26').replace(/#/g, '%23')
+  return raw
+    .replace(/[ ]/g, '+')
+    .replace(/\n/g, '%0A')
+    .replace(/\t/g, '%09')
+    .replace(/,/g, '%2C')
+    .replace(/&/g, '%26')
+    .replace(/#/g, '%23')
 }
 
 export function save_query(mode: string, query: Query): void {
@@ -113,7 +119,7 @@ export function save_query(mode: string, query: Query): void {
     }
   }
 
-  if (query.o) search += '&o=' + query.o
+  if (query.o) search += '&o=' + escape(query.o)
 
   if (query.d) search += '&d=1'
 

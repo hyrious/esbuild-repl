@@ -18,8 +18,20 @@
 </script>
 
 {#if $output}
+  {#if $output.stderr_}
+    <pre>{@html terminal_to_html($output.stderr_)}</pre>
+  {/if}
   {#if typeof $output.code_ === 'string'}
     <Editor label="OUTPUT" readonly content={$output.code_} lang={guess_lang()} />
+  {/if}
+  {#if Array.isArray($output.outputFiles_)}
+    {#if $output.outputFiles_.length === 0}
+      <p>(no output)</p>
+    {:else}
+      {#each $output.outputFiles_ as { path, text }}
+        <Editor label="OUTPUT" readonly header name={path.replace(/^\//, '')} content={text} />
+      {/each}
+    {/if}
   {/if}
   {#if $output.legalComments_}
     <Editor label="LEGAL COMMENTS" readonly content={$output.legalComments_} lang="comment" />
@@ -30,8 +42,8 @@
   {#if $output.mangleCache_ && Object.keys($output.mangleCache_).length}
     <Editor label="MANGLE CACHE" readonly content={json_print($output.mangleCache_)} lang="json" />
   {/if}
-  {#if $output.stderr_}
-    <pre>{@html terminal_to_html($output.stderr_)}</pre>
+  {#if $output.metafile_}
+    <Editor label="METAFILE" readonly content={json_print($output.metafile_)} lang="json" />
   {/if}
 {:else}
   <p>(no output)</p>

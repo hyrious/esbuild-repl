@@ -32,7 +32,7 @@ export interface BuildRequest {
 
 export interface BuildResponse {
   outputFiles_?: OutputFile[]
-  metafile_?: string
+  metafile_?: Record<string, any>
   mangleCache_?: Record<string, string | boolean>
   stderr_?: string
   duration_?: number

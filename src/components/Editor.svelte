@@ -11,38 +11,45 @@
   export let entry = false
   export let readonly = false
   export let download: boolean | string = false
-  export let lang = 'js'
+  export let lang = ''
 
   const dispatch = createEventDispatcher()
+
+  function guess_lang(name: string) {
+    if (name.endsWith('.css')) return 'css'
+    if (name.endsWith('.map') || name.endsWith('.json')) return 'json'
+    return 'js'
+  }
 
   async function download_it() {}
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <article data-label={label}>
-  {#if header}
-    <header class:entry>
-      {#if readonly}
-        <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
-      {:else}
-        <button class="entry" title="toggle entry point" on:click={() => (entry = !entry)}>
-          <i class={entry ? 'i-mdi-minus' : 'i-mdi-plus'} />
-        </button>
-        <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
-        <button class="remove" title="remove it" on:click={() => dispatch('remove')}>
-          <i class="i-mdi-close" />
-        </button>
-      {/if}
-      {#if download}
-        <button class="download" title="download it" on:click={download_it} />
-      {/if}
-    </header>
+  {#if header || $$slots.header}
+    <slot name="header">
+      <header class:entry>
+        {#if readonly}
+          <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
+        {:else}
+          <button class="entry" title={'entry: ' + (entry ? 'yes' : 'no')} on:click={() => (entry = !entry)}>
+            <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
+          </button>
+          <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
+          <button class="remove" title="remove it" on:click={() => dispatch('remove')}>
+            <i class="i-mdi-close" />
+          </button>
+        {/if}
+        {#if download}
+          <button class="download" title="download it" on:click={download_it} />
+        {/if}
+      </header>
+    </slot>
   {/if}
   {#if readonly}
     {#if lang === 'comment'}
       <pre class="hljs-comment">{content}</pre>
     {:else}
-      <pre use:highlight={{ code: content, loader: lang }} />
+      <pre use:highlight={{ code: content, loader: lang || guess_lang(name) }} />
     {/if}
   {:else}
     <textarea class="editor" {rows} spellcheck="false" bind:value={content} {placeholder} />
@@ -65,7 +72,7 @@
     pointer-events: none;
   }
   [data-label]:has(header)::after {
-    top: 32px;
+    top: 29px;
   }
   article {
     display: flex;
@@ -91,6 +98,10 @@
     font: var(--code-font);
     color: inherit;
   }
+  header input[readonly] {
+    color: var(--fg-on);
+    font-weight: 700;
+  }
   header.entry input,
   header.entry button.entry {
     color: #58a549;
@@ -100,6 +111,7 @@
   }
   header button {
     appearance: none;
+    display: inline-flex;
     background: transparent;
     border: none;
     outline: none;
@@ -112,6 +124,13 @@
     position: absolute;
     right: 100%;
     z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  header:has(input:focus) button.entry,
+  header.entry button.entry,
+  button.entry:hover {
+    opacity: 1;
   }
   button.remove {
     color: #e24834;

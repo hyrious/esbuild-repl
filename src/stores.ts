@@ -94,7 +94,6 @@ export const output: Readable<IPCResponse> = derived(
     }
   },
 )
-// export const error
 
 export const status = writable('Loading esbuild…', (set) => emitter.on('status', set))
 if (is_client) {

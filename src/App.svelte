@@ -28,7 +28,7 @@
 <style>
   main {
     padding: 25px 50px 70px;
-    height: 0;
+    height: fit-content;
   }
   section[slot='left'] {
     padding-right: 12.5px;
@@ -38,7 +38,7 @@
   }
   @media (max-width: 800px) {
     main {
-      padding: 25px;
+      padding: 25px 25px 70px;
     }
     section[slot='left'] {
       padding-right: 0;
