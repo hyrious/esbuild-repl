@@ -48,7 +48,9 @@
     </slot>
   {/if}
   {#if readonly}
-    {#if lang === 'comment'}
+    {#if lang === 'raw'}
+      <pre>{content}</pre>
+    {:else if lang === 'comment'}
       <pre class="hljs-comment">{content}</pre>
     {:else}
       <pre use:highlight={{ code: content, loader: lang || guess_lang(name) }} />
@@ -152,13 +154,14 @@
   pre {
     margin: 0;
     padding: 8px;
+    border-radius: 4px;
     min-height: 34px;
+    max-height: 400px;
     font: var(--code-font);
     background: var(--pre);
     white-space: pre-wrap;
     word-break: break-all;
     cursor: text;
-    max-height: 400px;
   }
   @media (max-width: 800px) {
     pre {

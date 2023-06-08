@@ -2,6 +2,7 @@
   import { options, output } from '../stores'
   import { terminal_to_html } from '../helpers/ansi'
   import Editor from './Editor.svelte'
+  import Features from './Features.svelte'
   import VisualizeSourcemap from './VisualizeSourcemap.svelte'
 
   function json_print(obj: any): string {
@@ -43,6 +44,9 @@
   {/if}
   {#if typeof $output.code_ === 'string'}
     <Editor label="OUTPUT" readonly content={$output.code_} lang={guess_lang()} />
+    {#if $output.code_}
+      <Features />
+    {/if}
   {/if}
   {#if Array.isArray($output.outputFiles_)}
     {#if $output.outputFiles_.length === 0}
