@@ -35,7 +35,7 @@
             <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
           </button>
           <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
-          <button class="remove" title="remove it" on:click={() => dispatch('remove')}>
+          <button class="remove" title={'remove ' + (name || 'it')} on:click={() => dispatch('remove')}>
             <i class="i-mdi-close" />
           </button>
         {/if}
@@ -119,13 +119,16 @@
     cursor: pointer;
     color: inherit;
     font-size: 20px;
+    transition: opacity 0.2s;
   }
   button.entry {
     position: absolute;
     right: 100%;
     z-index: 10;
     opacity: 0;
-    transition: opacity 0.2s;
+  }
+  :where(header:hover) button.entry {
+    opacity: 0.5;
   }
   header:has(input:focus) button.entry,
   header.entry button.entry,
@@ -134,6 +137,10 @@
   }
   button.remove {
     color: #e24834;
+    opacity: 0.5;
+  }
+  button.remove:hover {
+    opacity: 1;
   }
   pre {
     margin: 0;

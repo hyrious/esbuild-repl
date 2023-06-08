@@ -105,10 +105,12 @@
     outline: none;
     font: var(--code-font);
     color: var(--fg);
+    opacity: 0.5;
+    transition: opacity 0.2s;
     cursor: pointer;
   }
   button:hover {
-    color: var(--fg-on);
+    opacity: 1;
   }
   button i {
     font-size: 20px;

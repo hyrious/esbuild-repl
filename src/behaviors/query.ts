@@ -61,7 +61,7 @@ export function load_query(): Query {
   if (b.length > 0) {
     query.b = []
     for (const raw of b) {
-      const m = raw.match(/^(e?),([^,]+),(.*)$/)
+      const m = raw.match(/^(e?)\0([^\0]+)\0(.*)$/)
       if (!m) {
         console.warn('Unknown query', raw, 'skipped')
         continue
@@ -99,7 +99,6 @@ function escape(raw?: string): string {
     .replace(/[ ]/g, '+')
     .replace(/\n/g, '%0A')
     .replace(/\t/g, '%09')
-    .replace(/,/g, '%2C')
     .replace(/&/g, '%26')
     .replace(/#/g, '%23')
 }
@@ -115,7 +114,7 @@ export function save_query(mode: string, query: Query): void {
 
   if (mode === 'build' && query.b) {
     for (const { entry, path, content } of query.b) {
-      search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join(',')
+      search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join('\0')
     }
   }
 
