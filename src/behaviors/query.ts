@@ -43,8 +43,14 @@ export function load_query(): Query {
   }
 
   if (search.get('mode') === 'build') {
-    const modules = search.get('module')
-    if (modules) query.b = json_parse(modules, []).map((e: any) => [Boolean(e[2]), e[0], e[1]])
+    const modules = search.get('modules')
+    if (modules) {
+      query.b = json_parse(modules, []).map((e: any) => ({
+        entry: Boolean(e[2]),
+        path: e[0],
+        content: e[1],
+      }))
+    }
   } else {
     const input = search.get('input')
     if (input) query.t = input
@@ -52,6 +58,14 @@ export function load_query(): Query {
 
   const options = search.get('o') || search.get('options') || search.get('buildOptions')
   if (options) query.o = options
+  if (search.get('mode') === 'build' && query.o) {
+    try {
+      const obj = JSON.parse(query.o)
+      obj.outdir = '/'
+      obj.packages = 'external'
+      query.o = JSON.stringify(obj)
+    } catch {}
+  }
 
   if (search.has('d') || search.has('debug')) query.d = true
 
