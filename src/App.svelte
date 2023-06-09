@@ -35,7 +35,6 @@
 <style>
   main {
     padding: 25px 50px 70px;
-    height: fit-content;
   }
   section[slot='left'] {
     padding-right: 12.5px;

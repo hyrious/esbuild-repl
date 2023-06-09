@@ -281,6 +281,9 @@
   button i {
     font-size: 20px;
   }
+  button span {
+    white-space: nowrap;
+  }
   footer {
     display: flex;
     flex-direction: column;

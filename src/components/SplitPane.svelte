@@ -80,6 +80,7 @@
   section {
     display: flex;
     position: relative;
+    height: fit-content;
   }
   .divider {
     position: absolute;

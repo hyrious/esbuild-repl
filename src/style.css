@@ -47,6 +47,12 @@ body {
   color: var(--fg);
 }
 
+html,
+body,
+#app {
+  height: 100%;
+}
+
 a {
   color: inherit;
 }

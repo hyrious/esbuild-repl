@@ -31,7 +31,7 @@
     position: fixed;
     inset-inline: 0;
     inset-block-end: 0;
-    padding: 0 50px 25px;
+    padding: 10px 50px 25px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -51,7 +51,7 @@
   }
   @media (max-width: 800px) {
     footer {
-      padding: 0 25px 25px;
+      padding: 10px 25px 25px;
     }
   }
 </style>
