@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { options, output } from '../stores'
+  import { wait } from '@hyrious/utils'
+  import { status, options, output } from '../stores'
   import { terminal_to_html } from '../helpers/ansi'
   import Editor from './Editor.svelte'
   import Features from './Features.svelte'
   import VisualizeSourcemap from './VisualizeSourcemap.svelte'
+  import Download from './Download.svelte'
 
   const decoder = new TextDecoder()
 
@@ -36,6 +38,36 @@
       if (source) {
         visualize_sourcemap(decoder.decode(source.contents), map)
       }
+    }
+  }
+
+  async function download_metafile() {
+    if ($output?.metafile_) {
+      const blob = new Blob([json_print($output.metafile_)], { type: 'application/json' })
+      const suggestedName = 'metafile.json'
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({ suggestedName })
+          const writer = await handle.createWritable()
+          await writer.write(blob)
+          await writer.close()
+          $status = `File ${handle.name} saved.`
+          return
+        } catch (err) {
+          if (err.name === 'AbortError') return
+          else console.error(err)
+        }
+      }
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'metafile.json'
+      a.style.display = 'none'
+      document.body.append(a)
+      a.click()
+      await wait(1000)
+      URL.revokeObjectURL(url)
+      a.remove()
     }
   }
 </script>
@@ -76,6 +108,7 @@
   {/if}
   {#if $output.metafile_}
     <Editor label="METAFILE" readonly content={json_print($output.metafile_)} lang="json" />
+    <Download on:click={download_metafile} />
   {/if}
 {:else}
   <p>(no output)</p>

@@ -12,7 +12,6 @@
   export let placeholder = ''
   export let entry = false
   export let readonly = false
-  export let download: boolean | string = false
   export let lang = ''
 
   const dispatch = createEventDispatcher()
@@ -22,8 +21,6 @@
     if (name.endsWith('.map') || name.endsWith('.json')) return 'json'
     return 'js'
   }
-
-  async function download_it() {}
 </script>
 
 <article data-label={label}>
@@ -41,9 +38,6 @@
           <button class="remove" title="remove {name || 'it'}" on:click={() => dispatch('remove')}>
             <i class="i-mdi-close" />
           </button>
-        {/if}
-        {#if download}
-          <button class="download" title="download it" on:click={download_it} />
         {/if}
       </header>
     </slot>
