@@ -2,8 +2,8 @@
 import { emitter } from './global'
 
 export interface OutputFile {
-  path: string
-  text: string
+  readonly path: string
+  readonly contents: Uint8Array
 }
 
 export type IPCRequest = TransformRequest | BuildRequest

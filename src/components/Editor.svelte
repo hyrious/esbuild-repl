@@ -8,6 +8,7 @@
   export let name = ''
   export let label = ''
   export let content = ''
+  export let size = 0
   export let placeholder = ''
   export let entry = false
   export let readonly = false
@@ -31,7 +32,7 @@
       <header class:entry>
         {#if readonly}
           <input placeholder="<stdout>" spellcheck="false" value={name} readonly />
-          <span class="size">{prettyBytes(content.length, { binary: true })}</span>
+          {#if size}<span class="size">{prettyBytes(size, { binary: true })}</span>{/if}
         {:else}
           <button class="entry" title="entry: {entry ? 'yes' : 'no'}" on:click={() => (entry = !entry)}>
             <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />

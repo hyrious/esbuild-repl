@@ -10,8 +10,9 @@
     window.open(url, '_blank')
   }
 
+  $: index = $installed.findIndex((e) => e.name === name)
+
   function uninstall() {
-    const index = $installed.findIndex((e) => e.name === name)
     if (index >= 0) {
       $installed.splice(index, 1)
       $installed = $installed
@@ -19,18 +20,24 @@
   }
 </script>
 
-<div class="npm-package">
-  <i class="i-mdi-package-variant-closed-check" title={size ? size + ' files' : ''} />
+<div class="npm-package" class:not-installed={index < 0}>
+  {#if index >= 0}
+    <i class="i-mdi-package-variant-closed-check" title={size ? size + ' files' : ''} />
+  {:else}
+    <i class="i-mdi-package-variant-closed-plus" />
+  {/if}
   <a class="npm-package__name" href="https://www.npmjs.com/package/{name}" target="_blank" rel="noreferrer">
     {name}
   </a>
   <span class="npm-package__version">{version}</span>
-  <button class="view" title="view package content" on:click={npm_browser}>
-    <i class="i-mdi-eye-outline" />
-  </button>
-  <button class="remove" title="uninstall {name}" on:click={uninstall}>
-    <i class="i-mdi-package-variant-closed-remove" />
-  </button>
+  {#if index >= 0}
+    <button class="view" title="view package content" on:click={npm_browser}>
+      <i class="i-mdi-eye-outline" />
+    </button>
+    <button class="remove" title="uninstall {name}" on:click={uninstall}>
+      <i class="i-mdi-package-variant-closed-remove" />
+    </button>
+  {/if}
 </div>
 
 <style>
@@ -61,6 +68,10 @@
     margin-bottom: 10px;
     padding: 0 1px;
     position: relative;
+  }
+  .not-installed {
+    transform: translateX(20px);
+    opacity: 0.5;
   }
   .npm-package > i {
     position: absolute;

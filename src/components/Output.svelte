@@ -5,6 +5,8 @@
   import Features from './Features.svelte'
   import VisualizeSourcemap from './VisualizeSourcemap.svelte'
 
+  const decoder = new TextDecoder()
+
   function json_print(obj: any): string {
     return JSON.stringify(obj, null, 2)
   }
@@ -32,7 +34,7 @@
       const source_path = path.slice(0, -4)
       const source = $output.outputFiles_.find((e) => e.path === source_path)
       if (source) {
-        visualize_sourcemap(source.text, map)
+        visualize_sourcemap(decoder.decode(source.contents), map)
       }
     }
   }
@@ -52,8 +54,10 @@
     {#if $output.outputFiles_.length === 0}
       <p>(no output)</p>
     {:else}
-      {#each $output.outputFiles_ as { path, text }}
-        <Editor label="OUTPUT" readonly header name={path.replace(/^\//, '')} content={text} />
+      {#each $output.outputFiles_ as { path, contents }}
+        {@const name = path.replace(/^\//, '')}
+        {@const text = decoder.decode(contents)}
+        <Editor label="OUTPUT" readonly header {name} content={text} size={contents.byteLength} />
         {#if path.endsWith('.map')}
           <VisualizeSourcemap on:click={() => outfile_sourcemap(path, text)} />
         {/if}

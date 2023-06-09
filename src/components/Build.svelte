@@ -13,6 +13,8 @@
 
   export let show = true
 
+  let dependencies: Record<string, [string, string][]> = Object.create(null)
+
   const default_options = '--bundle --format=esm --splitting --outdir=/ --packages=external --allow-overwrite'
   let build_options = $mode === 'build' ? $options : ''
   $: if ($mode === 'build') {
@@ -139,10 +141,12 @@
 
     $status = `Extracting ${name}@${version} …`
     const files = await read_tarball(new Uint8Array(buffer))
-    // const package_json = files.find((e) => e.path === 'package.json')
-    // if (package_json) {
-    //   tick().then(install_dependencies.bind(null, package_json.content))
-    // }
+    const package_json = files.find((e) => e.path === 'package.json')
+    if (package_json) {
+      try {
+        add_dependencies(name, package_json.content)
+      } catch {}
+    }
 
     if (!$installed.some((e) => e.name === name)) {
       $installed.push({ name, version, files })
@@ -152,14 +156,16 @@
     $status = `Extracted ${files.length} files.`
   }
 
-  // function install_dependencies(json: string) {
-  //   const pkg = JSON.parse(json)
-  //   if (pkg.dependencies) {
-  //     for (const name of Object.keys(pkg.dependencies)) {
-  //       npm_install(`${name}@${pkg.dependencies[name]}`).catch(console.error)
-  //     }
-  //   }
-  // }
+  function add_dependencies(name: string, json: string) {
+    const pkg = JSON.parse(json)
+    if (pkg.dependencies) {
+      const deps: [string, string][] = (dependencies[name] = [])
+      for (const name of Object.keys(pkg.dependencies)) {
+        deps.push([name, pkg.dependencies[name]])
+      }
+      dependencies = dependencies
+    }
+  }
 
   const semver_loose =
     /^[\s=v]*(\d+)\.(\d+)\.(\d+)(?:-?((?:\d+|\d*[A-Za-z-][\dA-Za-z-]*)(?:\.(?:\d+|\d*[A-Za-z-][\dA-Za-z-]*))*))?(?:\+([\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*))?$/
@@ -215,12 +221,25 @@
     />
   {/each}
   <footer>
-    <button on:click={new_file}>
+    <button on:click={new_file} title="add a new file">
       <i class="i-mdi-file-plus-outline" />
       <span>{new_file_name}</span>
     </button>
     {#each $installed as { name, version, files } (name)}
       <NpmPackage {name} {version} size={files.length} />
+      {@const deps = dependencies[name] || []}
+      {#each deps as [name, spec]}
+        {#if !$installed.some((e) => e.name === name)}
+          <button
+            class="not-installed"
+            on:click={npm_install.bind(null, `${name}@${spec}`)}
+            title="npm install {name}@{spec}"
+          >
+            <i class="i-mdi-package-variant-closed-plus" />
+            <span class="sans-serif">{name}@{spec}</span>
+          </button>
+        {/if}
+      {/each}
     {/each}
     <button on:click={npm_install} title="npm install &hellip;">
       <i class="i-mdi-package-variant-closed-plus" />
@@ -246,8 +265,15 @@
     transition: opacity 0.2s;
     cursor: pointer;
   }
+  span.sans-serif {
+    font: 14px/20px sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
   button:not(:last-child) {
     margin-bottom: 10px;
+  }
+  button.not-installed {
+    transform: translateX(20px);
   }
   button:hover {
     opacity: 1;

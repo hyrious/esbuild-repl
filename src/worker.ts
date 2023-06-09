@@ -1,6 +1,6 @@
 // Credits: https://github.com/esbuild/esbuild.github.io/blob/main/src/try/worker.ts
-// Note: to make this file work in a normal web worker, it should not have
-// any common dependencies, './helpers/fs' is only imported here so it is ok.
+// Note: to make this file work in a not-es-module web worker, it shouldn't share
+// any common dependencies with other files, './helpers/fs' is only used here so it is ok.
 
 /* eslint-disable no-control-regex */
 // This file is responsible for spawning and terminating child worker threads.
@@ -13,8 +13,8 @@
 
 declare const esbuild: any
 
+import type { IPCRequest, IPCResponse } from './ipc'
 import { resetFileSystem, stderrSinceReset } from './helpers/fs'
-import { IPCRequest, IPCResponse } from './ipc'
 
 interface API {
   transform(input: string, options: any): Promise<any>
@@ -218,7 +218,7 @@ const handler = function (this: API, e: MessageEvent<IPCRequest>) {
         ({ warnings, outputFiles, metafile, mangleCache }) =>
           finish(warnings, (stderr: string) =>
             respond({
-              outputFiles_: outputFiles.map(({ path, text }) => ({ path, text })),
+              outputFiles_: outputFiles.map(({ path, contents }) => ({ path, contents })),
               metafile_: metafile,
               mangleCache_: mangleCache,
               stderr_: stderr,
