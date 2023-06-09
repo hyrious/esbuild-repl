@@ -159,7 +159,7 @@
     max-height: 400px;
     font: var(--code-font);
     background: var(--pre);
-    white-space: pre-wrap;
+    white-space: pre;
     word-break: break-all;
     cursor: text;
   }

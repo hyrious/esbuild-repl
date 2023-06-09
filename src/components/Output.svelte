@@ -81,7 +81,8 @@
   pre {
     margin: 0 0 10px;
     font: var(--code-font);
-    white-space: pre-wrap;
+    white-space: pre;
+    max-height: 400px;
   }
   p {
     margin: 0;
