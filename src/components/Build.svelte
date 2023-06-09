@@ -1,18 +1,72 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte'
+  import { onMount } from 'svelte'
+  import { tick, noop } from 'svelte/internal'
   import { focus_last, send_input } from '../helpers/dom'
   import { get, set } from '../helpers/idb'
   import { read_tarball } from '../helpers/tarball'
-  import { mode, files, options, status, initial_query, installed } from '../stores'
+  import { Mode, parseOptions, prettyPrintErrorAsStderr } from '../helpers/options'
+  import { mode, files, options, status, initial_query, installed, ready, output } from '../stores'
+  import { sendIPC } from '../ipc'
   import Editor from './Editor.svelte'
   import NpmPackage from './NpmPackage.svelte'
 
   export let show = true
 
-  const default_options = '--bundle --format=esm --splitting\n--outdir=/ --packages=external'
-  let build_options = ($mode === 'build' && $options) || default_options
+  const default_options = `--bundle
+--format=esm
+--splitting
+--outdir=/
+--packages=external
+--allow-overwrite`
+  let build_options = $mode === 'build' ? $options : ''
   $: if ($mode === 'build') {
     $options = build_options
+
+    if ($ready) {
+      try {
+        const o = parseOptions($options, Mode.Build)
+        const entryPoints = Array.isArray(o.entryPoints) ? o.entryPoints : (o.entryPoints = [])
+        const input: Record<string, string> = Object.create(null)
+        const duplicates = new Set<string>()
+
+        let stdin: any
+        for (const { entry, path, content } of $files) {
+          if (duplicates.has(path)) {
+            throw new Error('Duplicate input file: ' + (path ? JSON.stringify(path) : '<stdin>'))
+          }
+          duplicates.add(path)
+          if (!path) {
+            stdin = o.stdin && typeof o.stdin === 'object' ? o.stdin : (o.stdin = {})
+            stdin.contents = content
+            if (!('resolveDir' in stdin)) stdin.resolveDir = '/'
+          } else {
+            input[path] = content
+            if (entry) entryPoints.push(path)
+          }
+        }
+
+        // for (const {files} of $installed)
+        // svelte-lsp error: seems cannot use local variable whose name is the same as imported store
+        for (const pkg of $installed) {
+          const base = `node_modules/${pkg.name}/`
+          for (const { path, content } of pkg.files) {
+            const resolved = base + path
+            if (duplicates.has(resolved)) {
+              throw new Error('Duplicate input file: ' + JSON.stringify(resolved))
+            }
+            input[resolved] = content
+          }
+        }
+
+        sendIPC({
+          command_: 'build',
+          input_: input,
+          options_: o,
+        }).then(output.set, noop)
+      } catch (err) {
+        $output = { stderr_: prettyPrintErrorAsStderr(err) }
+      }
+    }
   }
 
   function reset_options() {
@@ -153,7 +207,7 @@
   <Editor
     bind:content={build_options}
     label="OPTIONS"
-    rows={2}
+    rows={1}
     placeholder="e.g. --minify or {'{'} minify: true {'}'}"
   >
     <aside class:show={build_options !== default_options} slot="header">
@@ -176,7 +230,7 @@
   {/each}
   <footer>
     <button on:click={new_file}>
-      <i class="i-mdi-plus" />
+      <i class="i-mdi-file-plus-outline" />
       <span>{new_file_name}</span>
     </button>
     {#each $installed as { name, version, files } (name)}

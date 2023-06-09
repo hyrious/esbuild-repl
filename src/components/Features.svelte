@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TransformOptions } from 'esbuild'
   import { Mode, parseOptions } from '../helpers/options'
-  import { input, options, status, output } from '../stores'
+  import { version, input, options, status, output } from '../stores'
   import { tick } from 'svelte'
   import Editor from './Editor.svelte'
 
@@ -11,6 +11,13 @@
   $: if ($output) {
     phase = 'idle'
     features = []
+  }
+
+  let enabled = false
+  // --supported is not available before esbuild 0.14.46
+  $: if ($version !== 'latest') {
+    const [major, minor, patch] = $version.split('.').map((x) => +x)
+    enabled = major > 0 || minor > 14 || (minor === 14 && patch >= 46)
   }
 
   // See https://github.com/evanw/esbuild/blob/main/internal/compat/js_table.go
@@ -167,7 +174,7 @@
   }
 </script>
 
-<div class="features" style={phase === 'detected' ? 'display: none' : ''}>
+<div class="features" style={!enabled || phase === 'detected' ? 'display: none' : ''}>
   <button
     class:detecting={phase === 'detecting'}
     title="--supported:?"

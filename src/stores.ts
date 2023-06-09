@@ -1,10 +1,8 @@
 import { is_client } from 'svelte/internal'
-import { derived, get, writable, type Readable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
 import { emitter } from './global'
 import { load_query } from './behaviors/query'
 import { fetch_versions } from './helpers/versions'
-import { Mode, parseOptions, prettyPrintErrorAsStderr } from './helpers/options'
-import { sendIPC, type IPCResponse } from './ipc'
 
 export const theme = writable<'light' | 'dark'>('dark')
 // @ts-expect-error 'matchMedia' may not exist
@@ -57,67 +55,9 @@ export const ready = writable(0, (set) => {
   let next = 1
   emitter.on('ready', () => set(next++))
 })
-export const output: Readable<IPCResponse> = derived(
-  [mode, input, files, options, installed, ready],
-  ([$mode, $input, $files, $options, $installed, $ready], set) => {
-    if (!$ready) return
 
-    try {
-      if ($mode === 'transform') {
-        sendIPC({
-          command_: $mode,
-          input_: $input,
-          options_: parseOptions($options, Mode.Transform),
-        }).then(set, () => {
-          // Swallow errors (e.g. "task aborted" or "failed to create worker")
-        })
-      }
-
-      if ($mode === 'build') {
-        const o = parseOptions($options, Mode.Build)
-        const entryPoints = Array.isArray(o.entryPoints) ? o.entryPoints : (o.entryPoints = [])
-        const input: Record<string, string> = Object.create(null)
-        const duplicates = new Set<string>()
-
-        for (const { entry, path, content } of $files) {
-          if (duplicates.has(path)) {
-            throw new Error('Duplicate input file: ' + (path ? JSON.stringify(path) : '<stdin>'))
-          }
-          duplicates.add(path)
-          if (!path) {
-            const stdin = o.stdin && typeof o.stdin === 'object' ? o.stdin : (o.stdin = {})
-            stdin.contents = content
-            if (!('resolveDir' in stdin)) stdin.resolveDir = '/'
-          } else {
-            input[path] = content
-            if (entry) entryPoints.push(path)
-          }
-        }
-
-        for (const { name, files } of $installed) {
-          const base = 'node_modules/' + name + '/'
-          for (const { path, content } of files) {
-            const resolved = base + path
-            if (duplicates.has(resolved)) {
-              throw new Error('Duplicate input file: ' + JSON.stringify(resolved))
-            }
-            input[resolved] = content
-          }
-        }
-
-        sendIPC({
-          command_: $mode,
-          input_: input,
-          options_: o,
-        }).then(set, () => {
-          // Swallow errors (e.g. "task aborted" or "failed to create worker")
-        })
-      }
-    } catch (err) {
-      set({ stderr_: prettyPrintErrorAsStderr(err) })
-    }
-  },
-)
+import type { IPCResponse } from './ipc'
+export const output = writable<IPCResponse | null>(null)
 
 export const status = writable('Loading esbuild…', (set) => emitter.on('status', set))
 if (is_client) {

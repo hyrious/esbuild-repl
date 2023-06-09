@@ -24,11 +24,11 @@
   }
 
   function simple_sourcemap() {
-    visualize_sourcemap($output.code_ || '', $output.map_ || '')
+    visualize_sourcemap($output?.code_ || '', $output?.map_ || '')
   }
 
   function outfile_sourcemap(path: string, map: string) {
-    if ($output.outputFiles_ && path.endsWith('.map')) {
+    if ($output?.outputFiles_ && path.endsWith('.map')) {
       const source_path = path.slice(0, -4)
       const source = $output.outputFiles_.find((e) => e.path === source_path)
       if (source) {

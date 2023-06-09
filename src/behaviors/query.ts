@@ -33,7 +33,7 @@ export function load_query(): Query {
       modules?: { name: string; code: string; isEntry: boolean }[]
     }
     if (legacy.code) query.t = legacy.code
-    if (legacy.config) query.o = JSON.stringify(legacy.config)
+    if (legacy.config) query.o = JSON.stringify(legacy.config, null, 2)
     if (legacy.modules)
       query.b = legacy.modules.map((m) => ({
         entry: m.isEntry,
@@ -63,8 +63,11 @@ export function load_query(): Query {
       const obj = JSON.parse(query.o)
       obj.outdir = '/'
       obj.packages = 'external'
-      query.o = JSON.stringify(obj)
-    } catch {}
+      obj.allowOverwrite = true
+      query.o = JSON.stringify(obj, null, 2)
+    } catch {
+      // ignore parsing error
+    }
   }
 
   if (search.has('d') || search.has('debug')) query.d = true
@@ -107,38 +110,29 @@ export function load_query(): Query {
   return query
 }
 
-function escape(raw?: string): string {
-  if (raw === undefined) return ''
-  return raw
-    .replace(/[ ]/g, '+')
-    .replace(/\n/g, '%0A')
-    .replace(/\t/g, '%09')
-    .replace(/&/g, '%26')
-    .replace(/#/g, '%23')
-}
-
 export function save_query(mode: string, query: Query): void {
   if (!is_client) return
 
-  let search = ''
+  const search = new URLSearchParams()
 
-  if (query.version && query.version !== 'latest') search += '&version=' + query.version
+  if (query.version && query.version !== 'latest') search.set('version', query.version)
 
-  if (mode === 'transform') search += '&t=' + escape(query.t)
+  if (mode === 'transform' && query.t) search.set('t', query.t)
 
   if (mode === 'build' && query.b) {
     for (const { entry, path, content } of query.b) {
-      search += '&b=' + [entry ? 'e' : '', escape(path), escape(content)].join('\0')
+      search.append('b', (entry ? 'e' : '') + '\0' + path + '\0' + content)
     }
     if (query.i) {
-      for (const i of query.i) search += '&i=' + escape(i)
+      for (const spec of query.i) search.append('i', spec)
     }
   }
 
-  if (query.o) search += '&o=' + escape(query.o)
+  if (query.o) search.set('o', query.o)
 
-  if (query.d) search += '&d=1'
+  if (query.d) search.set('d', '1')
 
   const base = location.pathname
-  history.replaceState({}, '', search ? base + '?' + search.slice(1) : base)
+  const suffix = search.toString()
+  history.replaceState({}, '', suffix ? base + '?' + suffix : base)
 }

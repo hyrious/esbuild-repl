@@ -183,48 +183,9 @@
     white-space: pre;
     overscroll-behavior: contain;
     overflow: auto;
-    overflow-y: scroll;
-    overflow-y: overlay;
-    -webkit-overflow-scrolling: touch;
-    -ms-overflow-style: -ms-autohiding-scrollbar;
-    scrollbar-width: auto;
   }
   textarea:focus {
     color: var(--fg-on);
     border-color: var(--fg);
-  }
-  textarea[rows='2'] {
-    min-height: 54px;
-  }
-  textarea::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-  }
-  textarea::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-  textarea::-webkit-scrollbar-corner {
-    background-color: transparent;
-  }
-  textarea::-webkit-scrollbar-thumb {
-    background-color: var(--pre);
-    background-color: transparent;
-    border-radius: 4px;
-    transition: background-color 0.4s;
-  }
-  textarea:hover::-webkit-scrollbar-thumb {
-    background-color: var(--pre);
-  }
-  textarea::-webkit-scrollbar-thumb:hover {
-    background-color: var(--border);
-  }
-  textarea::-webkit-scrollbar-thumb:active {
-    background-color: var(--fg);
-  }
-  textarea::-webkit-scrollbar-thumb:vertical {
-    min-height: 50px;
-  }
-  textarea::-webkit-scrollbar-thumb:horizontal {
-    min-width: 50px;
   }
 </style>

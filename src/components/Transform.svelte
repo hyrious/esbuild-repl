@@ -1,5 +1,8 @@
 <script type="ts">
-  import { mode, input, options } from '../stores'
+  import { noop } from 'svelte/internal'
+  import { mode, input, options, ready, output } from '../stores'
+  import { Mode, parseOptions, prettyPrintErrorAsStderr } from '../helpers/options'
+  import { sendIPC } from '../ipc'
   import Editor from './Editor.svelte'
 
   export let show = true
@@ -7,6 +10,18 @@
   let transform_options = $mode === 'transform' ? $options : ''
   $: if ($mode === 'transform') {
     $options = transform_options
+
+    if ($ready) {
+      try {
+        sendIPC({
+          command_: 'transform',
+          input_: $input,
+          options_: parseOptions($options, Mode.Transform),
+        }).then(output.set, noop)
+      } catch (err) {
+        $output = { stderr_: prettyPrintErrorAsStderr(err) }
+      }
+    }
   }
 </script>
 

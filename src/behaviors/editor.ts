@@ -56,7 +56,7 @@ function onKeydown(handler: (event: KeyboardEvent) => void): SubscribeFn {
   }
 }
 
-const handleEnterAndEscape = onKeydown((event) => {
+const commonKeymaps = onKeydown((event) => {
   if (isIMEVisible) return
 
   const textarea = event.target as HTMLTextAreaElement
@@ -103,6 +103,13 @@ const handleEnterAndEscape = onKeydown((event) => {
     } else {
       textarea.selectionStart = textarea.selectionEnd
     }
+    return
+  }
+
+  if (event.key === 'Tab' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+    stop(event)
+    insert(textarea, '  ')
+    return
   }
 })
 
@@ -143,10 +150,10 @@ observe('textarea.editor', {
   constructor: HTMLTextAreaElement,
   // prettier-ignore
   subscribe: (el: Element) => compose(
-    detectIME(el),
     autosize(el),
+    detectIME(el),
+    commonKeymaps(el),
     tabToIndent(el),
-    handleEnterAndEscape(el),
     oneKeyFormatting(el),
   ),
 })
