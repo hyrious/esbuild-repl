@@ -9,15 +9,11 @@
   import { sendIPC } from '../ipc'
   import Editor from './Editor.svelte'
   import NpmPackage from './NpmPackage.svelte'
+  import Options from './Options.svelte'
 
   export let show = true
 
-  const default_options = `--bundle
---format=esm
---splitting
---outdir=/
---packages=external
---allow-overwrite`
+  const default_options = '--bundle --format=esm --splitting --outdir=/ --packages=external --allow-overwrite'
   let build_options = $mode === 'build' ? $options : ''
   $: if ($mode === 'build') {
     $options = build_options
@@ -71,7 +67,7 @@
 
   function reset_options() {
     build_options = default_options
-    send_input('article[data-label="OPTIONS"] textarea.editor')
+    send_input('[data-options]')
   }
 
   let new_file_name = 'entry.js'
@@ -204,18 +200,7 @@
 </script>
 
 <div data-build style={show ? '' : 'display: none'}>
-  <Editor
-    bind:content={build_options}
-    label="OPTIONS"
-    rows={1}
-    placeholder="e.g. --minify or {'{'} minify: true {'}'}"
-  >
-    <aside class:show={build_options !== default_options} slot="header">
-      <button on:click={reset_options} title="reset options">
-        <i class="i-mdi-reload" />
-      </button>
-    </aside>
-  </Editor>
+  <Options bind:content={build_options} on:reload={reset_options} />
   {#each $files as { entry, path, content }, i}
     <Editor
       bind:entry
@@ -244,22 +229,6 @@
 </div>
 
 <style>
-  aside {
-    position: absolute;
-    display: inline-flex;
-    top: 8px;
-    right: 100%;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  aside button {
-    padding: 0;
-  }
-  aside:hover,
-  aside.show {
-    opacity: 1;
-  }
   button {
     position: relative;
     display: inline-flex;

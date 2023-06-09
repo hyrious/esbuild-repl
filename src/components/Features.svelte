@@ -181,7 +181,8 @@
     disabled={phase !== 'idle'}
     on:click={detect_features}
   >
-    {phase === 'detecting' ? 'Detecting' : 'Detect'} features
+    <i class="i-mdi-magnify" />
+    <span>{phase === 'detecting' ? 'Detecting' : 'Detect'} features</span>
   </button>
 </div>
 {#if phase === 'detected'}
@@ -195,13 +196,14 @@
   }
   button {
     appearance: none;
+    display: inline-flex;
     background: none;
     margin-left: auto;
     border: none;
     padding: 0;
     outline: none;
     color: inherit;
-    text-decoration: underline;
+    font-size: 20px;
     opacity: 0.5;
     transition: opacity 0.2s;
     cursor: pointer;
@@ -215,5 +217,8 @@
   }
   button.detecting {
     cursor: wait;
+  }
+  button span {
+    font: 14px/20px sans-serif;
   }
 </style>

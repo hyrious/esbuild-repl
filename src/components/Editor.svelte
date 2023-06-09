@@ -134,7 +134,7 @@
   :where(header:hover) button.entry {
     opacity: 0.5;
   }
-  header:has(input:focus) button.entry,
+  header:focus-within button.entry,
   header.entry button.entry,
   button.entry:hover {
     opacity: 1;

@@ -2,12 +2,15 @@
   import { noop } from 'svelte/internal'
   import { mode, input, options, ready, output } from '../stores'
   import { Mode, parseOptions, prettyPrintErrorAsStderr } from '../helpers/options'
+  import { send_input } from '../helpers/dom'
   import { sendIPC } from '../ipc'
   import Editor from './Editor.svelte'
+  import Options from './Options.svelte'
 
   export let show = true
 
   let transform_options = $mode === 'transform' ? $options : ''
+
   $: if ($mode === 'transform') {
     $options = transform_options
 
@@ -23,15 +26,16 @@
       }
     }
   }
+
+  function reset_options() {
+    transform_options = ''
+    send_input('[data-options]')
+  }
 </script>
 
 <div data-transform style={show ? '' : 'display: none'}>
   <Editor label="INPUT" bind:content={$input} rows={2} placeholder="(enter your code here)" />
-  <Editor
-    label="OPTIONS"
-    bind:content={transform_options}
-    placeholder="e.g. --minify or {'{'} minify: true {'}'}"
-  />
+  <Options bind:content={transform_options} on:reload={reset_options} />
 </div>
 
 <style>
