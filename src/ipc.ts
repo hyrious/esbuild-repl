@@ -135,9 +135,12 @@ function setupLocal(js: string, wasm: ArrayBuffer): void {
   script = document.createElement('script')
   script.onload = async () => {
     const esbuild: typeof import('esbuild') = (window as any).esbuild
-    await esbuild.initialize({
-      wasmURL: URL.createObjectURL(new Blob([wasm], { type: 'application/wasm' })),
-    })
+    const options = { wasmURL: URL.createObjectURL(new Blob([wasm], { type: 'application/wasm' })) }
+    if ((esbuild as any).startService) {
+      await (esbuild as any).startService(options)
+    } else {
+      await esbuild.initialize(options)
+    }
     console.log('loaded esbuild @', esbuild.version, esbuild)
   }
   script.src = url

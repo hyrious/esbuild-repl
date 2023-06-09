@@ -24,9 +24,10 @@ export const versions = writable<string[]>([])
 if (is_client) {
   fetch_versions('esbuild-wasm').then(
     ($versions) => {
-      const index_of_0_5_1 = $versions.indexOf('0.5.1')
-      if (index_of_0_5_1 >= 0) {
-        $versions = $versions.slice(0, index_of_0_5_1 + 1)
+      // esbuild-repl only works after 0.9.0
+      const index_of_0_9_0 = $versions.indexOf('0.9.0')
+      if (index_of_0_9_0 >= 0) {
+        $versions = $versions.slice(0, index_of_0_9_0 + 1)
       }
       versions.set($versions)
       if (get(version) === 'latest') {

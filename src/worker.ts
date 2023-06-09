@@ -81,7 +81,9 @@ const setup = async ([version, wasm]: [string, ArrayBuffer]): Promise<API> => {
   }
 
   // Warm up
-  await esbuild.transform('let a = 1').catch(() => void 0)
+  if (esbuild.transform) {
+    await esbuild.transform('let a = 1').catch(() => void 0)
+  }
 
   return esbuild
 }

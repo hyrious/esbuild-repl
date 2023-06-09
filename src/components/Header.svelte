@@ -78,6 +78,9 @@
       <input type="radio" name="mode" value="build" bind:group={$mode} />
       <span>Build</span>
     </label>
+    <sup>
+      <a href="https://esbuild.github.io/api/#overview" target="_blank" rel="noreferrer">[?]</a>
+    </sup>
   </nav>
   <select title="change version" bind:value={$version}>
     {#if $versions.length}
@@ -153,6 +156,19 @@
     inset: 0;
     cursor: pointer;
   }
+  header nav sup {
+    position: relative;
+    top: -4px;
+    vertical-align: top;
+    font-size: 0.7em;
+  }
+  header nav sup a {
+    text-decoration: none;
+  }
+  header nav sup a:hover {
+    color: var(--fg-on);
+    text-decoration: underline;
+  }
   header select {
     appearance: none;
     background: none;
@@ -191,6 +207,7 @@
       padding: 25px 25px 0;
     }
     header h1,
+    header nav sup,
     header select {
       display: none;
     }
