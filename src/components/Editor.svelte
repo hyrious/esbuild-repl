@@ -151,11 +151,9 @@
     padding: 8px;
     border-radius: 4px;
     min-height: 34px;
-    max-height: 400px;
     font: var(--code-font);
     background: var(--pre);
-    white-space: pre;
-    word-break: break-all;
+    white-space: pre-wrap;
     cursor: text;
   }
   @media (max-width: 800px) {
@@ -167,7 +165,6 @@
     appearance: none;
     resize: none;
     width: 100%;
-    height: 100%;
     font: var(--code-font);
     color: inherit;
     background: var(--pre);
@@ -175,9 +172,6 @@
     border-radius: 4px;
     outline: none;
     padding: 8px;
-    white-space: pre;
-    overscroll-behavior: contain;
-    overflow: auto;
   }
   textarea:focus {
     color: var(--fg-on);

@@ -1,6 +1,6 @@
 // Stolen from github's source code :D
 import { observe } from 'selector-observer'
-import { default as autosize } from '@github/textarea-autosize'
+// import { default as autosize } from '@github/textarea-autosize'
 import { tabToIndentListener } from 'indent-textarea'
 import { insert, wrapSelection } from 'text-field-edit'
 import { stop } from '../helpers/dom'
@@ -145,6 +145,25 @@ const oneKeyFormatting = onKeydown((event) => {
   const matchingEndChar = matchingCharacters[formattingCharacters.indexOf(formattingChar)]
   wrapSelection(textarea, formattingChar, matchingEndChar)
 })
+
+const autosize = function autosize(el: Element): Subscriber {
+  const textarea = el as HTMLTextAreaElement
+
+  function fitSize() {
+    textarea.style.height = '0'
+    textarea.style.height = Math.max(textarea.scrollHeight + 2, 36) + 'px'
+  }
+
+  if (textarea.value) fitSize()
+
+  textarea.addEventListener('input', fitSize)
+
+  return {
+    unsubscribe() {
+      textarea.removeEventListener('keydown', fitSize)
+    },
+  }
+}
 
 observe('textarea.editor', {
   constructor: HTMLTextAreaElement,

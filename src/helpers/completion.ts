@@ -1,5 +1,5 @@
 // prettier-ignore
-const FLAGS = [
+const FLAGS: [string, string][] = [
   ['--bundle', 'Bundle all dependencies into the output files'],
   ['--define:K=V', 'Substitute K with V while parsing'],
   ['--external:M', 'Exclude module M from the bundle (can use * wildcards)'],
@@ -59,3 +59,7 @@ const FLAGS = [
   ['--tree-shaking=...', 'Force tree shaking on or off (false | true)'],
   ['--tsconfig=...', 'Use this tsconfig.json file instead of other ones'],
 ]
+
+export function filter(pattern: string): [string, string][] {
+  return FLAGS.filter((e) => e[0].startsWith(pattern))
+}

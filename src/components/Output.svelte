@@ -118,8 +118,7 @@
   pre {
     margin: 0 0 10px;
     font: var(--code-font);
-    white-space: pre;
-    max-height: 400px;
+    white-space: pre-wrap;
   }
   p {
     margin: 0;
