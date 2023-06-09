@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { tick, noop } from 'svelte/internal'
+  import { noop } from 'svelte/internal'
   import { focus_last, send_input } from '../helpers/dom'
   import { get, set } from '../helpers/idb'
   import { read_tarball } from '../helpers/tarball'
@@ -115,6 +115,7 @@
       return
     }
 
+    $status = `Installing ${name} …`
     const spec = i === -1 ? 'latest' : raw.slice(i + 1)
     const version = await resolve_version(name, spec)
 
@@ -138,10 +139,10 @@
 
     $status = `Extracting ${name}@${version} …`
     const files = await read_tarball(new Uint8Array(buffer))
-    const package_json = files.find((e) => e.path === 'package.json')
-    if (package_json) {
-      tick().then(install_dependencies.bind(null, package_json.content))
-    }
+    // const package_json = files.find((e) => e.path === 'package.json')
+    // if (package_json) {
+    //   tick().then(install_dependencies.bind(null, package_json.content))
+    // }
 
     if (!$installed.some((e) => e.name === name)) {
       $installed.push({ name, version, files })
@@ -151,14 +152,14 @@
     $status = `Extracted ${files.length} files.`
   }
 
-  function install_dependencies(json: string) {
-    const pkg = JSON.parse(json)
-    if (pkg.dependencies) {
-      for (const name of Object.keys(pkg.dependencies)) {
-        npm_install(`${name}@${pkg.dependencies[name]}`).catch(console.error)
-      }
-    }
-  }
+  // function install_dependencies(json: string) {
+  //   const pkg = JSON.parse(json)
+  //   if (pkg.dependencies) {
+  //     for (const name of Object.keys(pkg.dependencies)) {
+  //       npm_install(`${name}@${pkg.dependencies[name]}`).catch(console.error)
+  //     }
+  //   }
+  // }
 
   const semver_loose =
     /^[\s=v]*(\d+)\.(\d+)\.(\d+)(?:-?((?:\d+|\d*[A-Za-z-][\dA-Za-z-]*)(?:\.(?:\d+|\d*[A-Za-z-][\dA-Za-z-]*))*))?(?:\+([\dA-Za-z-]+(?:\.[\dA-Za-z-]+)*))?$/
