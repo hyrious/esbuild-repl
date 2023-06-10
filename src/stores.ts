@@ -45,7 +45,7 @@ export const input = writable(initial_query.t || 'let a = 1')
 export const files = writable(initial_query.b || [{ entry: true, path: 'entry.js', content: '' }])
 export const options = writable(initial_query.o || '')
 
-interface InstalledPackage {
+export interface InstalledPackage {
   name: string
   version: string
   files: { path: string; content: string }[]
