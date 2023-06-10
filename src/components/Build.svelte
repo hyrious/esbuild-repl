@@ -258,7 +258,6 @@
     height: 20px;
     border: none;
     padding: 0 1px;
-    outline: none;
     font: var(--code-font);
     color: var(--fg);
     opacity: 0.5;

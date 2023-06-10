@@ -128,7 +128,7 @@
   function refresh_comp_text() {
     const [text, info] = comp_items[comp_index]
     comp_text = text.slice(comp_pattern.length)
-    comp_info = info
+    comp_info = comp_text ? info : ''
   }
 
   let is_mobile: MediaQueryList | null = null
@@ -299,7 +299,6 @@
     display: inline-flex;
     background: transparent;
     border: none;
-    outline: none;
     padding: 0;
     margin-left: 5px;
     cursor: pointer;

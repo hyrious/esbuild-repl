@@ -92,7 +92,6 @@
     appearance: none;
     background: transparent;
     border: none;
-    outline: none;
     padding: 0 1px;
     font: var(--code-font);
     color: inherit;
@@ -113,7 +112,6 @@
     display: inline-flex;
     background: transparent;
     border: none;
-    outline: none;
     padding: 0;
     cursor: pointer;
     color: inherit;

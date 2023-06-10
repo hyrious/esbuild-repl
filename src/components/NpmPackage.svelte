@@ -139,7 +139,6 @@
     display: inline-flex;
     background: transparent;
     border: none;
-    outline: none;
     padding: 0;
     margin-left: 5px;
     cursor: pointer;

@@ -201,7 +201,6 @@
     margin-left: auto;
     border: none;
     padding: 0;
-    outline: none;
     color: inherit;
     font-size: 20px;
     opacity: 0.5;
