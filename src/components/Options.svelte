@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { insert } from 'text-field-edit'
+  import { insert, set } from 'text-field-edit'
   import { Mode, parseOptions } from '../helpers/options'
-  import { send_input, stop } from '../helpers/dom'
+  import { stop } from '../helpers/dom'
   import { filter } from '../helpers/completion'
 
   export let content = ''
@@ -19,6 +19,8 @@
       return value
     }
   }
+
+  let textarea: HTMLTextAreaElement
 
   function format() {
     const options = parseOptions(content, mode)
@@ -55,7 +57,7 @@
           console.warn('Unknown option type: ' + typeof value + ' for ' + key, value)
         }
       }
-      content = args.join(' ')
+      set(textarea, args.join(' '))
     } else {
       let result = '{'
       let has_value = false
@@ -78,9 +80,8 @@
           console.warn('Unknown option type: ' + typeof value + ' for ' + key, value)
         }
       }
-      content = result + (has_value ? '\n}' : '}')
+      set(textarea, result + (has_value ? '\n}' : '}'))
     }
-    send_input('[data-options]')
   }
 
   let comp_x = 0
@@ -211,6 +212,7 @@
       {#if comp_info}<span class="info">[{comp_index + 1}/{comp_items.length}] {comp_info}</span>{/if}
     </aside>
     <textarea
+      bind:this={textarea}
       data-options
       class="editor"
       rows={1}
