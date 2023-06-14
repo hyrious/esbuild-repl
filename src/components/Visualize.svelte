@@ -1,12 +1,17 @@
-<div class="visualize-sourcemap">
-  <button title="evanw/source-map-visualization" on:click>
+<script lang="ts">
+  export let title: string
+  export let content: string
+</script>
+
+<div>
+  <button {title} on:click>
     <i class="i-mdi-eye-outline" />
-    <span>Visualize this source map</span>
+    <span>{content}</span>
   </button>
 </div>
 
 <style>
-  .visualize-sourcemap {
+  div {
     display: flex;
     margin: -6px 0 6px;
   }

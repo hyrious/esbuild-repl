@@ -4,8 +4,8 @@
   import { terminal_to_html } from '../helpers/ansi'
   import Editor from './Editor.svelte'
   import Features from './Features.svelte'
-  import VisualizeSourcemap from './VisualizeSourcemap.svelte'
-  import Download from './Download.svelte'
+  import Visualize from './Visualize.svelte'
+  import Metafile from './Metafile.svelte'
 
   const decoder = new TextDecoder()
 
@@ -20,11 +20,11 @@
     return 'js'
   }
 
-  let url = new URL('https://evanw.github.io/source-map-visualization')
+  let source_map_url = new URL('https://evanw.github.io/source-map-visualization')
   function visualize_sourcemap(code: string, map: string) {
     const data = code.length + '\0' + code + map.length + '\0' + map
-    url.hash = btoa(data).replace(/=+$/, '')
-    window.open(url, '_blank')
+    source_map_url.hash = btoa(data).replace(/=+$/, '')
+    window.open(source_map_url, '_blank')
   }
 
   function simple_sourcemap() {
@@ -70,6 +70,14 @@
       a.remove()
     }
   }
+
+  let analyze_url = new URL('https://esbuild.github.io/analyze/')
+  function analyze_metafile() {
+    if ($output?.metafile_) {
+      analyze_url.hash = btoa(json_print($output.metafile_)).replace(/=+$/, '')
+      window.open(analyze_url, '_blank')
+    }
+  }
 </script>
 
 {#if $output}
@@ -91,7 +99,11 @@
         {@const text = decoder.decode(contents)}
         <Editor label="OUTPUT" readonly header {name} content={text} size={contents.byteLength} />
         {#if path.endsWith('.map')}
-          <VisualizeSourcemap on:click={() => outfile_sourcemap(path, text)} />
+          <Visualize
+            title="evanw/source-map-visualization"
+            content="Visualize this source map"
+            on:click={() => outfile_sourcemap(path, text)}
+          />
         {/if}
       {/each}
     {/if}
@@ -101,14 +113,18 @@
   {/if}
   {#if $output.map_}
     <Editor label="SOURCE MAP" readonly content={$output.map_} lang="json" />
-    <VisualizeSourcemap on:click={simple_sourcemap} />
+    <Visualize
+      title="evanw/source-map-visualization"
+      content="Visualize this source map"
+      on:click={simple_sourcemap}
+    />
   {/if}
   {#if $output.mangleCache_ && Object.keys($output.mangleCache_).length}
     <Editor label="MANGLE CACHE" readonly content={json_print($output.mangleCache_)} lang="json" />
   {/if}
   {#if $output.metafile_}
     <Editor label="METAFILE" readonly content={json_print($output.metafile_)} lang="json" />
-    <Download on:click={download_metafile} />
+    <Metafile on:download={download_metafile} on:analyze={analyze_metafile} />
   {/if}
 {:else}
   <p>(no output)</p>
