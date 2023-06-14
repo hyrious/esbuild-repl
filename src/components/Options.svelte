@@ -110,8 +110,8 @@
         (event.key === 'Enter' && !event.ctrlKey && !event.shiftKey)
       ) {
         stop(event)
-        const text = comp_text.match(/^[-\w]+/)?.[0] || ''
-        insert(event.target as HTMLTextAreaElement, text)
+        const text = comp_text.match(/^[-\w]+/)?.[0]
+        if (text) insert(event.target as HTMLTextAreaElement, text)
         clear_completions()
         return
       }
