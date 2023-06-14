@@ -146,7 +146,7 @@
   }
   pre {
     margin: 0;
-    padding: 8px;
+    padding: 9px; /* 8px + 1px border */
     border-radius: 4px;
     min-height: 34px;
     font: var(--code-font);

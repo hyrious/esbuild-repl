@@ -10,7 +10,7 @@
     <span>Download</span>
   </button>
   <button on:click={() => dispatch('analyze')}>
-    <i class="i-mdi-eye-outline" />
+    <i class="i-mdi-magnify-expand" />
     <span>Analyze this metafile</span>
   </button>
 </div>

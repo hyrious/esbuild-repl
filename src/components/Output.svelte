@@ -74,7 +74,7 @@
   let analyze_url = new URL('https://esbuild.github.io/analyze/')
   function analyze_metafile() {
     if ($output?.metafile_) {
-      analyze_url.hash = btoa(json_print($output.metafile_)).replace(/=+$/, '')
+      analyze_url.hash = btoa(JSON.stringify($output.metafile_)).replace(/=+$/, '')
       window.open(analyze_url, '_blank')
     }
   }

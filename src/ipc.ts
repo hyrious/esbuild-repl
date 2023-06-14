@@ -70,12 +70,18 @@ const do_fetch: typeof fetch = (url, options) => {
 }
 
 async function packageFetch(subpath: string): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort('Timeout'), 5000)
+
   // Try to fetch from one CDN, but fall back to another CDN if that fails
   try {
     const response = await do_fetch(`https://cdn.jsdelivr.net/npm/${subpath}`)
-    if (response.ok) return response
-  } catch {
-    // ignore
+    if (response.ok) {
+      clearTimeout(timeout)
+      return response
+    }
+  } catch (err) {
+    console.error(err)
   }
   return do_fetch(`https://unpkg.com/${subpath}`)
 }
