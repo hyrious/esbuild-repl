@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import { insert, set } from 'text-field-edit'
-  import { Mode, parseOptions } from '../helpers/options'
+  import { Mode, parseOptions, printOptionsAsLooseJSON, printOptionsAsShellArgs } from '../helpers/options'
   import { stop } from '../helpers/dom'
   import { filter } from '../helpers/completion'
 
@@ -12,75 +12,14 @@
 
   const dispatch = createEventDispatcher()
 
-  function escape_for_shell(value: string) {
-    if (/[ '"]/.test(value)) {
-      return "'" + value.replace(/'/g, "\\'") + "'"
-    } else {
-      return value
-    }
-  }
-
   let textarea: HTMLTextAreaElement
 
   function format() {
     const options = parseOptions(content, mode)
     if (is_json_like) {
-      const args: string[] = []
-      for (const key in options) {
-        const prefix = '--' + key.replace(/[A-Z]/g, (x) => '-' + x.toLowerCase())
-        const value = options[key]
-        if (typeof value === 'boolean') {
-          if (value) args.push(prefix)
-          else args.push(prefix + '=false')
-        } else if (typeof value === 'string' || typeof value === 'number') {
-          args.push(prefix + '=' + escape_for_shell(value + ''))
-        } else if (value instanceof RegExp) {
-          args.push(prefix + '=' + escape_for_shell(value.source))
-        } else if (Array.isArray(value)) {
-          if (
-            key === 'resolveExtensions' ||
-            key === 'mainFields' ||
-            key === 'conditions' ||
-            key === 'target'
-          ) {
-            args.push(prefix + '=' + value.join(','))
-          } else {
-            for (const item of value) {
-              args.push(prefix + ':' + escape_for_shell(item))
-            }
-          }
-        } else if (value && typeof value === 'object') {
-          for (const key in value) {
-            args.push(prefix + ':' + escape_for_shell(key) + '=' + escape_for_shell(value[key] + ''))
-          }
-        } else {
-          console.warn('Unknown option type: ' + typeof value + ' for ' + key, value)
-        }
-      }
-      set(textarea, args.join(' '))
+      set(textarea, printOptionsAsShellArgs(options))
     } else {
-      let result = '{'
-      let has_value = false
-      for (const key in options) {
-        has_value = true
-        const value = options[key]
-        if (typeof value === 'boolean' || typeof value === 'number' || value instanceof RegExp) {
-          result += `\n  ${key}: ${value},`
-        } else if (typeof value === 'string' || Array.isArray(value)) {
-          result += `\n  ${key}: ${JSON.stringify(value)},`
-        } else if (value && typeof value === 'object') {
-          result += `\n  ${key}: {`
-          let has_value = false
-          for (const key in value) {
-            has_value = true
-            result += `\n    ${key}: ${JSON.stringify(value[key])},`
-          }
-          result += has_value ? '\n  },' : '},'
-        } else {
-          console.warn('Unknown option type: ' + typeof value + ' for ' + key, value)
-        }
-      }
-      set(textarea, result + (has_value ? '\n}' : '}'))
+      set(textarea, printOptionsAsLooseJSON(options))
     }
   }
 
@@ -226,7 +165,7 @@
   <footer>
     <button class="format" on:click={format}>
       <i class={is_json_like ? 'i-mdi-bash' : 'i-mdi-code-json'} />
-      <span>To {is_json_like ? 'shell args' : 'JSON5'}</span>
+      <span>Switch to {is_json_like ? 'CLI' : 'JS'} syntax</span>
     </button>
     <button class="reload" on:click={() => dispatch('reload')}>
       <i class="i-mdi-reload" />
@@ -272,11 +211,11 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    pointer-events: none;
   }
   aside span.hint {
     opacity: 0.5;
     font: var(--code-font);
-    pointer-events: none;
   }
   aside span.info {
     margin-top: 4px;
@@ -288,6 +227,7 @@
     color: var(--fg-on);
     font: 14px/20px sans-serif;
     z-index: 10;
+    pointer-events: all;
   }
   footer {
     display: flex;

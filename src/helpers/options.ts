@@ -80,6 +80,8 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   if (!trimmed) return {}
   if (/^{|^\/[*/]/.test(trimmed)) return parseOptionsAsLooseJSON(input)
 
+  const options = parseOptionsAsShellArgs(input, mode)
+
   type OptionKey = keyof BuildOptions | keyof TransformOptions
 
   const toString = (key: OptionKey): void => {
@@ -114,13 +116,21 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
     }
   }
 
+  const toJSON = (key: OptionKey): void => {
+    if (options[key] !== undefined) {
+      try {
+        options[key] = JSON.parse(options[key])
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   const splitOnComma = (key: OptionKey): void => {
     if (options[key] !== undefined) {
       options[key] = (options[key] + '').split(',')
     }
   }
-
-  const options = parseOptionsAsShellArgs(input, mode)
 
   // Fix string options which may have been parsed as booleans
   toString('legalComments')
@@ -133,6 +143,7 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   toBooleanValues('supported')
 
   toInteger('logLimit')
+  toJSON('tsconfigRaw')
 
   // These need to be arrays, not comma-separated strings or booleans
   splitOnComma('resolveExtensions')
@@ -247,7 +258,7 @@ function parseOptionsAsShellArgs(input: string, mode: Mode): Record<string, any>
     })
   }
 
-  const entryPoints: string[] = []
+  const entryPoints: (string | { in: string, out: string })[] = []
   const output: Record<string, any> = Object.create(null)
 
   const kebabCaseToCamelCase = (text: string, arg: Omit<Arg, 'text_'>): string => {
@@ -259,9 +270,10 @@ function parseOptionsAsShellArgs(input: string, mode: Mode): Record<string, any>
 
   // Convert CLI-style options to JS-style options
   for (const { text_: text, ...arg } of args) {
+    const equals = text.indexOf('=')
+
     if (text.startsWith('--')) {
       const colon = text.indexOf(':')
-      const equals = text.indexOf('=')
 
       // Array element
       if (colon >= 0 && equals < 0) {
@@ -304,11 +316,11 @@ function parseOptionsAsShellArgs(input: string, mode: Mode): Record<string, any>
 
     // Entry point
     else {
-      entryPoints.push(text)
+      output['entryPoints'] = entryPoints
+      entryPoints.push(equals < 0 ? text : { in: text.slice(equals + 1), out: text.slice(0, equals) })
     }
   }
 
-  if (entryPoints.length) output['entryPoints'] = entryPoints
   return output
 }
 
@@ -590,4 +602,110 @@ function throwNoClosingQuoteError(
   throwRichError(input,
     `Failed to find the closing ${kind} quote`, closeLine, closeColumn, 0,
     `The opening ${kind} quote is here:`, openLine, openColumn, 1, quote)
+}
+
+export function printOptionsAsShellArgs(options: Record<string, any>): string {
+  const quoteForShell = (text: string): string => {
+    if (!/[ \t\n\\'"]/.test(text)) return text
+    return '"' + text.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+  }
+
+  const camelCaseToKebabCase = (text: string): string => {
+    return text.replace(/[A-Z]/g, x => '-' + x.toLowerCase())
+  }
+
+  const args: string[] = []
+
+  for (const key in options) {
+    const kebabKey = camelCaseToKebabCase(key)
+    const it = options[key]
+    const type = typeof it
+
+    if (type === 'string' || type === 'boolean' || type === 'number' || it === null) {
+      args.push(it === true ? '--' + kebabKey : `--${kebabKey}=${it}`)
+    }
+
+    else if (Array.isArray(it)) {
+      if (key === 'resolveExtensions' || key === 'mainFields' || key === 'conditions' || key === 'target') {
+        args.push(`--${kebabKey}=${it}`)
+      } else {
+        for (const x of it) {
+          if (key === 'entryPoints') {
+            if (typeof x === 'object' && x !== null && typeof x.in === 'string' && typeof x.out === 'string') {
+              args.push(`${x.out}=${x.in}`)
+            } else {
+              args.push(x)
+            }
+          } else {
+            args.push(`--${kebabKey}:${x}`)
+          }
+        }
+      }
+    }
+
+    else if (it instanceof RegExp) {
+      args.push(`--${kebabKey}=${it.source}`)
+    }
+
+    else if (key === 'tsconfigRaw') {
+      args.push(`--${kebabKey}=${JSON.stringify(it)}`)
+    }
+
+    else if (type === 'object' && key !== 'mangleCache' && key !== 'stdin') {
+      for (const prop in it) {
+        args.push(`--${kebabKey}:${prop}=${it[prop]}`)
+      }
+    }
+
+    else {
+      throw new Error(`Cannot convert option ${key} to a command line argument`)
+    }
+  }
+
+  return args.map(quoteForShell).join(' ')
+}
+
+export function printOptionsAsLooseJSON(options: Record<string, any>): string {
+  const printForJSON5 = (it: any, indent: string, allowNewline = true): string => {
+    const type = typeof it
+
+    if (type === 'string') {
+      const text = it.replace(/\\/g, '\\\\').replace(/\n/g, '\\n')
+      const single = text.split('\'')
+      const double = text.split('"')
+      return double.length < single.length ? '"' + double.join('\\"') + '"' : '\'' + single.join("\\'") + '\''
+    }
+
+    if (type === 'boolean' || type === 'number' || it instanceof RegExp) {
+      return it + ''
+    }
+
+    const nextIndent = indent + '  '
+    if (Array.isArray(it)) {
+      // Format "entryPoints" on one line unless the extended "{ in, out }"
+      // syntax is used. And in that case, format on multiple lines but format
+      // each "{ in, out }" object on one line.
+      const oneLine = it.every(x => typeof x === 'string')
+      let result = '['
+      for (const value of it) {
+        result += result === '[' ? oneLine ? '' : '\n' + nextIndent : oneLine ? ', ' : nextIndent
+        result += printForJSON5(value, nextIndent, false)
+        if (!oneLine) result += ',\n'
+      }
+      if (result !== '[' && !oneLine) result += indent
+      return result + ']'
+    }
+
+    let result = '{'
+    for (const key in it) {
+      const value = it[key]
+      result += result === '{' ? allowNewline ? '\n' + nextIndent : ' ' : allowNewline ? nextIndent : ', '
+      result += `${/^[A-Za-z$_][A-Za-z0-9$_]*$/.test(key) ? key : printForJSON5(key, '')}: ${printForJSON5(value, nextIndent)}`
+      if (allowNewline) result += ',\n'
+    }
+    if (result !== '{') result += allowNewline ? indent : ' '
+    return result + '}'
+  }
+
+  return printForJSON5(options, '')
 }
