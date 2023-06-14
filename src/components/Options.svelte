@@ -4,9 +4,9 @@
   import { Mode, parseOptions, printOptionsAsLooseJSON, printOptionsAsShellArgs } from '../helpers/options'
   import { stop } from '../helpers/dom'
   import { filter } from '../helpers/completion'
+  import { mode } from '../stores'
 
   export let content = ''
-  export let mode: Mode = Mode.Transform
 
   $: is_json_like = /^{|^\/[*/]/.test(content.trimStart())
 
@@ -15,7 +15,7 @@
   let textarea: HTMLTextAreaElement
 
   function format() {
-    const options = parseOptions(content, mode)
+    const options = parseOptions(content, $mode === 'transform' ? Mode.Transform : Mode.Build)
     if (is_json_like) {
       set(textarea, printOptionsAsShellArgs(options))
     } else {
