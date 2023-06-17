@@ -100,6 +100,9 @@
     color: var(--fg-on);
     font-weight: 700;
   }
+  header input:focus {
+    outline: none;
+  }
   header.entry input,
   header.entry button.entry {
     color: #58a549;

@@ -78,6 +78,11 @@
       window.open(analyze_url, '_blank')
     }
   }
+
+  function sorted<T extends { path: string }>(files: T[]): T[] {
+    // mutate the state? it is ok..
+    return files.sort((a, b) => +(a.path > b.path) - +(a.path < b.path))
+  }
 </script>
 
 {#if $output}
@@ -94,7 +99,7 @@
     {#if $output.outputFiles_.length === 0}
       <p>(no output)</p>
     {:else}
-      {#each $output.outputFiles_ as { path, contents }}
+      {#each sorted($output.outputFiles_) as { path, contents }}
         {@const name = path.replace(/^\//, '')}
         {@const text = decoder.decode(contents)}
         <Editor label="OUTPUT" readonly header {name} content={text} size={contents.byteLength} />
