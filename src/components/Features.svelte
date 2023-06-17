@@ -4,11 +4,14 @@
   import { version, input, options, status, output } from '../stores'
   import { tick } from 'svelte'
   import Editor from './Editor.svelte'
+  import Rollup from './Rollup.svelte'
 
   let features: string[] = []
   let phase: 'idle' | 'detecting' | 'detected' = 'idle'
+  let vite = false
 
   $: if ($output) {
+    vite = false
     phase = 'idle'
     features = []
   }
@@ -175,6 +178,10 @@
 </script>
 
 <div class="features" style={!enabled || phase === 'detected' ? 'display: none' : ''}>
+  <button title="esbuild#3125" on:click={() => (vite = !vite)}>
+    <i class="i-logos-vitejs" />
+    <span>Simulate Vite output</span>
+  </button>
   <button
     class:detecting={phase === 'detecting'}
     title="--supported:?"
@@ -188,17 +195,25 @@
 {#if phase === 'detected'}
   <Editor label="FEATURES" readonly content={features.join('\n')} lang="raw" />
 {/if}
+{#if vite}
+  <Rollup />
+{/if}
 
 <style>
   .features {
     display: flex;
+    justify-content: flex-end;
     margin: -6px 0 6px;
+  }
+  .i-logos-vitejs {
+    background-size: 75% 75%;
+    background-position: center;
   }
   button {
     appearance: none;
     display: inline-flex;
     background: none;
-    margin-left: auto;
+    margin-left: 5px;
     border: none;
     padding: 0;
     color: inherit;

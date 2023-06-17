@@ -9,7 +9,7 @@ export const inspector = (): Plugin => {
       // Only enable in dev mode
       if (initialOptions.minify) return
 
-      onLoad({ filter: /src\/main\.ts$/ }, async (args) => {
+      onLoad({ filter: /src.main\.ts$/ }, async (args) => {
         let contents = await fs.promises.readFile(args.path, 'utf8')
         contents = `import './inspector'\n${contents}`
         return { contents, loader: 'default' }

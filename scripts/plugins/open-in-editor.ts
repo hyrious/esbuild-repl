@@ -3,7 +3,7 @@ import url from 'node:url'
 import http, { IncomingMessage, RequestListener, ServerResponse } from 'node:http'
 import launch_editor from 'launch-editor-middleware'
 
-const middleware: RequestListener = launch_editor('code')
+const middleware: RequestListener = launch_editor(process.platform === 'win32' ? 'subl' : 'code')
 
 function open_in_editor_handler(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
