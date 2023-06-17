@@ -6,13 +6,17 @@
   let promise: Promise<any>
 
   onMount(() => {
-    promise = new Promise((resolve, reject) => {
-      const script = document.createElement('script')
-      script.src = 'https://unpkg.com/@rollup/browser'
-      script.onload = () => resolve((window as any).rollup)
-      script.onerror = () => reject(new Error(`Could not load Rollup from ${script.src}`))
-      document.head.appendChild(script)
-    })
+    if ((window as any).rollup) {
+      promise = Promise.resolve((window as any).rollup)
+    } else {
+      promise = new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = 'https://unpkg.com/@rollup/browser'
+        script.onload = () => resolve((window as any).rollup)
+        script.onerror = () => reject(new Error(`Could not load Rollup from ${script.src}`))
+        document.head.appendChild(script)
+      })
+    }
   })
 
   async function bundle(rollup: any) {
