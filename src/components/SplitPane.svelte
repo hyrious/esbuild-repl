@@ -29,7 +29,7 @@
     }
   }
 
-  const drag: Action = function drag(node: HTMLElement, callback: (ev: PointerEvent) => void) {
+  const drag: Action<HTMLElement, (ev: PointerEvent) => void> = function drag(node, callback) {
     const down = (event: PointerEvent) => {
       if (!event.isPrimary) return
 

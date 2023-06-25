@@ -1,4 +1,8 @@
-import { query_selector_all, tick } from 'svelte/internal'
+import { tick } from 'svelte'
+
+export function query_selector_all(selector: string) {
+  return Array.from(document.querySelectorAll(selector))
+}
 
 export function stop(event: Event) {
   event.stopPropagation()
@@ -24,3 +28,5 @@ export function focus_last(selector: string) {
     }
   })
 }
+
+export const is_client = typeof window !== 'undefined'

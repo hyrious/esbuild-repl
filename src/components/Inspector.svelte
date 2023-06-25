@@ -1,7 +1,7 @@
 <script>
   // Credits: https://github.com/sveltejs/vite-plugin-svelte/tree/main/packages/vite-plugin-svelte-inspector
   import { onMount } from 'svelte'
-  import { query_selector_all, select_options } from 'svelte/internal'
+  import { query_selector_all } from '../helpers/dom'
 
   const macOS = navigator.userAgentData?.platform === 'macOS'
   const toggle_combo = macOS ? ['meta', 'shift'] : ['control', 'shift']

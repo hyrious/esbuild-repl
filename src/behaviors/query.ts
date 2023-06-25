@@ -1,4 +1,4 @@
-import { is_client } from 'svelte/internal'
+import { is_client } from '../helpers/dom'
 
 interface Query {
   version?: string

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { noop } from 'svelte/internal'
+  import { noop } from '@hyrious/utils'
   import { focus_last, send_input } from '../helpers/dom'
   import { get, set } from '../helpers/idb'
   import { read_tarball } from '../helpers/tarball'

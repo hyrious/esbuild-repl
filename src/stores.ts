@@ -1,4 +1,3 @@
-import { is_client } from 'svelte/internal'
 import { get, writable } from 'svelte/store'
 import { emitter } from './global'
 import { load_query } from './behaviors/query'
@@ -58,6 +57,7 @@ export const ready = writable(0, (set) => {
 })
 
 import type { IPCResponse } from './ipc'
+import { is_client } from './helpers/dom'
 export const output = writable<IPCResponse | null>(null)
 
 export const status = writable('Loading esbuild…', (set) => emitter.on('status', set))

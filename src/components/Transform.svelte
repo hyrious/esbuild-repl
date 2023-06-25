@@ -1,5 +1,5 @@
 <script type="ts">
-  import { noop } from 'svelte/internal'
+  import { noop } from '@hyrious/utils'
   import { mode, input, options, ready, output } from '../stores'
   import { Mode, parseOptions, prettyPrintErrorAsStderr } from '../helpers/options'
   import { send_input } from '../helpers/dom'

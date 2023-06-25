@@ -1,7 +1,6 @@
-import type { Loader } from 'esbuild'
 import type { Action } from 'svelte/action'
-import { is_client, noop } from 'svelte/internal'
-import { stop } from './dom'
+import { noop } from '@hyrious/utils'
+import { is_client, stop } from './dom'
 
 const hljs = is_client ? new Worker('hljs.js') : null
 
@@ -56,12 +55,12 @@ class Task {
 
 interface Params {
   code?: string
-  loader?: Loader
+  loader?: string
 }
 
 const MAX_CODE_SIZE = 100_000 // 100 KB
 
-export const highlight: Action = function highlight(node: HTMLElement, params: Params) {
+export const highlight: Action<HTMLElement, Params> = function highlight(node, params) {
   let activeTask: Task | null = null
 
   const update = ({ code, loader }: Params) => {
