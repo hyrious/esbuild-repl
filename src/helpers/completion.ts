@@ -33,6 +33,7 @@ const FLAGS: [string, string][] = [
   ['--jsx=...', 'Set to "automatic" to use React\'s automatic runtime or to "preserve" to disable transforming JSX to JS'],
   ['--keep-names', 'Preserve "name" on functions and classes'],
   ['--legal-comments=...', 'Where to place legal comments (none | inline | eof | linked | external, default eof when bundling and inline otherwise)'],
+  ['--line-limit=...', 'Lines longer than this will be wrap onto a new line'],
   ['--log-level=...', 'Disable logging (verbose | debug | info | warning | error | silent, default info)'],
   ['--log-limit=...', 'Maximum message count or 0 to disable (default 6)'],
   ['--log-override:X=Y', 'Use log level Y for log messages with identifier X'],

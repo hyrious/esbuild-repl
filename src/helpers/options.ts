@@ -110,9 +110,12 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
     }
   }
 
-  const toInteger = (key: OptionKey): void => {
+  const toNumber = (key: OptionKey): void => {
     if (options[key] !== undefined) {
-      options[key] = parseInt(options[key] + '', 10)
+      if (Number.isNaN(+options[key])) {
+        throw new Error(`Invalid number for "--${key}=": ${options[key]}`)
+      }
+      options[key] = +options[key]
     }
   }
 
@@ -142,7 +145,8 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   toBooleanValues('mangleCache')
   toBooleanValues('supported')
 
-  toInteger('logLimit')
+  toNumber('logLimit')
+  toNumber('lineLimit')
   toJSON('tsconfigRaw')
 
   // These need to be arrays, not comma-separated strings or booleans
