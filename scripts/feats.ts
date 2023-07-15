@@ -8,8 +8,8 @@ async function main(prefix: string, url: string) {
   console.log(']')
 }
 
-const js_table = 'https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat/js_table.go'
-const css_table = 'https://raw.githubusercontent.com/evanw/esbuild/main/internal/compat/css_table.go'
+const js_table = 'https://raw.gitmirror.com/evanw/esbuild/main/internal/compat/js_table.go'
+const css_table = 'https://raw.gitmirror.com/evanw/esbuild/main/internal/compat/css_table.go'
 await main('const JS_FEATURES = ', js_table)
 await main('const CSS_FEATURES = ', css_table)
 

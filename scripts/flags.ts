@@ -1,7 +1,8 @@
 import cp from 'node:child_process'
 import util from 'node:util'
 
-const bin = './node_modules/.bin/esbuild'
+let bin = './node_modules/.bin/esbuild'
+if (process.platform === 'win32') bin = bin.replace(/\//g, '\\') + '.cmd'
 const { stdout } = await util.promisify(cp.execFile)(bin, ['--help'], { encoding: 'utf8' })
 
 const flags: Record<string, string[]> = Object.create(null)

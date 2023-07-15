@@ -80,17 +80,18 @@
     'top-level-await',
     'typeof-exotic-object-is-object',
     'unicode-escapes',
+    'using',
   ]
 
   // See https://github.com/evanw/esbuild/blob/main/internal/compat/css_table.go
   const CSS_FEATURES = [
     'hex-rgba',
     'inline-style',
-    'rebecca-purple',
-    'modern-rgb-hsl',
     'inset-property',
-    'nesting',
     'is-pseudo-class',
+    'modern-rgb-hsl',
+    'nesting',
+    'rebecca-purple',
   ]
 
   class Task {

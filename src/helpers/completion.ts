@@ -20,6 +20,7 @@ const FLAGS: [string, string][] = [
   ['--chunk-names=...', 'Path template to use for code splitting chunks (default "[name]-[hash]")'],
   ['--color=...', 'Force use of color terminal escapes (true | false)'],
   ['--drop:...', 'Remove certain constructs (console | debugger)'],
+  ['--drop-labels=...', 'Remove labeled statements with these label names'],
   ['--entry-names=...', 'Path template to use for entry point output paths (default "[dir]/[name]", can also use "[hash]")'],
   ['--footer:T=...', 'Text to be appended to each output file of type T where T is one of: css | js'],
   ['--global-name=...', 'The name of the global for the IIFE format'],

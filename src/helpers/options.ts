@@ -154,6 +154,7 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   splitOnComma('mainFields')
   splitOnComma('conditions')
   splitOnComma('target')
+  splitOnComma('dropLabels')
 
   return options
 }
@@ -630,7 +631,7 @@ export function printOptionsAsShellArgs(options: Record<string, any>): string {
     }
 
     else if (Array.isArray(it)) {
-      if (key === 'resolveExtensions' || key === 'mainFields' || key === 'conditions' || key === 'target') {
+      if (key === 'resolveExtensions' || key === 'mainFields' || key === 'conditions' || key === 'target' || key === 'dropLabels') {
         args.push(`--${kebabKey}=${it}`)
       } else {
         for (const x of it) {
