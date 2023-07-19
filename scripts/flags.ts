@@ -34,15 +34,19 @@ const unsupported = new Set([
   'servedir',
   'version',
 ])
+let w = 0
 for (const flag in flags) {
   if (unsupported.has(flag.match(/^--([-\w]+)/)?.[1] as string)) {
     delete flags[flag]
+  } else {
+    w = Math.max(w, flag.length)
   }
 }
 
-console.log('const FLAGS = [')
+console.log('const FLAGS: [string, string][] = [')
 for (const flag in flags) {
   const comment = flags[flag].join(' ')
-  console.log(`  ['${flag}', '${comment.replace(/'/g, "\\'")}'],`)
+  const spaces = ' '.repeat(w - flag.length)
+  console.log(`  ['${flag}', ${spaces}'${comment.replace(/'/g, "\\'")}'],`)
 }
 console.log(']')

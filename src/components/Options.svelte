@@ -92,7 +92,7 @@
     if (!/^[-\w]+$/.test(pattern)) return clear_completions()
 
     comp_pattern = pattern
-    comp_items = filter(pattern)
+    comp_items = filter(pattern, $mode === 'transform')
     if (comp_items.length) {
       comp_index = 0
       get_caret_position(textarea, before, after)
@@ -110,7 +110,8 @@
         (event.key === 'Enter' && !event.ctrlKey && !event.shiftKey)
       ) {
         stop(event)
-        const text = comp_text.match(/^[-\w]+/)?.[0]
+        const match = comp_text.match(/^[-\w]*(?:[:=][a-z]*)?/)
+        const text = match ? match[0] : ''
         if (text) insert(event.target as HTMLTextAreaElement, text)
         clear_completions()
         return

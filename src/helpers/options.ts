@@ -75,6 +75,14 @@ interface Token {
   value_: any
 }
 
+const commaSeparatedArrays = [
+  'resolveExtensions',
+  'mainFields',
+  'conditions',
+  'target',
+  'dropLabels',
+]
+
 export function parseOptions(input: string, mode: Mode): Record<string, any> {
   const trimmed = input.trimStart()
   if (!trimmed) return {}
@@ -129,12 +137,6 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
     }
   }
 
-  const splitOnComma = (key: OptionKey): void => {
-    if (options[key] !== undefined) {
-      options[key] = (options[key] + '').split(',')
-    }
-  }
-
   // Fix string options which may have been parsed as booleans
   toString('legalComments')
 
@@ -150,11 +152,11 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
   toJSON('tsconfigRaw')
 
   // These need to be arrays, not comma-separated strings or booleans
-  splitOnComma('resolveExtensions')
-  splitOnComma('mainFields')
-  splitOnComma('conditions')
-  splitOnComma('target')
-  splitOnComma('dropLabels')
+  for (const key of commaSeparatedArrays) {
+    if (options[key] !== undefined) {
+      options[key] = (options[key] + '').split(',')
+    }
+  }
 
   return options
 }
@@ -631,7 +633,7 @@ export function printOptionsAsShellArgs(options: Record<string, any>): string {
     }
 
     else if (Array.isArray(it)) {
-      if (key === 'resolveExtensions' || key === 'mainFields' || key === 'conditions' || key === 'target' || key === 'dropLabels') {
+      if (commaSeparatedArrays.includes(key)) {
         args.push(`--${kebabKey}=${it}`)
       } else {
         for (const x of it) {
@@ -656,7 +658,7 @@ export function printOptionsAsShellArgs(options: Record<string, any>): string {
       args.push(`--${kebabKey}=${JSON.stringify(it)}`)
     }
 
-    else if (type === 'object' && key !== 'mangleCache' && key !== 'stdin') {
+    else if (type === 'object') {
       for (const prop in it) {
         args.push(`--${kebabKey}:${prop}=${it[prop]}`)
       }

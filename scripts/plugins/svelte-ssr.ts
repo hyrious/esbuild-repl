@@ -113,9 +113,10 @@ export const svelte_ssr = ({
         return { contents: result, loader: 'copy' }
       })
 
+      let last = ''
       onEnd(({ errors, outputFiles }) => {
         if (errors.length === 0) {
-          console.log('\x1B[2J\x1B[0;0H\x1B[32mSvelte SSR runs successfully.\x1B[m')
+          let out = '\x1B[2J\x1B[0;0H\x1B[32mSvelte SSR runs successfully.\x1B[m\n'
           if (outputFiles) {
             const table: [string, string][] = []
             for (const { path, contents } of outputFiles) {
@@ -129,8 +130,12 @@ export const svelte_ssr = ({
               w = Math.max(w, path.length)
             }
             for (const [path, size] of table) {
-              console.log(`  ${path.padEnd(w)}  ${size}`)
+              out += `  ${path.padEnd(w)}  ${size}\n`
             }
+          }
+          if (last !== out) {
+            process.stdout.write(out)
+            last = out
           }
         }
       })
