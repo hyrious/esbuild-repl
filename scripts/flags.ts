@@ -32,6 +32,7 @@ const unsupported = new Set([
   'keyfile',
   'preserve-symlinks',
   'servedir',
+  'serve-fallback',
   'version',
 ])
 let w = 0
