@@ -27,7 +27,8 @@
     const stdinPlugin = {
       name: 'stdin',
       resolveId(id: string) {
-        return id
+        if (id == 'main.js') return id
+        return { id, external: true }
       },
       load(_id: string) {
         return code
@@ -38,9 +39,10 @@
     const generated = await ret.generate({ format: 'es' })
 
     const stage1 = generated.output[0].code
-    const { code: stage2 } = await esbuild.transform(stage1, { minifySyntax: true })
+    console.log('===== STAGE 1 ===== (rollup.rollup)\n' + stage1)
 
-    console.log('===== STAGE 1 =====\n' + stage1 + '===== STAGE 2 =====\n' + stage2)
+    const { code: stage2 } = await esbuild.transform(stage1, { minifySyntax: true })
+    console.log('===== STAGE 2 ===== (esbuild.minify)\n' + stage2)
 
     return stage2
   }
