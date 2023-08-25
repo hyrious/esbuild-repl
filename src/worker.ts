@@ -143,7 +143,7 @@ const handler = function (this: API, e: MessageEvent<IPCRequest>) {
       warnings ? formatMessages(this, warnings, { kind: 'warning', color }) : [],
     ]).then(([errors, warnings]) => {
       respond({
-        stderr_: [...errors, ...warnings].join(''),
+        stderr_: mergeStderrStreams([...errors, ...warnings], stderrSinceReset),
       })
     })
   }
@@ -155,20 +155,21 @@ const handler = function (this: API, e: MessageEvent<IPCRequest>) {
   // information from WebAssembly such as verbose log messages. Remove duplicate
   // log information so each message is only shown once.
   const mergeStderrStreams = (formatted: string[], stderr: string): string => {
-    for (const text of formatted) {
-      const replaced = stderr.replace(text, '')
-      if (replaced !== stderr) {
+    for (let i = 0; i < formatted.length; ++i) {
+      if (stderr.includes(formatted[i])) {
         // Try with escape codes
-        stderr = replaced
+        formatted[i] = ''
       } else {
         // Try without escape codes
-        const replaced = text.replace(/\x1B\[[^m]*m/g, '')
-        if (replaced !== text) {
-          stderr = stderr.replace(replaced, '')
+        const replaced = formatted[i].replace(/\x1B\[[^m]*m/g, '')
+        const index = stderr.indexOf(replaced)
+        if (index >= 0) {
+          stderr = stderr.slice(0, index) + formatted[i] + stderr.slice(index + replaced.length)
+          formatted[i] = ''
         }
       }
     }
-    return formatted.join('') + stderr
+    return formatted.filter(Boolean).join('') + stderr
   }
 
   const finish = (warnings: any[], done: (stderr: string) => void): void => {
