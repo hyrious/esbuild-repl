@@ -7,9 +7,9 @@ if (import.meta.env.DEV) {
 
     if (!added.length && !removed.length && updated.length === 1) {
       for (const link of document.getElementsByTagName('link')) {
-        const url = new URL(link.href)
+        const url = link.href && new URL(link.href)
 
-        if (url.host === location.host && url.pathname === updated[0]) {
+        if (url && url.host === location.host && url.pathname === updated[0]) {
           const next = link.cloneNode() as HTMLLinkElement
           next.href = updated[0] + '?t=' + Date.now()
           next.onload = () => link.remove()

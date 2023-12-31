@@ -9,6 +9,7 @@
   let dragging = false
   let left = 0
   let width = 0
+  let offsetX = 0
 
   const measure: Action = function measure(node: HTMLElement) {
     const refresh = () => {
@@ -37,6 +38,9 @@
       node.setPointerCapture(event.pointerId)
       dragging = true
 
+      const r = (event.currentTarget as HTMLElement).getBoundingClientRect()
+      offsetX = event.clientX - r.left - r.width / 2
+
       const up = () => {
         dragging = false
         node.releasePointerCapture(event.pointerId)
@@ -60,7 +64,7 @@
   }
 
   function move(event: PointerEvent) {
-    const px = event.clientX - left
+    const px = event.clientX - left - offsetX
     pos = clamp((100 * px) / width, 0, 100)
   }
 </script>

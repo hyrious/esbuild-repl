@@ -1,5 +1,5 @@
 import * as idb from 'idb-keyval'
-import { is_client } from 'svelte/internal'
+import { is_client } from './dom'
 
 const NPM_PACKAGES = is_client ? idb.createStore('npm', 'packages') : undefined
 

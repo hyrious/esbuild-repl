@@ -51,10 +51,12 @@
     'export-star-as',
     'for-await',
     'for-of',
+    'function-name-configurable',
     'function-or-class-property-access',
     'generator',
     'hashbang',
     'import-assertions',
+    'import-attributes',
     'import-meta',
     'inline-script',
     'logical-assignment',
@@ -85,6 +87,11 @@
 
   // See https://github.com/evanw/esbuild/blob/main/internal/compat/css_table.go
   const CSS_FEATURES = [
+    'color-functions',
+    'gradient-double-position',
+    'gradient-interpolation',
+    'gradient-midpoints',
+    'hwb',
     'hex-rgba',
     'inline-style',
     'inset-property',

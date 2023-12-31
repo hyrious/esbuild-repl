@@ -1,17 +1,21 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { output } from '../stores'
+  import { terminal_to_html } from '../helpers/ansi'
   import Editor from './Editor.svelte'
 
   let promise: Promise<any>
+  let stderr = ''
 
   onMount(() => {
     if ((window as any).rollup) {
       promise = Promise.resolve((window as any).rollup)
     } else {
-      promise = new Promise((resolve, reject) => {
+      promise = new Promise(async (resolve, reject) => {
+        // Rollup relies on the script src to find the wasm asset
+        const full = await fetch('https://unpkg.com/@rollup/browser').then((r) => r.url)
         const script = document.createElement('script')
-        script.src = 'https://unpkg.com/@rollup/browser'
+        script.src = full
         script.onload = () => resolve((window as any).rollup)
         script.onerror = () => reject(new Error(`Could not load Rollup from ${script.src}`))
         document.head.appendChild(script)
@@ -35,8 +39,21 @@
       },
     }
 
-    const ret = await rollup.rollup({ input: 'main.js', plugins: [stdinPlugin] })
+    const warnings: { message: string }[] = []
+    const onwarn = (warning: { message: string }) => {
+      warnings.push(warning)
+      console.warn(warning.toString())
+    }
+
+    const ret = await rollup.rollup({ input: 'main.js', plugins: [stdinPlugin], onwarn })
     const generated = await ret.generate({ format: 'es' })
+
+    stderr = (
+      await esbuild.formatMessages(
+        warnings.map((e) => ({ text: e.message })),
+        { kind: 'warning', color: true },
+      )
+    ).join('')
 
     const stage1 = generated.output[0].code
     console.log('===== STAGE 1 ===== (rollup.rollup)\n' + stage1)
@@ -52,7 +69,12 @@
   <p>(loading rollup&hellip;)</p>
 {:then rollup}
   {#if rollup}
-    {#await bundle(rollup) then content}
+    {#await bundle(rollup)}
+      <p>(rollup {rollup.VERSION} is bundling&hellip;)</p>
+    {:then content}
+      {#if stderr}
+        <pre>{@html terminal_to_html(stderr)}</pre>
+      {/if}
       <Editor label="ROLLUP {rollup.VERSION} | VITE" readonly {content} lang="js" />
     {/await}
   {:else}
