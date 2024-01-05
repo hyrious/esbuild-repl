@@ -13,9 +13,23 @@
     } else {
       promise = new Promise(async (resolve, reject) => {
         // Rollup relies on the script src to find the wasm asset
-        const full = await fetch('https://unpkg.com/@rollup/browser').then((r) => r.url)
+        const signal = AbortSignal.timeout(5000)
+        const timeout = () => reject(new Error('Timeout'))
+        signal.addEventListener('abort', timeout)
+        // prettier-ignore
+        let resolved = await Promise.race([
+          fetch('https://unpkg.com/@rollup/browser', { signal }).then((r) => r.url),
+          fetch('https://cdn.jsdelivr.net/npm/@rollup/browser/package.json', { signal })
+            .then((r) => r.json()),
+        ])
+        signal.removeEventListener('abort', timeout)
+        // is package.json
+        if (typeof resolved === 'object') {
+          // currently the 'main' does not contain './', so it is safe to append it
+          resolved = `https://cdn.jsdelivr.net/npm/@rollup/browser@${resolved.version}/${resolved.main}`
+        }
         const script = document.createElement('script')
-        script.src = full
+        script.src = resolved
         script.onload = () => resolve((window as any).rollup)
         script.onerror = () => reject(new Error(`Could not load Rollup from ${script.src}`))
         document.head.appendChild(script)
