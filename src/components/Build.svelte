@@ -15,7 +15,8 @@
 
   let dependencies: Record<string, [string, string][]> = Object.create(null)
 
-  const default_options = '--bundle --format=esm --splitting --outdir=/ --packages=external --allow-overwrite'
+  const default_options =
+    '--bundle --format=esm --splitting --outdir=/ --packages=external --allow-overwrite'.replace(/[ ]/g, '\n')
   let build_options = $mode === 'build' ? $options : ''
   $: if ($mode === 'build') {
     $options = build_options

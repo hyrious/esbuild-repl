@@ -60,9 +60,8 @@ const FLAGS: [string, string][] = [
   ['--supported:F=...',        'Consider syntax F to be supported (true | false)'],
   ['--tree-shaking=...',       'Force tree shaking on or off (false | true)'],
   ['--tsconfig=...',           'Use this tsconfig.json file instead of other ones'],
+  ['--tsconfig-raw=...',       'Use this tsconfig.json instead of other ones'],
 ]
-
-// TODO: missing '--tsconfig-raw'
 
 const BUILD_ONLY = [
   '--bundle',
@@ -85,13 +84,16 @@ const BUILD_ONLY = [
   '--tsconfig',
 ]
 
+const TRANSFORM_ONLY = ['--tsconfig-raw']
+
 export function filter(pattern: string, transform: boolean): [string, string][] {
   const matches: typeof FLAGS = []
   for (let [flag, desc] of FLAGS) {
     if (flag.startsWith(pattern)) {
       if (transform) {
         // flags that not supported in transform mode
-        if (BUILD_ONLY.some((e) => flag.startsWith(e))) continue
+        if (BUILD_ONLY.some((e) => flag.startsWith(e)) && !TRANSFORM_ONLY.some((e) => flag.startsWith(e)))
+          continue
         // different syntax for some flags
         if (flag.startsWith('--loader')) {
           flag = '--loader=L'

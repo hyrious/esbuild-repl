@@ -8,7 +8,7 @@
     "build": "esbuild-dev scripts/build.ts",
     "cleanup": "rimraf dist",
     "preview": "w7 dist",
-    "check": "svelte-check"
+    "check": "case-police && svelte-check && eslint ."
   },
   "dependencies": {
     "@github/textarea-autosize": "^0.3.3",
@@ -18,24 +18,24 @@
     "pretty-bytes": "^6.1.1",
     "sanitize.css": "^13.0.0",
     "selector-observer": "^2.1.6",
-    "svelte": "^4.2.8",
-    "text-field-edit": "^4.0.0"
+    "svelte": "^4.2.12",
+    "text-field-edit": "^4.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@hyrious/esbuild-dev": "^0.10.5",
     "@hyrious/esbuild-plugin-svelte": "^0.2.2",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.13",
-    "@iconify/utils": "^2.1.14",
-    "@types/node": "~18.19.4",
-    "@typescript-eslint/eslint-plugin": "^6.16.0",
-    "@typescript-eslint/parser": "^6.16.0",
-    "esbuild": "^0.19.11",
-    "eslint": "^8.56.0",
-    "eslint-plugin-case-police": "^0.6.1",
+    "@iconify/utils": "^2.1.22",
+    "@types/node": "~20.12.6",
+    "case-police": "^0.6.1",
+    "esbuild": "^0.20.2",
+    "eslint": "^9.0.0",
     "fast-glob": "^3.3.2",
     "highlight.js": "^11.9.0",
     "launch-editor-middleware": "^2.6.1",
-    "svelte-check": "^3.6.2"
+    "svelte-check": "^3.6.9",
+    "typescript-eslint": "^7.6.0"
   }
 }

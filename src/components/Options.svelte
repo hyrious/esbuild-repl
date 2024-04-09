@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { insert, set } from 'text-field-edit'
+  import { insertTextIntoField as insert, setFieldText as set } from 'text-field-edit'
   import { Mode, parseOptions, printOptionsAsLooseJSON, printOptionsAsShellArgs } from '../helpers/options'
   import { stop } from '../helpers/dom'
   import { filter } from '../helpers/completion'
@@ -20,6 +20,27 @@
       set(textarea, printOptionsAsShellArgs(options))
     } else {
       set(textarea, printOptionsAsLooseJSON(options))
+    }
+  }
+
+  function enable_typescript_options() {
+    const options = parseOptions(content, $mode === 'transform' ? Mode.Transform : Mode.Build)
+    options.loader ||= 'ts'
+    if (['ts', 'tsx'].includes(options.loader)) {
+      options.tsconfigRaw = {
+        ...options.tsconfigRaw,
+        compilerOptions: {
+          ...options.tsconfigRaw?.compilerOptions,
+          useDefineForClassFields: false,
+          experimentalDecorators: true,
+          verbatimModuleSyntax: true,
+        },
+      }
+    }
+    if (is_json_like) {
+      set(textarea, printOptionsAsLooseJSON(options))
+    } else {
+      set(textarea, printOptionsAsShellArgs(options))
     }
   }
 
@@ -171,6 +192,9 @@
     <button class="reload" on:click={() => dispatch('reload')}>
       <i class="i-mdi-reload" />
       <span>Reset options</span>
+    </button>
+    <button class="typescript" on:click={enable_typescript_options} title="enable TypeScript options">
+      <i class="i-mdi-language-typescript" />
     </button>
   </footer>
 </article>
