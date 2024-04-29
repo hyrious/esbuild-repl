@@ -18,24 +18,24 @@
     "pretty-bytes": "^6.1.1",
     "sanitize.css": "^13.0.0",
     "selector-observer": "^2.1.6",
-    "svelte": "^4.2.12",
+    "svelte": "^4.2.15",
     "text-field-edit": "^4.1.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@eslint/js": "^9.1.1",
     "@hyrious/esbuild-dev": "^0.10.5",
     "@hyrious/esbuild-plugin-svelte": "^0.2.2",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.13",
-    "@iconify/utils": "^2.1.22",
-    "@types/node": "~20.12.6",
+    "@iconify/utils": "^2.1.23",
+    "@types/node": "~20.12.7",
     "case-police": "^0.6.1",
     "esbuild": "^0.20.2",
-    "eslint": "^9.0.0",
+    "eslint": "^9.1.1",
     "fast-glob": "^3.3.2",
     "highlight.js": "^11.9.0",
     "launch-editor-middleware": "^2.6.1",
-    "svelte-check": "^3.6.9",
-    "typescript-eslint": "^7.6.0"
+    "svelte-check": "^3.7.0",
+    "typescript-eslint": "^7.7.1"
   }
 }
