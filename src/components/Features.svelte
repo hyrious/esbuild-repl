@@ -132,6 +132,10 @@
       if (this.cancelled) return
 
       for (const feat of features) {
+        // Bypass a bug where esbuild >= 0.21.0 will panic without the 'object-accessors' feature.
+        if (feat === 'object-accessors' && esbuild.version >= '0.21.0') {
+          continue
+        }
         options.supported = { [feat]: false }
         try {
           await esbuild.transform(code, options).then((r) => {
