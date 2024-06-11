@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TransformOptions } from 'esbuild'
   import { Mode, parseOptions } from '../helpers/options'
+  import { version_in_range } from '../helpers/versions'
   import { version, input, options, status, output } from '../stores'
   import { tick } from 'svelte'
   import Editor from './Editor.svelte'
@@ -131,9 +132,11 @@
       }
       if (this.cancelled) return
 
+      const skip_object_accessors = version_in_range(esbuild.version, '0.21.0', '0.21.4')
+
       for (const feat of features) {
-        // Bypass a bug where esbuild >= 0.21.0 will panic without the 'object-accessors' feature.
-        if (feat === 'object-accessors' && esbuild.version >= '0.21.0') {
+        // Bypass a bug where esbuild 0.21.0..0.21.4 will panic without the 'object-accessors' feature.
+        if (skip_object_accessors && feat === 'object-accessors') {
           continue
         }
         options.supported = { [feat]: false }
