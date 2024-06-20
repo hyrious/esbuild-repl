@@ -12,7 +12,7 @@ interface Query {
 function json_parse(raw: any, def: any = {}): any {
   try {
     return JSON.parse(raw)
-  } catch (e) {
+  } catch {
     return def
   }
 }

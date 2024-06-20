@@ -22,20 +22,20 @@
     "text-field-edit": "^4.1.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.4.0",
+    "@eslint/js": "^9.5.0",
     "@hyrious/esbuild-dev": "^0.10.6",
     "@hyrious/esbuild-plugin-svelte": "^0.2.2",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.1.13",
-    "@iconify/utils": "^2.1.24",
-    "@types/node": "~20.14.2",
+    "@iconify/utils": "^2.1.25",
+    "@types/node": "~20.14.7",
     "case-police": "^0.6.1",
-    "esbuild": "^0.21.4",
-    "eslint": "^9.4.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^9.5.0",
     "fast-glob": "^3.3.2",
     "highlight.js": "^11.9.0",
-    "launch-editor-middleware": "^2.6.1",
-    "svelte-check": "^3.8.0",
-    "typescript-eslint": "^7.12.0"
+    "launch-editor-middleware": "^2.8.0",
+    "svelte-check": "^3.8.1",
+    "typescript-eslint": "8.0.0-alpha.30"
   }
 }
