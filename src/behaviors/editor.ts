@@ -2,7 +2,7 @@
 import { observe } from 'selector-observer'
 // import { default as autosize } from '@github/textarea-autosize'
 import { tabToIndentListener } from 'indent-textarea'
-import { insert, wrapSelection } from 'text-field-edit'
+import { insertTextIntoField as insert, wrapFieldSelection as wrapSelection } from 'text-field-edit'
 import { stop } from '../helpers/dom'
 
 interface Subscriber {
@@ -148,6 +148,10 @@ const oneKeyFormatting = onKeydown((event) => {
 
 const autosize = function autosize(el: Element): Subscriber {
   const textarea = el as HTMLTextAreaElement
+  if ('fieldSizing' in textarea.style) {
+    textarea.style.fieldSizing = 'content'
+    return { unsubscribe() {} }
+  }
 
   function fitSize() {
     textarea.style.height = '0'
