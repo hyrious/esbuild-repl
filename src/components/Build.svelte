@@ -227,7 +227,8 @@
         on:remove={() => remove_file(i)}
         on:up={() => move_file(i, -1)}
         on:down={() => move_file(i, 1)}
-        pos={i ? (i === $files.length - 1 ? 2 : 1) : 0}
+        up={i > 0}
+        down={i < $files.length - 1}
         header
         rows={2}
         label="INPUT"

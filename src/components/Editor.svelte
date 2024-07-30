@@ -13,7 +13,8 @@
   export let entry = false
   export let readonly = false
   export let lang = ''
-  export let pos = 0
+  export let up = false
+  export let down = false
 
   const dispatch = createEventDispatcher()
 
@@ -36,10 +37,10 @@
             <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
           </button>
           <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
-          <button class="move-up" title="move up" disabled={pos === 0} on:click={() => dispatch('up')}>
+          <button class="move-up" title="move up" disabled={!up} on:click={() => dispatch('up')}>
             <i class="i-mdi-arrow-up" />
           </button>
-          <button class="move-down" title="move down" disabled={pos === 2} on:click={() => dispatch('down')}>
+          <button class="move-down" title="move down" disabled={!down} on:click={() => dispatch('down')}>
             <i class="i-mdi-arrow-down" />
           </button>
           <button class="remove" title="remove {name || 'it'}" on:click={() => dispatch('remove')}>
