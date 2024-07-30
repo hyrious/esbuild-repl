@@ -251,7 +251,7 @@
     box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
     color: var(--fg-on);
     font: 14px/20px sans-serif;
-    z-index: 10;
+    z-index: 100;
     pointer-events: all;
   }
   footer {

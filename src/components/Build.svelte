@@ -10,13 +10,13 @@
   import Editor from './Editor.svelte'
   import NpmPackage from './NpmPackage.svelte'
   import Options from './Options.svelte'
+  import { flip } from 'svelte/animate'
 
   export let show = true
 
   let dependencies: Record<string, [string, string][]> = Object.create(null)
 
-  const default_options =
-    '--bundle --format=esm --splitting --outdir=/ --packages=external --allow-overwrite'.replace(/[ ]/g, '\n')
+  const default_options = '--bundle --format=esm --splitting --outdir=. --packages=external'
   let build_options = $mode === 'build' ? $options : ''
   $: if ($mode === 'build') {
     $options = build_options
@@ -100,6 +100,15 @@
 
   function remove_file(index: number) {
     $files.splice(index, 1)
+    $files = $files
+  }
+
+  function move_file(index: number, direction: -1 | 1) {
+    const i = index + direction
+    if (i < 0 || i >= $files.length) return
+    const temp = $files[i]
+    $files[i] = $files[index]
+    $files[index] = temp
     $files = $files
   }
 
@@ -209,17 +218,22 @@
 
 <div data-build style={show ? '' : 'display: none'}>
   <Options bind:content={build_options} on:reload={reset_options} />
-  {#each $files as { entry, path, content }, i}
-    <Editor
-      bind:entry
-      bind:name={path}
-      bind:content
-      on:remove={() => remove_file(i)}
-      header
-      rows={2}
-      label="INPUT"
-      placeholder="(enter your code here)"
-    />
+  {#each $files as file, i (file)}
+    <div class="editor" animate:flip={{ duration: 250 }}>
+      <Editor
+        bind:entry={file.entry}
+        bind:name={file.path}
+        bind:content={file.content}
+        on:remove={() => remove_file(i)}
+        on:up={() => move_file(i, -1)}
+        on:down={() => move_file(i, 1)}
+        pos={i ? (i === $files.length - 1 ? 2 : 1) : 0}
+        header
+        rows={2}
+        label="INPUT"
+        placeholder="(enter your code here)"
+      />
+    </div>
   {/each}
   <footer>
     <button on:click={new_file} title="add a new file">
@@ -270,7 +284,7 @@
     font-variant-numeric: tabular-nums;
   }
   button:not(:last-child) {
-    margin-bottom: 10px;
+    margin: 4px 0 10px;
   }
   button.not-installed {
     transform: translateX(20px);

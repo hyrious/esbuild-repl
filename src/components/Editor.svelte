@@ -13,6 +13,7 @@
   export let entry = false
   export let readonly = false
   export let lang = ''
+  export let pos = 0
 
   const dispatch = createEventDispatcher()
 
@@ -35,6 +36,12 @@
             <i class={entry ? 'i-mdi-checkbox-marked-outline' : 'i-mdi-checkbox-blank-outline'} />
           </button>
           <input placeholder="<stdin>" spellcheck="false" bind:value={name} />
+          <button class="move-up" title="move up" disabled={pos === 0} on:click={() => dispatch('up')}>
+            <i class="i-mdi-arrow-up" />
+          </button>
+          <button class="move-down" title="move down" disabled={pos === 2} on:click={() => dispatch('down')}>
+            <i class="i-mdi-arrow-down" />
+          </button>
           <button class="remove" title="remove {name || 'it'}" on:click={() => dispatch('remove')}>
             <i class="i-mdi-close" />
           </button>
@@ -84,7 +91,7 @@
   header {
     display: flex;
     align-items: center;
-    margin-bottom: 4px;
+    margin: 4px 0;
   }
   header input {
     flex: 1;
@@ -142,8 +149,21 @@
   button.remove:hover {
     opacity: 1;
   }
+  button.move-up,
+  button.move-down {
+    opacity: 0.5;
+  }
+  button.move-up:hover,
+  button.move-down:hover {
+    opacity: 1;
+  }
+  button.move-up:disabled,
+  button.move-down:disabled {
+    opacity: 0.1;
+    cursor: not-allowed;
+  }
   span.size {
-    font: 14px/20px sans-serif;
+    font: 14px/18px sans-serif;
     font-variant-numeric: tabular-nums;
     opacity: 0.5;
   }
@@ -151,7 +171,7 @@
     margin: 0;
     padding: 9px; /* 8px + 1px border */
     border-radius: 4px;
-    min-height: 34px;
+    min-height: 36px;
     font: var(--code-font);
     background: var(--pre);
     white-space: pre-wrap;
