@@ -76,11 +76,12 @@ interface Token {
 }
 
 const commaSeparatedArrays = [
-  'resolveExtensions',
-  'mainFields',
+  'absPaths',
   'conditions',
-  'target',
   'dropLabels',
+  'mainFields',
+  'resolveExtensions',
+  'target',
 ]
 
 export function parseOptions(input: string, mode: Mode): Record<string, any> {

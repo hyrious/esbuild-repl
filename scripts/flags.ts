@@ -27,6 +27,8 @@ for (const line of stdout.split('\n')) {
 const unsupported = new Set([
   'serve',
   'watch',
+  'watch-delay',
+  'cors-origin',
   'analyze', // should we have this?
   'certfile',
   'keyfile',
