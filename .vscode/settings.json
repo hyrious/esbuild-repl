@@ -9,5 +9,6 @@
   },
 
   "eslint.enable": true,
+  "eslint.useFlatConfig": true,
   "cSpell.enabled": true
 }

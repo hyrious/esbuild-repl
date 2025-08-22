@@ -51,6 +51,7 @@ export function terminal_to_html(ansi: string): string {
   ansi = ansi.trimEnd()
   let i = 0
   const buffer = new AnsiBuffer()
+  // eslint-disable-next-line no-control-regex
   for (const m of ansi.matchAll(/\x1b\[([^m]*)m/g)) {
     const escape = m[1]
     buffer.text_(ansi.slice(i, m.index))
