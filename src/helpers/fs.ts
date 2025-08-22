@@ -200,7 +200,6 @@ export function resetFileSystem(files: Record<string, string>): void {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var fs: unknown
 }
 

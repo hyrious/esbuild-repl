@@ -138,7 +138,7 @@
       $status = `Installing ${name}@${version} …`
       const cached = await get(name, version)
       if (cached) {
-        buffer = cached.buffer
+        buffer = cached
       } else {
         buffer = await fetch(url).then((r) => r.arrayBuffer())
         await set(name, version, new Uint8Array(buffer))
