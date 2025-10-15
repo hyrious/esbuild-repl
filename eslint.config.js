@@ -1,8 +1,9 @@
 // @ts-check
 import eslint from '@eslint/js'
 import tse from 'typescript-eslint'
+import { defineConfig } from 'eslint/config'
 
-export default tse.config({
+export default defineConfig({
   extends: [eslint.configs.recommended, ...tse.configs.recommended],
   files: ['**/*.ts'],
   rules: {

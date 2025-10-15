@@ -99,6 +99,7 @@
     'inline-style',
     'inset-property',
     'is-pseudo-class',
+    'media-range',
     'modern-rgb-hsl',
     'nesting',
     'rebecca-purple',

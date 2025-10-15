@@ -13,6 +13,7 @@ const FLAGS: [string, string][] = [
   ['--sourcemap',              'Emit a source map'],
   ['--splitting',              'Enable code splitting (currently only for esm)'],
   ['--target=...',             'Environment target (e.g. es2017, chrome58, firefox57, safari11, edge16, node10, ie9, opera45, default esnext)'],
+  ['--abs-paths=...',          'Emit absolute instead of relative paths in these situations (code | log | metafile)'],
   ['--allow-overwrite',        'Allow output files to overwrite input files'],
   ['--asset-names=...',        'Path template to use for "file" loader files (default "[name]-[hash]")'],
   ['--banner:T=...',           'Text to be prepended to each output file of type T where T is one of: css | js'],
