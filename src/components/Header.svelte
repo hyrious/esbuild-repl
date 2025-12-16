@@ -12,7 +12,7 @@
     try {
       const url = ev.shiftKey ? share_as_rollup() : ev.altKey ? share_as_esbuild_try() : location.href
       await navigator.clipboard.writeText(url)
-      alert('Shareable URL has been copied to clipboard.')
+      alert(`${ev.shiftKey ? 'Rollup ' : ev.altKey ? 'Try esbuild ' : ''}Shareable URL has been copied to clipboard.`)
     } catch (err) {
       console.error(err)
       alert(err + '')
@@ -49,7 +49,7 @@
       }
     }
     if (parts) {
-      const shareable = btoa(parts.join('\0')).replace(/=+$/, '')
+      const shareable = btoa(unescape(encodeURIComponent(parts.join('\0')))).replace(/=+$/, '')
       return `https://esbuild.github.io/try/#${shareable}`
     } else {
       throw new Error('no code to share')

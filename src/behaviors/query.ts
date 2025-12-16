@@ -89,7 +89,7 @@ export function load_query(): Query {
 
   const hash = is_client ? location.hash.slice(1) : ''
   if (hash) {
-    const parts = atob(hash).split('\0')
+    const parts = decodeURIComponent(escape(atob(hash))).split('\0')
 
     if (parts[0] === 't' && parts.length === 4) {
       query.version = parts[1]
