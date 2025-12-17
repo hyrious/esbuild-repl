@@ -1,9 +1,7 @@
 // Credits: https://github.com/unocss/unocss/tree/main/packages/preset-icons
 import fs from 'node:fs'
-import fg from 'fast-glob'
-import { Plugin } from 'esbuild'
+import type { PartialMessage, Plugin } from 'esbuild'
 import { resolve } from 'node:path'
-import { PartialMessage } from 'esbuild'
 import { searchForIcon } from '@iconify/utils/lib/loader/modern'
 import { encodeSvgForCss } from '@iconify/utils/lib/svg/encode-svg-for-css'
 
@@ -18,7 +16,7 @@ interface IconifyJSON {
 }
 
 export const icons = ({ glob = 'src/**/*.{tsx,vue,svelte}', custom }: IconsPluginOptions = {}): Plugin => {
-  const root_package_json = resolve(__dirname, '../../package.json')
+  const root_package_json = resolve(import.meta.dirname, '../../package.json')
 
   // .cache/icons/mdi.json
   const cache_dir = resolve(root_package_json, '../node_modules/.cache/icons')
@@ -135,7 +133,7 @@ export const icons = ({ glob = 'src/**/*.{tsx,vue,svelte}', custom }: IconsPlugi
 
       onStart(async () => {
         collected.clear()
-        watchFiles = await fg(glob)
+        watchFiles = await Array.fromAsync(fs.promises.glob(glob))
         watchFiles.unshift(root_package_json)
         const tasks: Promise<void>[] = []
         for (const file of watchFiles) {

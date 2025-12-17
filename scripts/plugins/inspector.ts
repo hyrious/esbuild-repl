@@ -1,6 +1,6 @@
 // Credits: https://github.com/sveltejs/vite-plugin-svelte/tree/main/packages/vite-plugin-svelte-inspector
 import fs from 'node:fs'
-import { Plugin } from 'esbuild'
+import type { Plugin } from 'esbuild'
 
 export const inspector = (): Plugin => {
   return {

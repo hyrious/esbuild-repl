@@ -1,6 +1,7 @@
 // This file creates a server that handles /__open-in-editor?file=file:line:column requests.
 import url from 'node:url'
-import http, { IncomingMessage, RequestListener, ServerResponse } from 'node:http'
+import http from 'node:http'
+import type { IncomingMessage, RequestListener, ServerResponse } from 'node:http'
 import launch_editor from 'launch-editor-middleware'
 
 const middleware: RequestListener = launch_editor(process.platform === 'win32' ? 'subl' : 'code')

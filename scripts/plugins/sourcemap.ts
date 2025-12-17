@@ -1,6 +1,5 @@
 import fs from 'node:fs'
-import fg from 'fast-glob'
-import { Plugin } from 'esbuild'
+import type { Plugin } from 'esbuild'
 
 interface SourceMapPluginOptions {
   glob?: string
@@ -13,8 +12,7 @@ export const sourcemap = ({ glob = 'dist/**/*.map' }: SourceMapPluginOptions = {
       if (!initialOptions.minify) return
 
       onEnd(async () => {
-        const files = await fg(glob)
-        for (const file of files) {
+        for await (const file of fs.promises.glob(glob)) {
           const map = fs.readFileSync(file, 'utf8')
           const json = JSON.parse(map) as {
             sources: string[]

@@ -1,7 +1,7 @@
 import os from 'node:os'
 import fs from 'node:fs'
 import url from 'node:url'
-import { build, BuildOptions, Plugin } from 'esbuild'
+import { build, type BuildOptions, type Plugin } from 'esbuild'
 import { join, normalize } from 'node:path'
 import { svelte } from '@hyrious/esbuild-plugin-svelte'
 import prettyBytes from 'pretty-bytes'

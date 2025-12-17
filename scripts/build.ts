@@ -1,11 +1,11 @@
 import fs from 'node:fs'
 import { svelte } from '@hyrious/esbuild-plugin-svelte'
-import { BuildOptions, Metafile, analyzeMetafile, build, context } from 'esbuild'
-import { icons } from './plugins/icons'
-import { svelte_ssr } from './plugins/svelte-ssr'
-import { inspector } from './plugins/inspector'
-import { open_in_editor } from './plugins/open-in-editor'
-import { sourcemap } from './plugins/sourcemap'
+import { analyzeMetafile, build, context, type BuildOptions, type Metafile } from 'esbuild'
+import { icons } from './plugins/icons.ts'
+import { svelte_ssr } from './plugins/svelte-ssr.ts'
+import { inspector } from './plugins/inspector.ts'
+import { open_in_editor } from './plugins/open-in-editor.ts'
+import { sourcemap } from './plugins/sourcemap.ts'
 
 const panic = () => process.exit(1)
 

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "esbuild-dev -w scripts/build.ts --serve",
-    "build": "esbuild-dev scripts/build.ts",
+    "dev": "node --watch-path=scripts scripts/build.ts --serve",
+    "build": "node scripts/build.ts",
     "cleanup": "rimraf dist",
     "preview": "w7 dist",
     "check": "case-police && svelte-check && eslint ."
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@hyrious/esbuild-dev": "^0.10.13",
+    "@hyrious/configs": "^0.1.5",
     "@hyrious/esbuild-plugin-svelte": "^0.2.3",
     "@hyrious/rimraf": "^0.1.0",
     "@hyrious/w7": "^0.2.0",
@@ -32,7 +32,6 @@
     "case-police": "^2.1.1",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
-    "fast-glob": "^3.3.3",
     "highlight.js": "^11.11.1",
     "launch-editor-middleware": "^2.12.0",
     "svelte-check": "^3.8.6",
