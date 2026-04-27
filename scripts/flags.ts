@@ -29,7 +29,7 @@ const unsupported = new Set([
   'watch',
   'watch-delay',
   'cors-origin',
-  'analyze', // should we have this?
+  'analyze',
   'certfile',
   'keyfile',
   'preserve-symlinks',

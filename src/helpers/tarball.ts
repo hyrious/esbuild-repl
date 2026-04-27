@@ -76,7 +76,7 @@ function read_pax(view: DataView, offset: number, length: number) {
   const re = /^(\d+) ([^=]+)=(.*)$/gm
   const raw = read_string(view, offset, length)
   const result: { path?: string; size?: number } = { path: undefined, size: undefined }
-  for (let match: RegExpExecArray | null; (match = re.exec(raw)); ) {
+  for (let match: RegExpExecArray | null; (match = re.exec(raw));) {
     const [, _len, key, value] = match
     if (key === 'path') result.path = value
     if (key === 'size') result.size = Number.parseInt(value)
@@ -98,14 +98,13 @@ export async function read_tarball(item: Uint8Array): Promise<Entry[]> {
 
   let globalPaxHeader: { path?: string; size?: number } | undefined
   let localPaxHeader: { path?: string; size?: number } | undefined
-  for (let offset = 0; offset + 4 < length && view.getUint32(offset, true) !== 0; ) {
+  for (let offset = 0; offset + 4 < length && view.getUint32(offset, true) !== 0;) {
     let name: string
     let content = ''
-    let size: number
 
     name = read_string(view, offset, 100)
     // const mode = Number.parseInt(read_string(view, offset + 100, 8), 8)
-    size = Number.parseInt(read_string(view, offset + 124, 12), 8)
+    const size = Number.parseInt(read_string(view, offset + 124, 12), 8)
     const type = read_string(view, offset + 156, 1)
 
     const ustar = read_string(view, offset + 257, 6)
@@ -130,12 +129,12 @@ export async function read_tarball(item: Uint8Array): Promise<Entry[]> {
 
     if (globalPaxHeader) {
       if (globalPaxHeader.path) name = globalPaxHeader.path
-      if (globalPaxHeader.size) size = globalPaxHeader.size
+      // if (globalPaxHeader.size) size = globalPaxHeader.size
     }
 
     if (localPaxHeader) {
       if (localPaxHeader.path) name = localPaxHeader.path
-      if (localPaxHeader.size) size = localPaxHeader.size
+      // if (localPaxHeader.size) size = localPaxHeader.size
       localPaxHeader = undefined
     }
 

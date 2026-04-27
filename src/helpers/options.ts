@@ -105,7 +105,7 @@ export function parseOptions(input: string, mode: Mode): Record<string, any> {
         options[key] = new RegExp(options[key] + '')
       } catch (err) {
         key = key.replace(/[A-Z]/g, x => '-' + x.toLowerCase()) as OptionKey
-        throw new Error(`Invalid regular expression for "--${key}=": ${err.message}`)
+        throw new Error(`Invalid regular expression for "--${key}=": ${err.message}`, { cause: err })
       }
     }
   }

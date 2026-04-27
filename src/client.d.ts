@@ -11,6 +11,11 @@ declare module '*.svelte' {
   export { SvelteComponent as default } from 'svelte'
 }
 
+declare module '*.css' {
+  const content: string
+  export default content
+}
+
 interface Navigator extends NavigatorUA {}
 interface NavigatorUA {
   readonly userAgentData?: NavigatorUAData
