@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Taze Configuration File",
+  "type": "object",
+  "properties": {
+    "packageMode": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": ["major", "minor", "patch", "latest", "newest", "next", "ignore"]
+      }
+    }
+  }
+}

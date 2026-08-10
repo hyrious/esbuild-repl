@@ -1,0 +1,6 @@
+{
+  "$schema": "./scripts/tazerc.schema.json",
+  "packageMode": {
+    "/svelte/": "minor"
+  }
+}

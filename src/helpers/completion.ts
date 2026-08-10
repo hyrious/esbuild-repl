@@ -39,6 +39,7 @@ const FLAGS: [string, string][] = [
   ['--log-level=...',          'Disable logging (verbose | debug | info | warning | error | silent, default info)'],
   ['--log-limit=...',          'Maximum message count or 0 to disable (default 6)'],
   ['--log-override:X=Y',       'Use log level Y for log messages with identifier X'],
+  ['--log-style=...',          'Adapt log output to other tools (default | visualstudio)'],
   ['--main-fields=...',        'Override the main file order in package.json (default "browser,module,main" when platform is browser and "main,module" when platform is node)'],
   ['--mangle-cache=...',       'Save "mangle props" decisions to a JSON file'],
   ['--mangle-props=...',       'Rename all properties matching a regular expression'],
